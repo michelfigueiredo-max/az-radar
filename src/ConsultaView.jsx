@@ -6,6 +6,7 @@ import {
 } from "./az_radar_transparencia.js";
 import { consultarProcessos } from "./az_radar_datajud.js";
 import { consultarPGFN } from "./az_radar_pgfn.js";
+import { consultarCNDT } from "./az_radar_cndt.js";
 
 const C = {
   bg:"#F0F4F9", surface:"#FFFFFF", navy:"#0A1628", navyMid:"#1E3A5F",
@@ -27,8 +28,8 @@ const PERFIS = [
 ];
 
 // Checks que serão executados por tipo de documento
-const CHECKS_CPF  = ["CEIS — Impedimentos CGU","CNEP — Anticorrupção","Processos Judiciais — DataJud","PGFN — Dívida Ativa","MTE — Trabalho Escravo","PEP — Pessoa Politicamente Exposta","Benefícios Sociais — CGU"];
-const CHECKS_CNPJ = ["CNPJ — Receita Federal","Simples Nacional","CEIS — Impedimentos CGU","CNEP — Anticorrupção","Processos Judiciais — DataJud","PGFN — Dívida Ativa","CEPIM — Convênios","MTE — Trabalho Escravo"];
+const CHECKS_CPF  = ["CEIS — Impedimentos CGU","CNEP — Anticorrupção","Processos Judiciais — DataJud","PGFN — Dívida Ativa","CNDT — Débitos Trabalhistas","MTE — Trabalho Escravo","PEP — Pessoa Politicamente Exposta","Benefícios Sociais — CGU"];
+const CHECKS_CNPJ = ["CNPJ — Receita Federal","Simples Nacional","CEIS — Impedimentos CGU","CNEP — Anticorrupção","Processos Judiciais — DataJud","PGFN — Dívida Ativa","CNDT — Débitos Trabalhistas","CEPIM — Convênios","MTE — Trabalho Escravo"];
 
 function formatDoc(v, tipo) {
   const d = v.replace(/\D/g, "");
@@ -117,6 +118,7 @@ function CheckResult({ label, resultado }) {
               {o.tribunal    && <div style={{ color:C.textSub, fontSize:10 }}>Tribunal: {String(o.tribunal)}</div>}
               {o.data        && <div style={{ color:C.textMuted, fontSize:10 }}>Ajuizamento: {String(o.data)}</div>}
               {o.situacao    && <div style={{ color:cor, fontWeight:600 }}>⚠ {String(o.situacao)}</div>}
+              {o.validade    && <div style={{ color:C.textMuted, fontSize:10 }}>Validade: {String(o.validade)}</div>}
               {o.mensagem    && <div style={{ color:C.textSub, fontSize:10 }}>{String(o.mensagem)}</div>}
               {o.valor != null && o.valor > 0 && <div style={{ color:C.textSub }}>Valor: R$ {Number(o.valor).toLocaleString("pt-BR",{minimumFractionDigits:2})}</div>}
               {o.dataInicio  && <div style={{ color:C.textMuted, fontSize:10 }}>Início: {String(o.dataInicio)}{o.dataFim && o.dataFim !== "Sem informação" ? ` · Fim: ${String(o.dataFim)}` : " · Em vigor"}</div>}
@@ -273,16 +275,18 @@ export default function ConsultaView({ mobile }) {
         const keys = ["CEIS — Impedimentos CGU","CNEP — Anticorrupção","Processos Judiciais — DataJud","CEPIM — Convênios","MTE — Trabalho Escravo"];
         keys.forEach(k => setProgresso(p => ({ ...p, [k]: "loading" })));
 
-        const [res, processos, pgfn] = await Promise.all([
+        const [res, processos, pgfn, cndt] = await Promise.all([
           rodarVerificacoesCNPJ(docLimpo),
           consultarProcessos(docLimpo).catch(() => ({ status:"erro", erro:"Indisponível", total:0, ocorrencias:[] })),
           consultarPGFN(docLimpo).catch(() => ({ status:"erro", erro:"Indisponível", total:0, ocorrencias:[] })),
+          consultarCNDT(docLimpo).catch(() => ({ status:"erro", erro:"Indisponível", total:0, ocorrencias:[] })),
         ]);
         const map = {
           "CEIS — Impedimentos CGU":      res.ceis,
           "CNEP — Anticorrupção":         res.cnep,
           "Processos Judiciais — DataJud":processos,
           "PGFN — Dívida Ativa":          pgfn,
+          "CNDT — Débitos Trabalhistas":  cndt,
           "CEPIM — Convênios":            res.cepim,
           "MTE — Trabalho Escravo":       res.mte,
         };
@@ -291,16 +295,18 @@ export default function ConsultaView({ mobile }) {
       } else {
         const keys = CHECKS_CPF;
         keys.forEach(k => setProgresso(p => ({ ...p, [k]: "loading" })));
-        const [res, processos, pgfn] = await Promise.all([
+        const [res, processos, pgfn, cndt] = await Promise.all([
           rodarVerificacoesCPF(docLimpo),
           consultarProcessos(docLimpo).catch(() => ({ status:"erro", erro:"Indisponível", total:0, ocorrencias:[] })),
           consultarPGFN(docLimpo).catch(() => ({ status:"erro", erro:"Indisponível", total:0, ocorrencias:[] })),
+          consultarCNDT(docLimpo).catch(() => ({ status:"erro", erro:"Indisponível", total:0, ocorrencias:[] })),
         ]);
         const map = {
           "CEIS — Impedimentos CGU":           res.ceis,
           "CNEP — Anticorrupção":              res.cnep,
           "Processos Judiciais — DataJud":     processos,
           "PGFN — Dívida Ativa":              pgfn,
+          "CNDT — Débitos Trabalhistas":       cndt,
           "MTE — Trabalho Escravo":            res.mte,
           "PEP — Pessoa Politicamente Exposta":res.pep,
           "Benefícios Sociais — CGU":          res.beneficios,
@@ -480,7 +486,7 @@ export default function ConsultaView({ mobile }) {
         <div style={{ fontSize: 11, fontWeight: 700, color: C.textMuted, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>
           ⏳ Verificações adicionais (V1/V3 — requerem parceiro)
         </div>
-        {["CNDT — Débitos Trabalhistas (TST)", "CND Federal / PGFN", "BNMP — Mandados de Prisão (CNJ)", "Antecedentes Criminais — SSPs"].map(c => (
+        {["BNMP — Mandados de Prisão (CNJ)", "Antecedentes Criminais — SSPs"].map(c => (
           <div key={c} style={{ fontSize: 12, color: C.textMuted, padding: "4px 0", display: "flex", gap: 8, alignItems: "center" }}>
             <span style={{ color: C.textMuted }}>○</span> {c}
           </div>
