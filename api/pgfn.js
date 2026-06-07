@@ -2,6 +2,15 @@ export default async function handler(req, res) {
   const doc = (req.query.cpfCnpj || "").replace(/\D/g, "");
   if (!doc) return res.status(400).json({ erro: "cpfCnpj obrigatório" });
 
+  // PGFN não disponibiliza API REST pública para consulta por CPF/CNPJ
+  return res.status(200).json({
+    fonte: "PGFN — Dívida Ativa da União",
+    status: "indisponivel",
+    mensagem: "Consulta disponível em regularize.pgfn.gov.br",
+    total: 0,
+    ocorrencias: [],
+  });
+
   try {
     const upstream = await fetch(
       `https://regularize.pgfn.gov.br/api/v1/contribuinte/${doc}/situacao`,
