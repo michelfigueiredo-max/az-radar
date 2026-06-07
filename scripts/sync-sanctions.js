@@ -1,151 +1,122 @@
-// Baixa CSVs do Portal da Transparência e importa no Vercel Postgres
+// Pagina a API do Portal da Transparência e importa todos os registros no banco Neon
 // Rodado pelo GitHub Actions toda semana (domingo 3h)
-// Rodar manualmente: node scripts/sync-sanctions.js
+// Rodar manualmente: node --env-file=.env.local scripts/sync-sanctions.js
 
-import { sql } from "@vercel/postgres";
-import { createReadStream } from "fs";
-import { createWriteStream } from "fs";
-import { pipeline } from "stream/promises";
-import { parse } from "csv-parse";
-import { createGunzip } from "zlib";
-import fetch from "node-fetch";
-import * as fs from "fs";
+import pg from "pg";
 
-// Fontes disponíveis para download (arquivos CSV completos)
+const { Client } = pg;
+const API_BASE = "https://api.portaldatransparencia.gov.br/api-de-dados";
+const API_KEY  = process.env.TRANSPARENCIA_API_KEY;
+const POR_PAG  = 500;
+
+if (!API_KEY) { console.error("TRANSPARENCIA_API_KEY não definida"); process.exit(1); }
+
+// ─── busca uma página da API ──────────────────────────────────────────────────
+async function fetchPagina(endpoint, pagina) {
+  const url = new URL(`${API_BASE}/${endpoint}`);
+  url.searchParams.set("pagina", pagina);
+  url.searchParams.set("quantidade", POR_PAG);
+
+  const res = await fetch(url.toString(), {
+    headers: { "chave-api-dados": API_KEY, "Accept": "application/json" },
+  });
+
+  if (res.status === 404) return [];
+  if (!res.ok) throw new Error(`HTTP ${res.status} — ${endpoint} pág ${pagina}`);
+  const data = await res.json();
+  return Array.isArray(data) ? data : (data?.data || []);
+}
+
+// ─── importa todos os registros de um endpoint ───────────────────────────────
+async function importarFonte(client, fonte) {
+  const { nome, endpoint, mapear } = fonte;
+  console.log(`\n[${nome}] Iniciando importação...`);
+
+  await client.query("DELETE FROM sancoes WHERE fonte = $1", [nome]);
+
+  let pagina = 1;
+  let total = 0;
+
+  while (true) {
+    const registros = await fetchPagina(endpoint, pagina);
+    if (registros.length === 0) break;
+
+    for (const r of registros) {
+      const row = mapear(r);
+      if (!row.cpf_cnpj) continue;
+      await client.query(
+        `INSERT INTO sancoes (fonte, cpf_cnpj, nome, sancao, orgao, esfera, data_inicio, data_fim, multa)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
+        [nome, row.cpf_cnpj, row.nome, row.sancao, row.orgao, row.esfera, row.data_inicio, row.data_fim, row.multa ?? null]
+      );
+    }
+
+    total += registros.length;
+    console.log(`  pág ${pagina} — ${total} registros acumulados`);
+
+    if (registros.length < POR_PAG) break;
+    pagina++;
+
+    // Pausa leve para não sobrecarregar a API
+    await new Promise(r => setTimeout(r, 200));
+  }
+
+  console.log(`[${nome}] Concluído: ${total} registros.`);
+}
+
+// ─── mapeadores de campos ─────────────────────────────────────────────────────
+function _clean(v) { return (v || "").replace(/\D/g, ""); }
+function _sancao(v) {
+  if (!v) return "";
+  if (typeof v === "string") return v;
+  return v.descricaoResumida || v.descricaoPortal || v.descricao || v.nome || "";
+}
+
 const FONTES = [
   {
     nome: "CEIS",
-    url: "https://portaldatransparencia.gov.br/download-de-dados/ceis/CEIS_CSV.zip",
-    cpfCnpjCol: "CPF OU CNPJ DO SANCIONADO",
-    nomeCol:    "NOME DO SANCIONADO",
-    sancaoCol:  "TIPO DE SANÇÃO",
-    orgaoCol:   "ÓRGÃO SANCIONADOR",
-    esferaCol:  "ESFERA DO ÓRGÃO SANCIONADOR",
-    inicioCol:  "DATA INÍCIO DA SANÇÃO",
-    fimCol:     "DATA FIM DA SANÇÃO",
-    multaCol:   null,
+    endpoint: "ceis",
+    mapear: o => ({
+      cpf_cnpj:   _clean(o.pessoa?.cnpjFormatado || o.pessoa?.cpfFormatado || o.sancionado?.codigoFormatado || ""),
+      nome:       o.sancionado?.nome || o.pessoa?.nome || o.nomeRazaoSocial || "",
+      sancao:     _sancao(o.tipoSancao),
+      orgao:      o.orgaoSancionador?.nome || "",
+      esfera:     o.orgaoSancionador?.esfera || "",
+      data_inicio:o.dataInicioSancao || "",
+      data_fim:   o.dataFimSancao || "",
+      multa:      null,
+    }),
   },
   {
     nome: "CNEP",
-    url: "https://portaldatransparencia.gov.br/download-de-dados/cnep/CNEP_CSV.zip",
-    cpfCnpjCol: "CPF OU CNPJ DO SANCIONADO",
-    nomeCol:    "NOME DO SANCIONADO",
-    sancaoCol:  "TIPO DE SANÇÃO",
-    orgaoCol:   "ÓRGÃO SANCIONADOR",
-    esferaCol:  "ESFERA DO ÓRGÃO SANCIONADOR",
-    inicioCol:  "DATA INÍCIO DA SANÇÃO",
-    fimCol:     "DATA FIM DA SANÇÃO",
-    multaCol:   "VALOR DA MULTA APLICADA",
+    endpoint: "cnep",
+    mapear: o => ({
+      cpf_cnpj:   _clean(o.pessoa?.cnpjFormatado || o.pessoa?.cpfFormatado || ""),
+      nome:       o.sancionado?.nome || o.pessoa?.nome || o.nomeRazaoSocial || "",
+      sancao:     _sancao(o.tipoSancao),
+      orgao:      o.orgaoSancionador?.nome || "",
+      esfera:     o.orgaoSancionador?.esfera || "",
+      data_inicio:o.dataInicioSancao || "",
+      data_fim:   o.dataFimSancao || "",
+      multa:      typeof o.valorMulta === "number" ? o.valorMulta : null,
+    }),
   },
 ];
 
-async function downloadAndExtract(url, destPath) {
-  console.log(`Baixando ${url}...`);
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status} ao baixar ${url}`);
+// ─── MAIN ─────────────────────────────────────────────────────────────────────
+const client = new Client({ connectionString: process.env.DATABASE_URL_UNPOOLED });
+await client.connect();
 
-  // Salva o ZIP
-  const zipPath = destPath + ".zip";
-  await pipeline(res.body, createWriteStream(zipPath));
-
-  // Extrai usando unzipper
-  const unzipper = await import("unzipper");
-  const zip = fs.createReadStream(zipPath).pipe(unzipper.Parse({ forceStream: true }));
-
-  for await (const entry of zip) {
-    if (entry.path.endsWith(".csv") || entry.path.endsWith(".CSV")) {
-      await pipeline(entry, createWriteStream(destPath));
-      console.log(`Extraído: ${entry.path} → ${destPath}`);
-    } else {
-      entry.autodrain();
-    }
-  }
-
-  fs.unlinkSync(zipPath);
-}
-
-async function importCSV(fonte, csvPath) {
-  console.log(`Importando ${fonte.nome} de ${csvPath}...`);
-
-  // Limpa registros antigos desta fonte
-  await sql`DELETE FROM sancoes WHERE fonte = ${fonte.nome}`;
-
-  let count = 0;
-  const batch = [];
-
-  await new Promise((resolve, reject) => {
-    const parser = parse({
-      delimiter: ";",
-      columns: true,
-      skip_empty_lines: true,
-      encoding: "latin1",
-      trim: true,
-    });
-
-    parser.on("readable", async function () {
-      let record;
-      while ((record = parser.read()) !== null) {
-        const cpfCnpj = (record[fonte.cpfCnpjCol] || "").replace(/\D/g, "");
-        if (!cpfCnpj) continue;
-
-        batch.push({
-          fonte:      fonte.nome,
-          cpf_cnpj:   cpfCnpj,
-          nome:       record[fonte.nomeCol] || "",
-          sancao:     record[fonte.sancaoCol] || "",
-          orgao:      record[fonte.orgaoCol] || "",
-          esfera:     record[fonte.esferaCol] || "",
-          data_inicio:record[fonte.inicioCol] || "",
-          data_fim:   record[fonte.fimCol] || "",
-          multa:      fonte.multaCol ? parseFloat((record[fonte.multaCol] || "0").replace(",", ".")) || null : null,
-        });
-
-        // Insere em lotes de 500
-        if (batch.length >= 500) {
-          await flushBatch(batch.splice(0));
-          count += 500;
-          if (count % 10000 === 0) console.log(`  ${count} registros importados...`);
-        }
-      }
-    });
-
-    parser.on("error", reject);
-    parser.on("end", resolve);
-
-    createReadStream(csvPath).pipe(parser);
-  });
-
-  // Flush restante
-  if (batch.length > 0) {
-    await flushBatch(batch.splice(0));
-    count += batch.length;
-  }
-
-  console.log(`${fonte.nome}: ${count} registros importados.`);
-}
-
-async function flushBatch(records) {
-  // Insere múltiplos registros
-  for (const r of records) {
-    await sql`
-      INSERT INTO sancoes (fonte, cpf_cnpj, nome, sancao, orgao, esfera, data_inicio, data_fim, multa)
-      VALUES (${r.fonte}, ${r.cpf_cnpj}, ${r.nome}, ${r.sancao}, ${r.orgao}, ${r.esfera}, ${r.data_inicio}, ${r.data_fim}, ${r.multa})
-    `;
-  }
-}
-
-// ─── MAIN ──────────────────────────────────────────────────────────────────────
 for (const fonte of FONTES) {
-  const csvPath = `/tmp/${fonte.nome}.csv`;
   try {
-    await downloadAndExtract(fonte.url, csvPath);
-    await importCSV(fonte, csvPath);
-    if (fs.existsSync(csvPath)) fs.unlinkSync(csvPath);
+    await importarFonte(client, fonte);
   } catch (e) {
-    console.error(`Erro ao processar ${fonte.nome}:`, e.message);
+    console.error(`Erro em ${fonte.nome}:`, e.message);
+    await client.end();
     process.exit(1);
   }
 }
 
-console.log("Sincronização concluída.");
+await client.end();
+console.log("\nSincronização concluída.");
 process.exit(0);

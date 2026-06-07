@@ -1,13 +1,17 @@
-// Cria a tabela de sanções no Vercel Postgres
+// Cria a tabela de sanções no banco Neon
 // Rodar uma vez: node scripts/init-db.js
 
-import { sql } from "@vercel/postgres";
+import pg from "pg";
+const { Client } = pg;
 
-await sql`
+const client = new Client({ connectionString: process.env.DATABASE_URL_UNPOOLED });
+await client.connect();
+
+await client.query(`
   CREATE TABLE IF NOT EXISTS sancoes (
     id           SERIAL PRIMARY KEY,
-    fonte        TEXT NOT NULL,          -- 'CEIS', 'CNEP', 'CEPIM'
-    cpf_cnpj     TEXT NOT NULL,          -- somente dígitos
+    fonte        TEXT NOT NULL,
+    cpf_cnpj     TEXT NOT NULL,
     nome         TEXT,
     sancao       TEXT,
     orgao        TEXT,
@@ -15,13 +19,13 @@ await sql`
     data_inicio  TEXT,
     data_fim     TEXT,
     multa        NUMERIC,
-    raw          JSONB,
     atualizado   TIMESTAMPTZ DEFAULT NOW()
-  );
-`;
+  )
+`);
 
-await sql`CREATE INDEX IF NOT EXISTS idx_sancoes_cpf_cnpj ON sancoes (cpf_cnpj);`;
-await sql`CREATE INDEX IF NOT EXISTS idx_sancoes_fonte ON sancoes (fonte);`;
+await client.query(`CREATE INDEX IF NOT EXISTS idx_sancoes_cpf_cnpj ON sancoes (cpf_cnpj)`);
+await client.query(`CREATE INDEX IF NOT EXISTS idx_sancoes_fonte ON sancoes (fonte)`);
 
 console.log("Tabela criada com sucesso.");
+await client.end();
 process.exit(0);
