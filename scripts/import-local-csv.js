@@ -16,11 +16,11 @@ const FONTES = [
     arquivo: join(__dir, "CEIS.csv"),
     cpfCnpjCol: "CPF OU CNPJ DO SANCIONADO",
     nomeCol:    "NOME DO SANCIONADO",
-    sancaoCol:  "TIPO DE SANÇÃO",
+    sancaoCol:  "CATEGORIA DA SANÇÃO",
     orgaoCol:   "ÓRGÃO SANCIONADOR",
-    esferaCol:  "ESFERA DO ÓRGÃO SANCIONADOR",
-    inicioCol:  "DATA INÍCIO DA SANÇÃO",
-    fimCol:     "DATA FIM DA SANÇÃO",
+    esferaCol:  "ESFERA ÓRGÃO SANCIONADOR",
+    inicioCol:  "DATA INÍCIO SANÇÃO",
+    fimCol:     "DATA FINAL SANÇÃO",
     multaCol:   null,
   },
   {
@@ -28,12 +28,24 @@ const FONTES = [
     arquivo: join(__dir, "CNEP.csv"),
     cpfCnpjCol: "CPF OU CNPJ DO SANCIONADO",
     nomeCol:    "NOME DO SANCIONADO",
-    sancaoCol:  "TIPO DE SANÇÃO",
+    sancaoCol:  "CATEGORIA DA SANÇÃO",
     orgaoCol:   "ÓRGÃO SANCIONADOR",
-    esferaCol:  "ESFERA DO ÓRGÃO SANCIONADOR",
-    inicioCol:  "DATA INÍCIO DA SANÇÃO",
-    fimCol:     "DATA FIM DA SANÇÃO",
-    multaCol:   "VALOR DA MULTA APLICADA",
+    esferaCol:  "ESFERA ÓRGÃO SANCIONADOR",
+    inicioCol:  "DATA INÍCIO SANÇÃO",
+    fimCol:     "DATA FINAL SANÇÃO",
+    multaCol:   "VALOR DA MULTA",
+  },
+  {
+    nome: "CEPIM",
+    arquivo: join(__dir, "CEPIM.csv"),
+    cpfCnpjCol: "CNPJ ENTIDADE",
+    nomeCol:    "NOME ENTIDADE",
+    sancaoCol:  "MOTIVO DO IMPEDIMENTO",
+    orgaoCol:   "ÓRGÃO CONCEDENTE",
+    esferaCol:  null,
+    inicioCol:  null,
+    fimCol:     null,
+    multaCol:   null,
   },
 ];
 
@@ -52,12 +64,42 @@ async function importarCSV(client, fonte) {
 
   let batch = [];
   let count = 0;
+  let headersValidated = false;
+
+  // Colunas esperadas para esta fonte (ignora nulos — campos opcionais)
+  const COLS_ESPERADAS = {
+    cpfCnpj: fonte.cpfCnpjCol,
+    nome:    fonte.nomeCol,
+    sancao:  fonte.sancaoCol,
+    orgao:   fonte.orgaoCol,
+    esfera:  fonte.esferaCol,
+    inicio:  fonte.inicioCol,
+    fim:     fonte.fimCol,
+    multa:   fonte.multaCol,
+  };
+
+  const validarCabecalho = (record) => {
+    const colsReais = Object.keys(record);
+    let erros = 0;
+    for (const [campo, col] of Object.entries(COLS_ESPERADAS)) {
+      if (!col) continue; // opcional
+      if (!colsReais.includes(col)) {
+        console.error(`  ⚠ COLUNA NÃO ENCONTRADA [${campo}]: "${col}"`);
+        erros++;
+      }
+    }
+    if (erros > 0) {
+      console.error(`  Colunas reais do CSV (${colsReais.length}):`);
+      colsReais.forEach(c => console.error(`    • "${c}"`));
+      throw new Error(`[${fonte.nome}] ${erros} coluna(s) com mapeamento incorreto — abortando importação.`);
+    }
+    console.log(`  ✓ Cabeçalho validado (${colsReais.length} colunas)`);
+  };
 
   const flush = async () => {
     if (!batch.length) return;
     const rows = batch;
     batch = [];
-    // Insere em uma transação por lote
     await client.query("BEGIN");
     for (const r of rows) {
       await client.query(
@@ -72,6 +114,10 @@ async function importarCSV(client, fonte) {
   };
 
   for await (const record of parser) {
+    if (!headersValidated) {
+      validarCabecalho(record); // lança se alguma coluna não bater
+      headersValidated = true;
+    }
     const cpfCnpj = (record[fonte.cpfCnpjCol] || "").replace(/\D/g, "");
     if (!cpfCnpj) continue;
     batch.push({

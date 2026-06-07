@@ -60,7 +60,21 @@ function lerPlanilha(caminho) {
   const iInicio   = colIdx(["Inclusão no Cadastro de Empregadores", "Inclusão no CEAC"]);
   const iDecisao  = colIdx(["Decisão administrativa", "Termo de Ajustamento"]);
 
-  console.log(`  Colunas detectadas: doc=${iDoc} nome=${iNome} uf=${iUF} inicio=${iInicio}`);
+  // Valida colunas obrigatórias — aborta se não encontrar
+  const OBRIGATORIAS = { "CNPJ/CPF": iDoc, "Empregador": iNome };
+  let erros = 0;
+  for (const [label, idx] of Object.entries(OBRIGATORIAS)) {
+    if (idx === -1) {
+      console.error(`  ⚠ COLUNA NÃO ENCONTRADA: "${label}"`);
+      erros++;
+    }
+  }
+  if (erros > 0) {
+    console.error(`  Colunas reais do arquivo (${headers.length}):`);
+    headers.forEach(h => console.error(`    • "${h}"`));
+    throw new Error(`${erros} coluna(s) obrigatória(s) não encontrada(s)`);
+  }
+  console.log(`  ✓ Colunas validadas — doc=${iDoc} nome=${iNome} uf=${iUF} inicio=${iInicio}`);
   console.log(`  Total de linhas de dados: ${data.length}`);
 
   return data.map(row => ({

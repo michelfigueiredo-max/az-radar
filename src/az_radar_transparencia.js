@@ -259,10 +259,7 @@ export async function rodarVerificacoesCPF(cpf) {
 
 // ─── BUNDLE — roda todas as verificações em paralelo para um CNPJ ─────────────
 export async function rodarVerificacoesCNPJ(cnpj) {
-  const [banco, cepim] = await Promise.all([
-    _consultarBanco(cnpj).catch(() => null),
-    consultarCEPIM(cnpj).catch(() => _V1("CEPIM — Convênios Impedidos")),
-  ]);
+  const banco = await _consultarBanco(cnpj).catch(() => null);
 
   const ocorrencias = banco?.ocorrencias || null;
 
@@ -281,6 +278,20 @@ export async function rodarVerificacoesCNPJ(cnpj) {
     total: mteItems.length,
     ocorrencias: mteItems,
     status: mteItems.some(i => i.sanção?.includes("escravi")) ? "recusa" : mteItems.length > 0 ? "alerta" : "ok",
+  };
+
+  const cepimItems = _filtrarFonte(ocorrencias, "CEPIM").map(o => ({
+    entidade:    o.nome || "",
+    cnpj:        o.cpf_cnpj || "",
+    impedimento: o.sanção || o.sancao || "",
+    convenio:    "",
+    orgao:       o.orgaoSancionador || o.orgao || "",
+  }));
+  const cepim = !ocorrencias ? _V1("CEPIM — Convênios Impedidos") : {
+    fonte: "CEPIM — CGU",
+    total: cepimItems.length,
+    ocorrencias: cepimItems,
+    status: cepimItems.length === 0 ? "ok" : "alerta",
   };
 
   return {

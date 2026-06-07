@@ -133,87 +133,407 @@ function CheckResult({ label, resultado }) {
   );
 }
 
+// Extrai os dígitos visíveis do CPF mascarado (posições 4-9)
+// Ex: "***524258**" ou "***.524.258-**" → "524258"
+function _digitosVisiveis(cpfMasc) {
+  if (!cpfMasc) return "";
+  return cpfMasc.replace(/\D/g, "").replace(/^\*+/, "").replace(/\*+$/, "");
+}
+
+// ─── Busca inline de sócio por nome + CPF parcial ────────────────────────────
+function SocioInlineCheck({ socio, onConsultarCompleto }) {
+  const [estado, setEstado] = useState("idle"); // idle | loading | done
+  const [resultado, setResultado] = useState(null);
+  const [cpfInput, setCpfInput] = useState("");
+  const [mostrarCpf, setMostrarCpf] = useState(false);
+
+  const digitosRef = _digitosVisiveis(socio.cpfCnpjMasc);
+
+  const buscar = async () => {
+    setEstado("loading");
+    try {
+      const params = new URLSearchParams({ nome: socio.nome });
+      if (digitosRef) params.set("cpfParcial", digitosRef);
+      const res = await fetch(`/api/sanctions?${params}`);
+      const data = await res.json();
+      setResultado(data);
+      setEstado("done");
+    } catch {
+      setResultado({ total: 0, ocorrencias: [], erro: true });
+      setEstado("done");
+    }
+  };
+
+  const cpfLimpo  = cpfInput.replace(/\D/g, "");
+  const cpfValido = cpfLimpo.length === 11;
+  const cpfBate   = cpfValido && (digitosRef ? cpfLimpo.includes(digitosRef) : true);
+
+  if (estado === "idle") return (
+    <button onClick={buscar}
+      style={{ fontSize:10, fontWeight:700, color:C.accent, background:C.accentBg, border:`1px solid ${C.accent}30`, borderRadius:6, padding:"4px 10px", cursor:"pointer", whiteSpace:"nowrap", flexShrink:0 }}>
+      Verificar →
+    </button>
+  );
+
+  if (estado === "loading") return (
+    <span style={{ fontSize:10, color:C.textMuted, padding:"4px 10px" }}>Buscando…</span>
+  );
+
+  const temOcorrencia = resultado?.total > 0;
+  const cor = temOcorrencia ? C.yellow : resultado?.erro ? C.textMuted : C.green;
+  const bgChip = temOcorrencia ? C.yellowBg : resultado?.erro ? C.grayBg : C.greenBg;
+  const bdChip = temOcorrencia ? C.yellowBorder : resultado?.erro ? C.border : C.greenBorder;
+
+  return (
+    <div style={{ marginTop:6, borderRadius:6, background:bgChip, border:`1px solid ${bdChip}`, padding:"8px 10px" }}>
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom: temOcorrencia ? 6 : 0 }}>
+        <span style={{ fontSize:10, fontWeight:700, color:cor }}>
+          {resultado?.erro ? "Erro ao buscar" : temOcorrencia ? `${resultado.total} ocorrência(s) em sanções` : "Sem ocorrências nas bases de sanções"}
+        </span>
+        <button onClick={() => setMostrarCpf(v => !v)}
+          style={{ fontSize:10, color:C.accent, background:"none", border:`1px solid ${C.accent}30`, borderRadius:5, padding:"2px 8px", cursor:"pointer" }}>
+          {mostrarCpf ? "▲ Fechar" : "Consulta completa"}
+        </button>
+      </div>
+
+      {temOcorrencia && resultado.ocorrencias.slice(0,3).map((o, i) => (
+        <div key={i} style={{ fontSize:10, color:C.text, padding:"4px 0", borderTop:`1px solid ${bdChip}` }}>
+          <span style={{ fontWeight:700, color:cor }}>⚠ {o.sancao || o.fonte}</span>
+          {o.orgao && <span style={{ color:C.textMuted }}> — {o.orgao}</span>}
+        </div>
+      ))}
+
+      {mostrarCpf && (
+        <div style={{ marginTop:8, paddingTop:8, borderTop:`1px solid ${bdChip}` }}>
+          <div style={{ fontSize:10, color:C.textSub, marginBottom:6 }}>
+            Para DataJud, CNDT e PEP informe o CPF completo.
+            {digitosRef && <span> Dígitos visíveis: <b style={{ fontFamily:"monospace" }}>{socio.cpfCnpjMasc}</b></span>}
+          </div>
+          <div style={{ display:"flex", gap:6 }}>
+            <input value={cpfInput}
+              onChange={e => {
+                const d = e.target.value.replace(/\D/g,"");
+                let f = d;
+                if (d.length > 3) f = `${d.slice(0,3)}.${d.slice(3)}`;
+                if (d.length > 6) f = `${d.slice(0,3)}.${d.slice(3,6)}.${d.slice(6)}`;
+                if (d.length > 9) f = `${d.slice(0,3)}.${d.slice(3,6)}.${d.slice(6,9)}-${d.slice(9,11)}`;
+                setCpfInput(f.slice(0,14));
+              }}
+              placeholder="000.000.000-00"
+              style={{ flex:1, padding:"6px 10px", borderRadius:6, border:`1.5px solid ${cpfValido && !cpfBate ? C.redBorder : cpfBate ? C.greenBorder : C.border}`, fontSize:12, fontFamily:"monospace", outline:"none" }}
+            />
+            <button onClick={() => cpfBate && onConsultarCompleto(cpfLimpo)}
+              disabled={!cpfBate}
+              style={{ padding:"6px 12px", borderRadius:6, border:"none", background: cpfBate ? C.accent : C.border, color: cpfBate ? "#fff" : C.textMuted, fontSize:11, fontWeight:700, cursor: cpfBate ? "pointer" : "not-allowed" }}>
+              Consultar
+            </button>
+          </div>
+          {cpfValido && !cpfBate && (
+            <div style={{ fontSize:10, color:C.red, marginTop:4 }}>Dígitos visíveis ({digitosRef}) não batem.</div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Resultado CNPJ ───────────────────────────────────────────────────────────
-function CnpjCard({ data }) {
+function CnpjCard({ data, onConsultarSocio }) {
+  const [mostrarCnaes, setMostrarCnaes] = useState(false);
   if (!data) return null;
-  const ok = (data.situacao || "").toLowerCase().includes("ativa");
-  const bd = ok ? C.greenBorder : C.yellowBorder;
-  const bg = ok ? C.greenBg : C.yellowBg;
+
+  const ok  = (data.situacao || "").toLowerCase().includes("ativa");
+  const bd  = ok ? C.greenBorder : C.yellowBorder;
+  const bg  = ok ? C.greenBg : C.yellowBg;
   const cor = ok ? C.green : C.yellow;
 
-  const cnaeFormatado = [data.cnaeCode, data.cnaeDesc].filter(Boolean).join(" — ") || "—";
   const capitalFormatado = data.capitalSocial > 0
     ? `R$ ${data.capitalSocial.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`
     : "—";
   const endFormatado = [
-    data.endereco?.logradouro,
-    data.endereco?.numero,
-    data.endereco?.bairro,
+    data.endereco?.logradouro, data.endereco?.numero, data.endereco?.bairro,
     data.endereco?.municipio && data.endereco?.uf
       ? `${data.endereco.municipio} / ${data.endereco.uf}`
       : (data.endereco?.municipio || data.endereco?.uf),
     data.endereco?.cep,
   ].filter(Boolean).join(", ") || "—";
 
+  const regimeCor = data.regimeTributario === "MEI" ? C.green
+    : data.regimeTributario === "Simples Nacional" ? C.accent : C.textSub;
+
   return (
-    <div style={{ borderRadius:8, background:bg, border:`1px solid ${bd}`, padding:"12px 14px", marginBottom:0 }}>
-      {/* Cabeçalho */}
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexWrap:"wrap", gap:8 }}>
-        <div>
-          <div style={{ fontSize:14, fontWeight:800, color:C.text }}>{data.razaoSocial}</div>
-          {data.nomeFantasia && <div style={{ fontSize:11, color:C.textSub }}>Fantasia: {data.nomeFantasia}</div>}
-          <div style={{ fontSize:11, color:C.textSub, fontFamily:"monospace", marginTop:2 }}>
-            {(data.cnpj || "").replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5")}
+    <>
+      <div style={{ borderRadius:8, background:bg, border:`1px solid ${bd}`, padding:"12px 14px" }}>
+        {/* Cabeçalho */}
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexWrap:"wrap", gap:8 }}>
+          <div>
+            <div style={{ fontSize:14, fontWeight:800, color:C.text }}>{data.razaoSocial}</div>
+            {data.nomeFantasia && <div style={{ fontSize:11, color:C.textSub }}>Fantasia: {data.nomeFantasia}</div>}
+            <div style={{ fontSize:11, color:C.textSub, fontFamily:"monospace", marginTop:2 }}>
+              {(data.cnpj || "").replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5")}
+            </div>
+          </div>
+          <div style={{ textAlign:"right" }}>
+            <span style={{ fontSize:10, fontWeight:800, padding:"3px 10px", borderRadius:20, background:bg, color:cor, border:`1.5px solid ${bd}`, whiteSpace:"nowrap", display:"inline-block" }}>
+              {ok ? "✓" : "!"} {data.situacao || "—"}
+            </span>
+            {data.dataSituacao && <div style={{ fontSize:9, color:C.textMuted, marginTop:3 }}>{data.dataSituacao}</div>}
           </div>
         </div>
-        <span style={{ fontSize:10, fontWeight:800, padding:"3px 10px", borderRadius:20, background:bg, color:cor, border:`1.5px solid ${bd}`, whiteSpace:"nowrap" }}>
-          {ok ? "✓" : "!"} {data.situacao || "—"}
-        </span>
-      </div>
 
-      {/* Grid campos principais */}
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:6, marginTop:10 }}>
-        {[
-          { l:"Abertura",  v: data.abertura },
-          { l:"Porte",     v: data.porte },
-          { l:"Capital",   v: capitalFormatado },
-          { l:"Natureza",  v: data.natureza },
-          { l:"Regime",    v: data.regimeTributario || "Não optante" },
-          { l:"Email",     v: data.email },
-        ].map(f => (
-          <div key={f.l} style={{ background:"rgba(255,255,255,0.65)", borderRadius:6, padding:"6px 8px" }}>
-            <div style={{ fontSize:9, color:C.textMuted, textTransform:"uppercase", letterSpacing:1, fontWeight:700 }}>{f.l}</div>
-            <div style={{ fontSize:10, color:C.text, fontWeight:600, marginTop:2, wordBreak:"break-word" }}>{f.v||"—"}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* CNAE */}
-      <div style={{ background:"rgba(255,255,255,0.55)", borderRadius:6, padding:"6px 8px", marginTop:6 }}>
-        <div style={{ fontSize:9, color:C.textMuted, textTransform:"uppercase", letterSpacing:1, fontWeight:700 }}>CNAE Principal</div>
-        <div style={{ fontSize:10, color:C.text, fontWeight:600, marginTop:2 }}>{cnaeFormatado}</div>
-      </div>
-
-      {/* Endereço */}
-      {endFormatado !== "—" && (
-        <div style={{ background:"rgba(255,255,255,0.55)", borderRadius:6, padding:"6px 8px", marginTop:6 }}>
-          <div style={{ fontSize:9, color:C.textMuted, textTransform:"uppercase", letterSpacing:1, fontWeight:700 }}>Endereço</div>
-          <div style={{ fontSize:10, color:C.text, fontWeight:600, marginTop:2 }}>{endFormatado}</div>
-        </div>
-      )}
-
-      {/* QSA */}
-      {data.socios?.length > 0 && (
-        <div style={{ marginTop:8 }}>
-          <div style={{ fontSize:9, color:C.textMuted, textTransform:"uppercase", letterSpacing:1, fontWeight:700, marginBottom:5 }}>QSA — {data.socios.length} sócio(s)</div>
-          {data.socios.slice(0,5).map((s,i) => (
-            <div key={i} style={{ fontSize:11, display:"flex", justifyContent:"space-between", background:"rgba(255,255,255,0.6)", borderRadius:6, padding:"4px 8px", marginBottom:3 }}>
-              <span style={{ fontWeight:600, color:C.text }}>{s.nome}</span>
-              <span style={{ color:C.textMuted }}>{s.qualificacao}</span>
+        {/* Grid campos */}
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:6, marginTop:10 }}>
+          {[
+            { l:"Abertura",  v: data.abertura },
+            { l:"Porte",     v: data.porte },
+            { l:"Capital",   v: capitalFormatado },
+            { l:"Natureza",  v: data.natureza },
+            { l:"Telefone",  v: data.telefone },
+            { l:"Email",     v: data.email },
+          ].map(f => (
+            <div key={f.l} style={{ background:"rgba(255,255,255,0.65)", borderRadius:6, padding:"6px 8px" }}>
+              <div style={{ fontSize:9, color:C.textMuted, textTransform:"uppercase", letterSpacing:1, fontWeight:700 }}>{f.l}</div>
+              <div style={{ fontSize:10, color:C.text, fontWeight:600, marginTop:2, wordBreak:"break-word" }}>{f.v||"—"}</div>
             </div>
           ))}
         </div>
-      )}
+
+        {/* Regime Tributário */}
+        <div style={{ background:"rgba(255,255,255,0.65)", borderRadius:6, padding:"6px 10px", marginTop:6, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+          <div>
+            <div style={{ fontSize:9, color:C.textMuted, textTransform:"uppercase", letterSpacing:1, fontWeight:700 }}>Regime Tributário</div>
+            <div style={{ fontSize:11, color:regimeCor, fontWeight:700, marginTop:2 }}>{data.regimeTributario || "—"}</div>
+          </div>
+          {(data.simplesOpcao || data.simplesExclusao) && (
+            <div style={{ fontSize:9, color:C.textMuted, textAlign:"right" }}>
+              {data.simplesOpcao    && <div>Opção: {data.simplesOpcao}</div>}
+              {data.simplesExclusao && <div>Exclusão: {data.simplesExclusao}</div>}
+            </div>
+          )}
+        </div>
+
+        {/* CNAE Principal */}
+        <div style={{ background:"rgba(255,255,255,0.55)", borderRadius:6, padding:"6px 8px", marginTop:6 }}>
+          <div style={{ fontSize:9, color:C.textMuted, textTransform:"uppercase", letterSpacing:1, fontWeight:700 }}>CNAE Principal</div>
+          <div style={{ fontSize:10, color:C.text, fontWeight:600, marginTop:2 }}>
+            {[data.cnaeCode, data.cnaeDesc].filter(Boolean).join(" — ") || "—"}
+          </div>
+        </div>
+
+        {/* Inscrições Estaduais */}
+        {data.inscricoesEstaduais?.length > 0 && (
+          <div style={{ background:"rgba(255,255,255,0.55)", borderRadius:6, padding:"6px 8px", marginTop:4 }}>
+            <div style={{ fontSize:9, color:C.textMuted, textTransform:"uppercase", letterSpacing:1, fontWeight:700, marginBottom:5 }}>
+              Inscrições Estaduais ({data.inscricoesEstaduais.length})
+            </div>
+            {data.inscricoesEstaduais.map((ie, i) => (
+              <div key={i} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"3px 0", borderTop: i > 0 ? `1px solid ${C.border}` : "none" }}>
+                <div>
+                  <span style={{ fontSize:10, fontFamily:"monospace", color:C.text, fontWeight:600 }}>{ie.numero}</span>
+                  <span style={{ fontSize:9, color:C.textMuted, marginLeft:8 }}>{ie.estado}{ie.tipo ? ` — ${ie.tipo}` : ""}</span>
+                </div>
+                <span style={{ fontSize:9, fontWeight:700, padding:"2px 7px", borderRadius:10,
+                  background: ie.ativo ? C.greenBg : C.redBg,
+                  color:      ie.ativo ? C.green   : C.red,
+                  border:     `1px solid ${ie.ativo ? C.greenBorder : C.redBorder}` }}>
+                  {ie.ativo ? "Ativa" : "Inativa"}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* CNAEs Secundários */}
+        {data.cnaesSecundarios?.length > 0 && (
+          <div style={{ background:"rgba(255,255,255,0.45)", borderRadius:6, padding:"6px 8px", marginTop:4 }}>
+            <button onClick={() => setMostrarCnaes(v => !v)}
+              style={{ background:"none", border:"none", cursor:"pointer", padding:0, width:"100%", textAlign:"left", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+              <div style={{ fontSize:9, color:C.textMuted, textTransform:"uppercase", letterSpacing:1, fontWeight:700 }}>
+                CNAEs Secundários ({data.cnaesSecundarios.length})
+              </div>
+              <span style={{ fontSize:10, color:C.accent }}>{mostrarCnaes ? "▲" : "▼"}</span>
+            </button>
+            {mostrarCnaes && (
+              <div style={{ marginTop:6 }}>
+                {data.cnaesSecundarios.map((c, i) => (
+                  <div key={i} style={{ fontSize:10, color:C.textSub, padding:"3px 0", borderBottom: i < data.cnaesSecundarios.length-1 ? `1px solid ${C.border}` : "none" }}>
+                    <span style={{ fontFamily:"monospace", color:C.textMuted, marginRight:6 }}>{c.code}</span>{c.desc}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Endereço */}
+        {endFormatado !== "—" && (
+          <div style={{ background:"rgba(255,255,255,0.55)", borderRadius:6, padding:"6px 8px", marginTop:4 }}>
+            <div style={{ fontSize:9, color:C.textMuted, textTransform:"uppercase", letterSpacing:1, fontWeight:700 }}>Endereço</div>
+            <div style={{ fontSize:10, color:C.text, fontWeight:600, marginTop:2 }}>{endFormatado}</div>
+          </div>
+        )}
+
+        {/* QSA */}
+        {data.socios?.length > 0 && (
+          <div style={{ marginTop:8 }}>
+            <div style={{ fontSize:9, color:C.textMuted, textTransform:"uppercase", letterSpacing:1, fontWeight:700, marginBottom:5 }}>
+              QSA — {data.socios.length} sócio(s)
+            </div>
+            {data.socios.map((s, i) => (
+              <div key={i} style={{ background:"rgba(255,255,255,0.6)", borderRadius:6, padding:"8px 10px", marginBottom:4 }}>
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:8 }}>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ fontSize:11, fontWeight:700, color:C.text }}>{s.nome}</div>
+                    <div style={{ fontSize:10, color:C.textSub, marginTop:1 }}>{s.qualificacao}</div>
+                    <div style={{ display:"flex", gap:10, marginTop:3, flexWrap:"wrap" }}>
+                      {s.cpfCnpjMasc && (
+                        <span style={{ fontSize:9, fontFamily:"monospace", color:C.textMuted, background:C.grayBg, padding:"1px 5px", borderRadius:4 }}>{s.cpfCnpjMasc}</span>
+                      )}
+                      {s.faixaEtaria && <span style={{ fontSize:9, color:C.textMuted }}>{s.faixaEtaria}</span>}
+                      {s.dataEntrada && <span style={{ fontSize:9, color:C.textMuted }}>Entrada: {s.dataEntrada}</span>}
+                    </div>
+                  </div>
+                  {s.tipo === "PJ" && s.cpfCnpjMasc && (
+                    <button onClick={() => onConsultarSocio?.(s.cpfCnpjMasc.replace(/\D/g,""), s.nome)}
+                      style={{ fontSize:10, fontWeight:700, color:C.accent, background:C.accentBg, border:`1px solid ${C.accent}30`, borderRadius:6, padding:"4px 10px", cursor:"pointer", whiteSpace:"nowrap", flexShrink:0 }}>
+                      Ver CNPJ →
+                    </button>
+                  )}
+                </div>
+                {s.tipo !== "PJ" && (
+                  <SocioInlineCheck socio={s} onConsultarCompleto={(cpf) => onConsultarSocio?.(cpf, s.nome)} />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+// ─── Card CPF ────────────────────────────────────────────────────────────────
+function CpfCard({ cpf, resultados, nomeContexto, onConsultarEmpresa }) {
+  const [sociedades,     setSociedades]     = useState(null);  // null=não buscou, []=[vazio], [...]
+  const [loadSociedades, setLoadSociedades] = useState(false);
+  const [sancoesCnpj,    setSancoesCnpj]    = useState({});    // cnpj → true se tem sanção
+
+  const nome = nomeContexto
+    || resultados?.["PEP — Pessoa Politicamente Exposta"]?.ocorrencias?.[0]?.nome
+    || resultados?.["CEIS — Impedimentos CGU"]?.ocorrencias?.[0]?.nome
+    || resultados?.["CNEP — Anticorrupção"]?.ocorrencias?.[0]?.nome
+    || resultados?.["MTE — Trabalho Escravo"]?.ocorrencias?.[0]?.nome
+    || "";
+
+  const cpfFormatado = cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, "$1.$2.$3-$4");
+
+  const buscarSociedades = async () => {
+    setLoadSociedades(true);
+    try {
+      const res  = await fetch(`/api/socios?cpf=${cpf}`);
+      const data = await res.json();
+      const lista = data.sociedades || [];
+      setSociedades(lista);
+
+      // Verifica sanções para cada CNPJ das sociedades
+      if (lista.length > 0) {
+        const checks = await Promise.all(
+          lista.map(s => fetch(`/api/sanctions?cpfCnpj=${s.cnpj}`).then(r => r.json()).catch(() => ({ total: 0 })))
+        );
+        const mapa = {};
+        lista.forEach((s, i) => { mapa[s.cnpj] = checks[i]?.total > 0; });
+        setSancoesCnpj(mapa);
+      }
+    } catch {
+      setSociedades([]);
+    }
+    setLoadSociedades(false);
+  };
+
+  return (
+    <div style={{ borderRadius:8, background:C.grayBg, border:`1px solid ${C.border}`, padding:"12px 14px" }}>
+      {/* Cabeçalho */}
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:8, marginBottom:10 }}>
+        <div>
+          <div style={{ fontSize:14, fontWeight:800, color:C.text }}>{nome || "Pessoa Física"}</div>
+          <div style={{ fontSize:11, fontFamily:"monospace", color:C.textSub, marginTop:2 }}>{cpfFormatado}</div>
+          {!nome && (
+            <div style={{ fontSize:10, color:C.textMuted, marginTop:4 }}>
+              Nome indisponível — dados cadastrais de CPF não são públicos (LGPD)
+            </div>
+          )}
+        </div>
+        <span style={{ fontSize:10, fontWeight:700, padding:"3px 10px", borderRadius:20, background:C.surface, color:C.textSub, border:`1.5px solid ${C.border}`, whiteSpace:"nowrap" }}>
+          Pessoa Física
+        </span>
+      </div>
+
+      {/* Sociedades */}
+      <div style={{ borderTop:`1px solid ${C.border}`, paddingTop:10 }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
+          <div style={{ fontSize:9, fontWeight:700, color:C.textMuted, textTransform:"uppercase", letterSpacing:1 }}>
+            Sociedades em Empresas
+          </div>
+          {sociedades === null && !loadSociedades && (
+            <button onClick={buscarSociedades}
+              style={{ fontSize:10, fontWeight:700, color:C.accent, background:C.accentBg, border:`1px solid ${C.accent}30`, borderRadius:6, padding:"3px 10px", cursor:"pointer" }}>
+              Buscar sociedades
+            </button>
+          )}
+        </div>
+
+        {loadSociedades && (
+          <div style={{ fontSize:11, color:C.textMuted }}>Consultando Receita Federal…</div>
+        )}
+
+        {sociedades === null && !loadSociedades && (
+          <div style={{ fontSize:11, color:C.textMuted }}>Clique para verificar em quais empresas esta pessoa é sócia.</div>
+        )}
+
+        {sociedades?.length === 0 && (
+          <div style={{ fontSize:11, color:C.textMuted }}>Nenhuma sociedade encontrada.</div>
+        )}
+
+        {sociedades?.length > 0 && (
+          <div style={{ display:"flex", flexDirection:"column", gap:4 }}>
+            {sociedades.map((s, i) => {
+              const temSancao = sancoesCnpj[s.cnpj];
+              const bd = temSancao ? C.yellowBorder : C.border;
+              const bg = temSancao ? C.yellowBg : "rgba(255,255,255,0.7)";
+              return (
+                <div key={i} style={{ borderRadius:6, background:bg, border:`1px solid ${bd}`, padding:"7px 10px", display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:8 }}>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ fontSize:11, fontWeight:700, color:C.text }}>
+                      {temSancao && <span style={{ color:C.yellow }}>⚠ </span>}
+                      {s.razaoSocial || s.cnpj}
+                    </div>
+                    <div style={{ display:"flex", gap:8, marginTop:3, flexWrap:"wrap" }}>
+                      <span style={{ fontSize:9, fontFamily:"monospace", color:C.textMuted }}>
+                        {s.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5")}
+                      </span>
+                      {s.qualificacao && <span style={{ fontSize:9, color:C.textSub }}>{s.qualificacao}</span>}
+                      {s.dataEntrada && <span style={{ fontSize:9, color:C.textMuted }}>Entrada: {s.dataEntrada}</span>}
+                      {s.uf && <span style={{ fontSize:9, color:C.textMuted }}>{s.uf}</span>}
+                      {s.situacao && s.situacao.toLowerCase() !== "ativa" && (
+                        <span style={{ fontSize:9, color:C.yellow, fontWeight:700 }}>{s.situacao}</span>
+                      )}
+                    </div>
+                    {temSancao && (
+                      <div style={{ fontSize:10, color:C.yellow, fontWeight:600, marginTop:3 }}>
+                        Empresa com sanções no banco — verifique
+                      </div>
+                    )}
+                  </div>
+                  <button onClick={() => onConsultarEmpresa?.(s.cnpj, s.razaoSocial)}
+                    style={{ fontSize:10, fontWeight:700, color:temSancao ? C.yellow : C.accent, background: temSancao ? C.yellowBg : C.accentBg, border:`1px solid ${temSancao ? C.yellowBorder : C.accent + "30"}`, borderRadius:6, padding:"4px 10px", cursor:"pointer", whiteSpace:"nowrap", flexShrink:0 }}>
+                    Ver CNPJ →
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -226,6 +546,7 @@ export default function ConsultaView({ mobile }) {
   const [progresso,   setProgresso]   = useState({});
   const [resultados,  setResultados]  = useState(null);
   const [cnpjData,    setCnpjData]    = useState(null);
+  const [nomeConsultado, setNomeConsultado] = useState("");
   const [erro,        setErro]        = useState(null);
 
   const perfil = PERFIS.find(p => p.id === perfilId);
@@ -255,6 +576,7 @@ export default function ConsultaView({ mobile }) {
     setProgresso({});
     setResultados(null);
     setCnpjData(null);
+    setNomeConsultado("");
 
     // Para perfil "ambos" (MEI/Prestador) usa o tipo detectado do documento
     const tipoReal = tipoPerfil === "ambos" ? docTipoReal : tipoPerfil;
@@ -484,13 +806,36 @@ export default function ConsultaView({ mobile }) {
         </div>
       </div>
 
+      {/* Card CPF */}
+      {!cnpjData && docLimpo.length === 11 && (
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: C.textMuted, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>
+            👤 Dados do Consultado
+          </div>
+          <CpfCard cpf={docLimpo} resultados={resultados} nomeContexto={nomeConsultado}
+            onConsultarEmpresa={(cnpj, nome) => {
+              setNomeConsultado(nome || "");
+              setDoc(cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5"));
+              setPerfilId("empresa1");
+              setFase("form");
+            }} />
+        </div>
+      )}
+
       {/* Dados CNPJ RF */}
       {cnpjData && (
         <div style={{ marginBottom: 12 }}>
           <div style={{ fontSize: 11, fontWeight: 700, color: C.textMuted, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>
             📋 Receita Federal — Dados Cadastrais
           </div>
-          <CnpjCard data={cnpjData} />
+          <CnpjCard data={cnpjData} onConsultarSocio={(cpf, nome) => {
+            setNomeConsultado(nome || "");
+            setFase("form");
+            setDoc(cpf.length === 11
+              ? cpf.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, "$1.$2.$3-$4")
+              : cpf.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.$2.$3/$4-$5"));
+            setPerfilId(cpf.length === 14 ? "empresa1" : "motorista");
+          }} />
         </div>
       )}
 

@@ -308,9 +308,11 @@ function _parseCNPJ(json) {
   const socios = (json.qsa || json.socios || []).map(s => ({
     nome:          s.nome_socio || s.nome || "",
     qualificacao:  _str(s.qualificacao_socio) || s.descricao_qualificacao_socio || s.qual || "",
-    cpfCnpj:       s.cnpj_cpf_do_socio || s.cpf_cnpj_socio || "",
-    dataEntrada:   s.data_entrada || "",
-    faixaEtaria:   s.faixa_etaria || "",
+    cpfCnpjMasc:   s.cnpj_cpf_do_socio || s.cpf_cnpj_socio || "",
+    dataEntrada:   s.data_entrada_sociedade || s.data_entrada || "",
+    faixaEtaria:   _str(s.faixa_etaria) || s.faixa_etaria || "",
+    paisOrigem:    _str(s.pais) || "",
+    tipo:          s.tipo ? _str(s.tipo) : (s.cnpj_cpf_do_socio?.length > 14 ? "PJ" : "PF"),
   }));
 
   // CNAE principal
@@ -318,11 +320,25 @@ function _parseCNPJ(json) {
   const cnaeCode = String(e.cnae_fiscal || cnaeObj?.id || json.cnae_fiscal || "");
   const cnaeDesc = e.cnae_fiscal_descricao || cnaeObj?.descricao || json.cnae_fiscal_descricao || "";
 
+  // CNAEs secundários
+  const cnaesSecundarios = (e.cnaes_secundarios || json.atividades_secundarias || []).map(c => ({
+    code: String(c.id || c.codigo || c.code || ""),
+    desc: c.descricao || c.text || "",
+  })).filter(c => c.code);
+
+  // Inscrições Estaduais
+  const inscricoesEstaduais = (e.inscricoes_estaduais || json.inscricoes_estaduais || []).map(ie => ({
+    numero: ie.inscricao_estadual || ie.numero || "",
+    estado: ie.estado?.sigla || ie.estado || ie.uf || "",
+    ativo:  ie.ativo ?? ie.ativa ?? true,
+    tipo:   ie.tipo?.descricao || ie.tipo || "",
+  })).filter(ie => ie.numero);
+
   // Simples / MEI
   const simples = json.simples || {};
   const regimeTributario = simples.mei === "Sim" ? "MEI"
     : simples.simples === "Sim" ? "Simples Nacional"
-    : "";
+    : "Lucro Real ou Presumido";
 
   return {
     cnpj:            e.cnpj || json.cnpj || json.CNPJ || "",
@@ -340,6 +356,8 @@ function _parseCNPJ(json) {
     simplesOpcao:    simples.data_opcao_simples || "",
     simplesExclusao: simples.data_exclusao_simples || "",
     socios,
+    cnaesSecundarios,
+    inscricoesEstaduais,
     email:           e.email || json.email || "",
     telefone:        e.ddd1 && e.telefone1
                        ? `(${e.ddd1}) ${e.telefone1}`.trim()

@@ -7,4 +7,7 @@ dist/
 
 .vercel
 scripts/*.csv
+scripts/*.xlsx
 scripts/test-*.js
+*.docx
+*.xlsx
