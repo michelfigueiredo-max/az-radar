@@ -4,6 +4,7 @@ import {
   rodarVerificacoesCPF,
   rodarVerificacoesCNPJ,
 } from "./az_radar_transparencia.js";
+import { consultarProcessos } from "./az_radar_datajud.js";
 
 const C = {
   bg:"#F0F4F9", surface:"#FFFFFF", navy:"#0A1628", navyMid:"#1E3A5F",
@@ -25,8 +26,8 @@ const PERFIS = [
 ];
 
 // Checks que serão executados por tipo de documento
-const CHECKS_CPF  = ["CEIS — Impedimentos CGU","CNEP — Anticorrupção","MTE — Trabalho Escravo","PEP — Pessoa Politicamente Exposta","Benefícios Sociais — CGU"];
-const CHECKS_CNPJ = ["CNPJ — Receita Federal","Simples Nacional","CEIS — Impedimentos CGU","CNEP — Anticorrupção","CEPIM — Convênios","MTE — Trabalho Escravo"];
+const CHECKS_CPF  = ["CEIS — Impedimentos CGU","CNEP — Anticorrupção","Processos Judiciais — DataJud","MTE — Trabalho Escravo","PEP — Pessoa Politicamente Exposta","Benefícios Sociais — CGU"];
+const CHECKS_CNPJ = ["CNPJ — Receita Federal","Simples Nacional","CEIS — Impedimentos CGU","CNEP — Anticorrupção","Processos Judiciais — DataJud","CEPIM — Convênios","MTE — Trabalho Escravo"];
 
 function formatDoc(v, tipo) {
   const d = v.replace(/\D/g, "");
@@ -109,6 +110,11 @@ function CheckResult({ label, resultado }) {
               {o.cargo       && <div style={{ color:C.textSub }}>Cargo: {String(o.cargo)}{o.orgao ? ` — ${String(o.orgao)}` : ""}</div>}
               {o.orgaoSancionador && <div style={{ color:C.textSub, fontSize:10 }}>Órgão: {String(o.orgaoSancionador)}{o.esfera ? ` (${String(o.esfera)})` : ""}</div>}
               {o.multa       && <div style={{ color:cor, fontSize:10 }}>Multa: {String(o.multa)}</div>}
+              {o.numero      && <div style={{ color:C.textMuted, fontFamily:"monospace", fontSize:10 }}>{String(o.numero)}</div>}
+              {o.classe      && <div style={{ color:C.textSub, fontSize:10 }}>Classe: {String(o.classe)}</div>}
+              {o.assunto     && <div style={{ color:C.textSub, fontSize:10 }}>Assunto: {String(o.assunto)}</div>}
+              {o.tribunal    && <div style={{ color:C.textSub, fontSize:10 }}>Tribunal: {String(o.tribunal)}</div>}
+              {o.data        && <div style={{ color:C.textMuted, fontSize:10 }}>Ajuizamento: {String(o.data)}</div>}
               {o.valor != null && o.valor > 0 && <div style={{ color:C.textSub }}>Valor: R$ {Number(o.valor).toLocaleString("pt-BR",{minimumFractionDigits:2})}</div>}
               {o.dataInicio  && <div style={{ color:C.textMuted, fontSize:10 }}>Início: {String(o.dataInicio)}{o.dataFim && o.dataFim !== "Sem informação" ? ` · Fim: ${String(o.dataFim)}` : " · Em vigor"}</div>}
             </div>
@@ -261,25 +267,33 @@ export default function ConsultaView({ mobile }) {
         setProgresso(p => ({ ...p, "CNPJ — Receita Federal": "ok", "Simples Nacional": "ok" }));
 
         // Portal Transparência em paralelo
-        const keys = ["CEIS — Impedimentos CGU","CNEP — Anticorrupção","CEPIM — Convênios","MTE — Trabalho Escravo"];
+        const keys = ["CEIS — Impedimentos CGU","CNEP — Anticorrupção","Processos Judiciais — DataJud","CEPIM — Convênios","MTE — Trabalho Escravo"];
         keys.forEach(k => setProgresso(p => ({ ...p, [k]: "loading" })));
 
-        const res = await rodarVerificacoesCNPJ(docLimpo);
+        const [res, processos] = await Promise.all([
+          rodarVerificacoesCNPJ(docLimpo),
+          consultarProcessos(docLimpo).catch(() => ({ status:"erro", erro:"Indisponível", total:0, ocorrencias:[] })),
+        ]);
         const map = {
-          "CEIS — Impedimentos CGU": res.ceis,
-          "CNEP — Anticorrupção":    res.cnep,
-          "CEPIM — Convênios":       res.cepim,
-          "MTE — Trabalho Escravo":  res.mte,
+          "CEIS — Impedimentos CGU":      res.ceis,
+          "CNEP — Anticorrupção":         res.cnep,
+          "Processos Judiciais — DataJud":processos,
+          "CEPIM — Convênios":            res.cepim,
+          "MTE — Trabalho Escravo":       res.mte,
         };
         keys.forEach(k => setProgresso(p => ({ ...p, [k]: map[k]?.erro ? "erro" : "ok" })));
         setResultados(map);
       } else {
         const keys = CHECKS_CPF;
         keys.forEach(k => setProgresso(p => ({ ...p, [k]: "loading" })));
-        const res = await rodarVerificacoesCPF(docLimpo);
+        const [res, processos] = await Promise.all([
+          rodarVerificacoesCPF(docLimpo),
+          consultarProcessos(docLimpo).catch(() => ({ status:"erro", erro:"Indisponível", total:0, ocorrencias:[] })),
+        ]);
         const map = {
           "CEIS — Impedimentos CGU":           res.ceis,
           "CNEP — Anticorrupção":              res.cnep,
+          "Processos Judiciais — DataJud":     processos,
           "MTE — Trabalho Escravo":            res.mte,
           "PEP — Pessoa Politicamente Exposta":res.pep,
           "Benefícios Sociais — CGU":          res.beneficios,
@@ -459,7 +473,7 @@ export default function ConsultaView({ mobile }) {
         <div style={{ fontSize: 11, fontWeight: 700, color: C.textMuted, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>
           ⏳ Verificações adicionais (V1/V3 — requerem parceiro)
         </div>
-        {["CNDT — Débitos Trabalhistas (TST)", "CND Federal / PGFN", "BNMP — Mandados de Prisão (CNJ)", "Criminal completo — TJs"].map(c => (
+        {["CNDT — Débitos Trabalhistas (TST)", "CND Federal / PGFN", "BNMP — Mandados de Prisão (CNJ)", "Antecedentes Criminais — SSPs"].map(c => (
           <div key={c} style={{ fontSize: 12, color: C.textMuted, padding: "4px 0", display: "flex", gap: 8, alignItems: "center" }}>
             <span style={{ color: C.textMuted }}>○</span> {c}
           </div>
