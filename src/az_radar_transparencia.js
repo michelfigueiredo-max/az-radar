@@ -228,10 +228,22 @@ export async function rodarVerificacoesCPF(cpf) {
     return { fonte: fonteLabel, total: items.length, ocorrencias: items, status: items.length === 0 ? "ok" : "alerta" };
   };
 
+  // MTE: combina Trabalho Escravo + CEAC no mesmo card
+  const mteItems = [
+    ..._filtrarFonte(ocorrencias, "MTE — Trabalho Escravo"),
+    ..._filtrarFonte(ocorrencias, "CEAC — Ajustamento de Conduta MTE"),
+  ];
+  const mte = !ocorrencias ? _V1("MTE — Lista de Trabalho Escravo") : {
+    fonte: "MTE — Lista de Trabalho Escravo",
+    total: mteItems.length,
+    ocorrencias: mteItems,
+    status: mteItems.some(i => i.sanção?.includes("escravi")) ? "recusa" : mteItems.length > 0 ? "alerta" : "ok",
+  };
+
   return {
     ceis:       _fonte("CEIS", "CEIS — CGU"),
     cnep:       _fonte("CNEP", "CNEP — CGU"),
-    mte:        _V1("MTE — Lista de Trabalho Escravo"),
+    mte,
     pep:        _V1("PEP — Portal Transparência"),
     beneficios: _V1("Benefícios Sociais — CGU"),
   };
@@ -250,10 +262,21 @@ export async function rodarVerificacoesCNPJ(cnpj) {
     return { fonte: fonteLabel, total: items.length, ocorrencias: items, status: items.length === 0 ? "ok" : "alerta" };
   };
 
+  const mteItemsCnpj = [
+    ..._filtrarFonte(ocorrencias, "MTE — Trabalho Escravo"),
+    ..._filtrarFonte(ocorrencias, "CEAC — Ajustamento de Conduta MTE"),
+  ];
+  const mteCnpj = !ocorrencias ? _V1("MTE — Lista de Trabalho Escravo") : {
+    fonte: "MTE — Lista de Trabalho Escravo",
+    total: mteItemsCnpj.length,
+    ocorrencias: mteItemsCnpj,
+    status: mteItemsCnpj.some(i => i.sanção?.includes("escravi")) ? "recusa" : mteItemsCnpj.length > 0 ? "alerta" : "ok",
+  };
+
   return {
     ceis:  _fonte("CEIS", "CEIS — CGU"),
     cnep:  _fonte("CNEP", "CNEP — CGU"),
     cepim: _V1("CEPIM — CGU"),
-    mte:   _V1("MTE — Lista de Trabalho Escravo"),
+    mte:   mteCnpj,
   };
 }
