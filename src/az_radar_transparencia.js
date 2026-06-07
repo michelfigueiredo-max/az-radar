@@ -102,8 +102,15 @@ export async function consultarCNEP(cpfCnpj) {
 export async function consultarCEPIM(cnpj) {
   const doc = _clean(cnpj);
   if (doc.length !== 14) return { fonte: "CEPIM — CGU", total: 0, ocorrencias: [], status: "ok" };
-  const data = await _call("cepim", { cnpjEntidade: doc, pagina: 1, quantidade: 10 });
-  const ocorrencias = Array.isArray(data) ? data : (data?.data || []);
+  const data = await _call("cepim", { cnpjEntidade: doc, pagina: 1, quantidade: 50 });
+  const todos = Array.isArray(data) ? data : (data?.data || []);
+
+  // A API às vezes ignora o filtro — garantir que o CNPJ bate
+  const ocorrencias = todos.filter(o => {
+    const cnpjReg = _clean(o.entidade?.cnpj || o.cnpjEntidade || "");
+    return !cnpjReg || cnpjReg === doc;
+  });
+
   return {
     fonte:       "CEPIM — CGU",
     endpoint:    "cepim",
