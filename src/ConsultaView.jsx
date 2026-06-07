@@ -5,6 +5,7 @@ import {
   rodarVerificacoesCNPJ,
 } from "./az_radar_transparencia.js";
 import { consultarProcessos } from "./az_radar_datajud.js";
+import { consultarPGFN } from "./az_radar_pgfn.js";
 
 const C = {
   bg:"#F0F4F9", surface:"#FFFFFF", navy:"#0A1628", navyMid:"#1E3A5F",
@@ -26,8 +27,8 @@ const PERFIS = [
 ];
 
 // Checks que serão executados por tipo de documento
-const CHECKS_CPF  = ["CEIS — Impedimentos CGU","CNEP — Anticorrupção","Processos Judiciais — DataJud","MTE — Trabalho Escravo","PEP — Pessoa Politicamente Exposta","Benefícios Sociais — CGU"];
-const CHECKS_CNPJ = ["CNPJ — Receita Federal","Simples Nacional","CEIS — Impedimentos CGU","CNEP — Anticorrupção","Processos Judiciais — DataJud","CEPIM — Convênios","MTE — Trabalho Escravo"];
+const CHECKS_CPF  = ["CEIS — Impedimentos CGU","CNEP — Anticorrupção","Processos Judiciais — DataJud","PGFN — Dívida Ativa","MTE — Trabalho Escravo","PEP — Pessoa Politicamente Exposta","Benefícios Sociais — CGU"];
+const CHECKS_CNPJ = ["CNPJ — Receita Federal","Simples Nacional","CEIS — Impedimentos CGU","CNEP — Anticorrupção","Processos Judiciais — DataJud","PGFN — Dívida Ativa","CEPIM — Convênios","MTE — Trabalho Escravo"];
 
 function formatDoc(v, tipo) {
   const d = v.replace(/\D/g, "");
@@ -115,6 +116,8 @@ function CheckResult({ label, resultado }) {
               {o.assunto     && <div style={{ color:C.textSub, fontSize:10 }}>Assunto: {String(o.assunto)}</div>}
               {o.tribunal    && <div style={{ color:C.textSub, fontSize:10 }}>Tribunal: {String(o.tribunal)}</div>}
               {o.data        && <div style={{ color:C.textMuted, fontSize:10 }}>Ajuizamento: {String(o.data)}</div>}
+              {o.situacao    && <div style={{ color:cor, fontWeight:600 }}>⚠ {String(o.situacao)}</div>}
+              {o.mensagem    && <div style={{ color:C.textSub, fontSize:10 }}>{String(o.mensagem)}</div>}
               {o.valor != null && o.valor > 0 && <div style={{ color:C.textSub }}>Valor: R$ {Number(o.valor).toLocaleString("pt-BR",{minimumFractionDigits:2})}</div>}
               {o.dataInicio  && <div style={{ color:C.textMuted, fontSize:10 }}>Início: {String(o.dataInicio)}{o.dataFim && o.dataFim !== "Sem informação" ? ` · Fim: ${String(o.dataFim)}` : " · Em vigor"}</div>}
             </div>
@@ -270,14 +273,16 @@ export default function ConsultaView({ mobile }) {
         const keys = ["CEIS — Impedimentos CGU","CNEP — Anticorrupção","Processos Judiciais — DataJud","CEPIM — Convênios","MTE — Trabalho Escravo"];
         keys.forEach(k => setProgresso(p => ({ ...p, [k]: "loading" })));
 
-        const [res, processos] = await Promise.all([
+        const [res, processos, pgfn] = await Promise.all([
           rodarVerificacoesCNPJ(docLimpo),
           consultarProcessos(docLimpo).catch(() => ({ status:"erro", erro:"Indisponível", total:0, ocorrencias:[] })),
+          consultarPGFN(docLimpo).catch(() => ({ status:"erro", erro:"Indisponível", total:0, ocorrencias:[] })),
         ]);
         const map = {
           "CEIS — Impedimentos CGU":      res.ceis,
           "CNEP — Anticorrupção":         res.cnep,
           "Processos Judiciais — DataJud":processos,
+          "PGFN — Dívida Ativa":          pgfn,
           "CEPIM — Convênios":            res.cepim,
           "MTE — Trabalho Escravo":       res.mte,
         };
@@ -286,14 +291,16 @@ export default function ConsultaView({ mobile }) {
       } else {
         const keys = CHECKS_CPF;
         keys.forEach(k => setProgresso(p => ({ ...p, [k]: "loading" })));
-        const [res, processos] = await Promise.all([
+        const [res, processos, pgfn] = await Promise.all([
           rodarVerificacoesCPF(docLimpo),
           consultarProcessos(docLimpo).catch(() => ({ status:"erro", erro:"Indisponível", total:0, ocorrencias:[] })),
+          consultarPGFN(docLimpo).catch(() => ({ status:"erro", erro:"Indisponível", total:0, ocorrencias:[] })),
         ]);
         const map = {
           "CEIS — Impedimentos CGU":           res.ceis,
           "CNEP — Anticorrupção":              res.cnep,
           "Processos Judiciais — DataJud":     processos,
+          "PGFN — Dívida Ativa":              pgfn,
           "MTE — Trabalho Escravo":            res.mte,
           "PEP — Pessoa Politicamente Exposta":res.pep,
           "Benefícios Sociais — CGU":          res.beneficios,
