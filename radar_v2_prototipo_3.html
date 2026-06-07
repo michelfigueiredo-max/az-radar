@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>RADAR — Inteligência Empresarial v3</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07090D;--s1:#0D1117;--s2:#131920;--s3:#1A2230;
+  --b1:#1E2A3A;--b2:#243446;--b3:#2E4058;
+  --or:#F97316;--or-d:rgba(249,115,22,.09);--or-b:rgba(249,115,22,.22);
+  --gn:#22C55E;--gn-d:rgba(34,197,94,.08);--gn-b:rgba(34,197,94,.2);
+  --bl:#3B82F6;--bl-d:rgba(59,130,246,.09);--bl-b:rgba(59,130,246,.22);
+  --rd:#EF4444;--rd-d:rgba(239,68,68,.08);--rd-b:rgba(239,68,68,.2);
+  --yl:#EAB308;--yl-d:rgba(234,179,8,.08);--yl-b:rgba(234,179,8,.2);
+  --pu:#A855F7;--pu-d:rgba(168,85,247,.08);--pu-b:rgba(168,85,247,.2);
+  --tl:#14B8A6;--tl-d:rgba(20,184,166,.07);
+  --w:#F1F5F9;--t1:#94A3B8;--t2:#475569;
+  --ds:'Syne',sans-serif;--bd:'DM Sans',sans-serif;--mo:'JetBrains Mono',monospace;
+  --r:9px;--r2:13px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{font-size:13px;scroll-behavior:smooth;}
+body{background:var(--bg);font-family:var(--bd);color:var(--w);line-height:1.55;overflow-x:hidden;}
+.page{display:none;}.page.act{display:block;}
+.tab-p{display:none;}.tab-p.act{display:block;}
+.mod{display:none;}.mod.act{display:block;}
+.sub-t{display:none !important;}.sub-t.act{display:flex !important;}
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:7px;font-family:var(--ds);font-size:.72rem;font-weight:700;cursor:pointer;border:none;transition:all .15s;letter-spacing:.25px;}
+.btn-or{background:var(--or);color:#fff;}.btn-or:hover{background:#ea6b0e;}
+.btn-gn{background:var(--gn);color:#052e16;}.btn-gn:hover{background:#16a34a;}
+.btn-ol{background:transparent;color:var(--w);border:1px solid var(--b2);}.btn-ol:hover{border-color:var(--b3);background:var(--s2);}
+/* chips */
+.chip{display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:.59rem;font-weight:600;letter-spacing:.25px;}
+.ch-or{background:var(--or-d);color:var(--or);border:1px solid var(--or-b);}
+.ch-gn{background:var(--gn-d);color:var(--gn);border:1px solid var(--gn-b);}
+.ch-bl{background:var(--bl-d);color:var(--bl);border:1px solid var(--bl-b);}
+.ch-rd{background:var(--rd-d);color:var(--rd);border:1px solid var(--rd-b);}
+.ch-yl{background:var(--yl-d);color:var(--yl);border:1px solid var(--yl-b);}
+.ch-pu{background:var(--pu-d);color:var(--pu);border:1px solid var(--pu-b);}
+/* nav */
+.nav{background:rgba(7,9,13,.96);backdrop-filter:blur(20px);border-bottom:1px solid var(--b1);height:50px;display:flex;align-items:center;padding:0 22px;position:sticky;top:0;z-index:800;}
+.nlogo{font-family:var(--ds);font-size:.92rem;font-weight:800;letter-spacing:2.5px;cursor:pointer;}
+.nlogo span{color:var(--or);}
+.nlnk{font-size:.71rem;color:var(--t1);background:none;border:none;cursor:pointer;font-family:var(--bd);transition:color .12s;padding:4px 10px;}
+.nlnk:hover{color:var(--w);}
+.n-tab{padding:0 14px;height:50px;display:flex;align-items:center;font-size:.69rem;font-weight:600;color:var(--t1);border:none;background:transparent;cursor:pointer;font-family:var(--bd);white-space:nowrap;border-bottom:2px solid transparent;transition:all .15s;}
+.n-tab:hover{color:var(--w);}
+.n-tab.ao{color:var(--or);border-bottom-color:var(--or);}
+.n-tab.ag{color:var(--gn);border-bottom-color:var(--gn);}
+/* subnav */
+.snav{background:rgba(13,17,23,.97);border-bottom:1px solid var(--b1);height:36px;align-items:center;padding:0 6px;overflow-x:auto;scrollbar-width:none;position:sticky;top:50px;z-index:700;}
+.snav::-webkit-scrollbar{display:none;}
+.st{padding:5px 11px;border-radius:5px;font-size:.67rem;font-weight:500;color:var(--t1);border:none;background:transparent;cursor:pointer;font-family:var(--bd);white-space:nowrap;transition:all .12s;}
+.st:hover{color:var(--w);}
+.st.so{background:var(--or-d);color:var(--or);}
+.st.sg{background:var(--gn-d);color:var(--gn);}
+/* cards */
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);}
+.wrap{max-width:1080px;margin:0 auto;padding:16px 14px 80px;}
+/* verdicts */
+.verd{border-radius:var(--r2);padding:12px 14px;margin-bottom:10px;border:1px solid;}
+.vg{background:var(--gn-d);border-color:rgba(34,197,94,.2);}
+.vy{background:var(--yl-d);border-color:rgba(234,179,8,.2);}
+.vr{background:var(--rd-d);border-color:rgba(239,68,68,.18);}
+.vb{background:var(--bl-d);border-color:rgba(59,130,246,.2);}
+.vp{background:var(--pu-d);border-color:rgba(168,85,247,.2);}
+.v-row{display:flex;align-items:flex-start;gap:9px;}
+.v-em{font-size:1rem;flex-shrink:0;margin-top:1px;}
+.v-tit{font-family:var(--ds);font-size:.85rem;font-weight:700;margin-bottom:3px;}
+.vg .v-tit{color:var(--gn);}.vy .v-tit{color:var(--yl);}
+.vr .v-tit{color:var(--rd);}.vb .v-tit{color:var(--bl);}.vp .v-tit{color:var(--pu);}
+.v-txt{font-size:.74rem;color:var(--t1);line-height:1.68;}
+.v-txt strong{color:var(--w);}
+.v-act{margin-top:7px;font-size:.71rem;font-weight:600;padding:4px 10px;border-radius:5px;display:inline-block;}
+.va-or{background:var(--or-d);color:var(--or);border:1px solid var(--or-b);}
+.va-gn{background:var(--gn-d);color:var(--gn);border:1px solid var(--gn-b);}
+.va-bl{background:var(--bl-d);color:var(--bl);border:1px solid var(--bl-b);}
+/* stats bar */
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:4px;margin-bottom:10px;}
+.stat{background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:7px;text-align:center;}
+.sv{font-family:var(--mo);font-size:.79rem;font-weight:700;display:block;margin-bottom:1px;}
+.sv-or{color:var(--or);}.sv-gn{color:var(--gn);}.sv-bl{color:var(--bl);}
+.sv-yl{color:var(--yl);}.sv-rd{color:var(--rd);}.sv-pu{color:var(--pu);}
+.sl{font-size:.57rem;color:var(--t2);}
+/* block title */
+.blk-t{font-size:.58rem;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--t2);margin:16px 0 7px;display:flex;align-items:center;gap:8px;}
+.blk-t::after{content:'';flex:1;height:.5px;background:var(--b1);}
+/* check items */
+.ck{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);margin-bottom:5px;overflow:hidden;}
+.ck-h{display:flex;align-items:center;gap:9px;padding:9px 13px;cursor:pointer;transition:background .12s;}
+.ck-h:hover{background:var(--s2);}
+.ck-ic{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;flex-shrink:0;}
+.ic-ok{background:rgba(34,197,94,.12);color:var(--gn);border:1px solid rgba(34,197,94,.22);}
+.ic-al{background:rgba(239,68,68,.12);color:var(--rd);border:1px solid rgba(239,68,68,.22);}
+.ic-wr{background:rgba(234,179,8,.12);color:var(--yl);border:1px solid rgba(234,179,8,.22);}
+.ic-in{background:rgba(59,130,246,.12);color:var(--bl);border:1px solid rgba(59,130,246,.22);}
+.ic-cr{background:rgba(168,85,247,.12);color:var(--pu);border:1px solid rgba(168,85,247,.22);}
+.ck-tit{font-size:.76rem;font-weight:500;color:var(--w);flex:1;}
+.ck-src{font-size:.59rem;color:var(--t2);white-space:nowrap;margin-left:auto;}
+.ck-bd{display:none;padding:9px 13px 10px;border-top:1px solid var(--b1);background:var(--s2);font-size:.74rem;color:var(--t1);line-height:1.65;}
+.ck-bd.open{display:block;}
+.ck-bd strong{color:var(--w);}
+.ck-cta{margin-top:7px;font-size:.7rem;font-weight:600;padding:4px 10px;border-radius:5px;display:inline-block;background:var(--or-d);color:var(--or);border:1px solid var(--or-b);}
+/* lock */
+.lock{border:1px solid var(--b1);border-radius:var(--r);padding:18px;text-align:center;background:var(--s1);margin-bottom:8px;}
+.lock-i{font-size:1.1rem;margin-bottom:5px;}
+.lock-t{font-size:.75rem;color:var(--t1);margin-bottom:8px;}
+/* callout */
+.call{border-radius:var(--r);padding:10px 13px;font-size:.74rem;color:var(--t1);line-height:1.68;margin-bottom:9px;border:1px solid;}
+.ca-y{background:var(--yl-d);border-color:rgba(234,179,8,.18);}
+.ca-g{background:var(--gn-d);border-color:rgba(34,197,94,.18);}
+.ca-b{background:var(--bl-d);border-color:rgba(59,130,246,.18);}
+.ca-r{background:var(--rd-d);border-color:rgba(239,68,68,.18);}
+.ca-p{background:var(--pu-d);border-color:rgba(168,85,247,.18);}
+.call strong{color:var(--w);}
+/* co header */
+.co-hd{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r2);padding:14px 16px;margin-bottom:10px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.co-av{width:40px;height:40px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:var(--ds);font-size:.68rem;font-weight:800;flex-shrink:0;}
+.av-or{background:rgba(249,115,22,.14);color:var(--or);border:1px solid rgba(249,115,22,.28);}
+.av-gn{background:rgba(34,197,94,.11);color:var(--gn);border:1px solid rgba(34,197,94,.24);}
+.av-rd{background:rgba(239,68,68,.14);color:var(--rd);border:1px solid rgba(239,68,68,.28);}
+.av-bl{background:rgba(59,130,246,.12);color:var(--bl);border:1px solid rgba(59,130,246,.26);}
+.co-nm{font-family:var(--ds);font-size:.92rem;font-weight:700;color:var(--w);margin-bottom:2px;}
+.co-sb{font-size:.67rem;color:var(--t1);margin-bottom:6px;}
+.co-tg{display:flex;flex-wrap:wrap;gap:4px;}
+.sc-big{font-family:var(--mo);font-size:1.9rem;font-weight:700;line-height:1;}
+.sc-lb{font-size:.59rem;color:var(--t2);margin-top:1px;text-align:right;}
+/* version badge */
+.vbadge{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:4px;font-size:.58rem;font-weight:700;letter-spacing:.5px;margin-bottom:4px;}
+.v1b{background:rgba(34,197,94,.1);color:var(--gn);border:1px solid rgba(34,197,94,.22);}
+.v2b{background:rgba(59,130,246,.1);color:var(--bl);border:1px solid rgba(59,130,246,.22);}
+.v3b{background:rgba(168,85,247,.1);color:var(--pu);border:1px solid rgba(168,85,247,.22);}
+/* grid helpers */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:10px;}
+@media(max-width:700px){.g2,.g3{grid-template-columns:1fr;}.g4{grid-template-columns:1fr 1fr;}}
+/* plan pill */
+.plan-pill{font-size:.58rem;font-weight:700;padding:2px 7px;border-radius:3px;background:var(--s3);color:var(--t2);border:1px solid var(--b1);}
+
+
+/* ─── INDICATORS (BOLSA) ─── */
+.ind-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:7px;margin-bottom:10px;}
+.ind{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;}
+.ind-tp{padding:10px 11px 8px;}
+.ind-nm{font-size:.66rem;color:var(--t1);margin-bottom:1px;}
+.ind-tc{font-size:.57rem;color:var(--t2);margin-bottom:5px;}
+.ind-vl{font-family:var(--mo);font-size:1.2rem;font-weight:700;color:var(--w);line-height:1;margin-bottom:4px;}
+.ruler{height:5px;background:var(--b1);border-radius:3px;margin-bottom:3px;position:relative;overflow:hidden;}
+.ruler-grad{position:absolute;inset:0;background:linear-gradient(90deg,#3B82F6 0%,#22C55E 25%,#EAB308 55%,#EF4444 100%);border-radius:3px;}
+.rmk{position:absolute;top:-1px;width:2px;height:7px;background:#fff;border-radius:1px;}
+.rlbl{display:flex;justify-content:space-between;font-size:.54rem;color:var(--t2);}
+.sema{display:flex;align-items:center;justify-content:space-between;padding:5px 11px;background:var(--s2);border-top:1px solid var(--b1);}
+.sstatus{display:flex;align-items:center;gap:5px;font-size:.67rem;font-weight:600;}
+.sdot{width:6px;height:6px;border-radius:50%;}
+.sg{background:var(--gn);}.sy{background:var(--yl);}.sr{background:var(--rd);}
+.stag{font-size:.58rem;padding:2px 6px;border-radius:3px;}
+.st-u{background:rgba(34,197,94,.1);color:var(--gn);}.st-e{background:rgba(239,68,68,.1);color:var(--rd);}
+.st-n{background:rgba(234,179,8,.1);color:var(--yl);}
+/* CEO table */
+.tr-row{display:grid;grid-template-columns:50px 1fr 1fr 80px;gap:8px;padding:7px 12px;border-bottom:.5px solid var(--b1);font-size:.72rem;align-items:center;}
+.tr-row:last-child{border-bottom:none;}
+.tr-year{font-family:var(--mo);color:var(--t2);}
+.tr-prom{color:var(--t1);}
+.tr-entregou{font-weight:500;color:var(--w);}
+.td-p{color:var(--gn);font-weight:700;}.td-e{color:var(--bl);font-weight:700;}.td-n{color:var(--rd);font-weight:700;}
+/* actions */
+.acoes{background:rgba(34,197,94,.05);border:1px solid rgba(34,197,94,.2);border-radius:var(--r);padding:11px 13px;margin-bottom:8px;}
+.acoes-tit{font-size:.67rem;font-weight:700;color:var(--gn);margin-bottom:7px;letter-spacing:.3px;}
+.acao{display:flex;align-items:flex-start;gap:8px;padding:5px 0;font-size:.73rem;color:var(--t1);border-bottom:.5px solid rgba(34,197,94,.12);}
+.acao:last-child{border-bottom:none;padding-bottom:0;}
+.anum{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;flex-shrink:0;margin-top:1px;}
+.any{background:rgba(34,197,94,.15);color:var(--gn);}.ang{background:rgba(34,197,94,.12);color:var(--gn);}
+.acao strong{color:var(--w);display:block;margin-bottom:1px;}
+.evitar{background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.18);border-radius:var(--r);padding:11px 13px;margin-bottom:10px;}
+.evitar-tit{font-size:.67rem;font-weight:700;color:var(--rd);margin-bottom:7px;letter-spacing:.3px;}
+.ev-item{display:flex;align-items:flex-start;gap:8px;padding:5px 0;font-size:.73rem;color:var(--t1);border-bottom:.5px solid rgba(239,68,68,.1);}
+.ev-item:last-child{border-bottom:none;padding-bottom:0;}
+.ev-item strong{color:var(--w);display:block;margin-bottom:1px;}
+/* ecosystem */
+.eco-bar-wrap{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;}
+.eco-bar{display:flex;height:28px;border-radius:5px;overflow:hidden;margin-bottom:9px;}
+.eco-seg{display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:rgba(255,255,255,.9);transition:flex .3s;}
+.eco-legend{display:flex;flex-wrap:wrap;gap:8px;}
+.cl-item{display:flex;align-items:center;gap:5px;font-size:.67rem;color:var(--t1);}
+.cl-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+.eco-layer-tit{font-size:.6rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t2);margin:14px 0 8px;}
+.eco-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;margin-bottom:8px;}
+.eco-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;}
+.eco-top{padding:10px 12px 7px;}
+.eco-nm{font-size:.8rem;font-weight:700;color:var(--w);margin-bottom:2px;}
+.eco-sub{font-size:.67rem;color:var(--t1);margin-bottom:5px;line-height:1.5;}
+.eco-flags{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px;}
+.eco-flag{padding:2px 6px;border-radius:3px;font-size:.57rem;font-weight:600;}
+.ef-br{background:rgba(34,197,94,.1);color:var(--gn);}
+.ef-us{background:rgba(59,130,246,.1);color:var(--bl);}
+.ef-eu{background:rgba(168,85,247,.1);color:var(--pu);}
+.ef-au{background:rgba(249,115,22,.1);color:var(--or);}
+.eco-moat{background:rgba(20,184,166,.1);color:var(--tl);}
+.eco-mets{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:8px 12px;background:var(--s2);border-top:1px solid var(--b1);}
+.eco-m{display:flex;flex-direction:column;}
+.eco-mv{font-family:var(--mo);font-size:.75rem;font-weight:700;margin-bottom:1px;}
+.eco-ml{font-size:.57rem;color:var(--t2);}
+.eco-tr{font-size:.59rem;font-weight:600;}
+.et-up{color:var(--gn);}.et-dn{color:var(--rd);}.et-ne{color:var(--yl);}
+/* people */
+.ppl-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:6px;margin-bottom:10px;}
+.ppl-m{background:var(--s2);border-radius:var(--r);padding:9px;text-align:center;}
+.pm-v{font-family:var(--mo);font-size:.92rem;font-weight:700;display:block;margin-bottom:2px;}
+.pm-l{font-size:.6rem;color:var(--t2);}
+.pm-s{font-size:.57rem;color:var(--t2);}
+/* person card */
+.person{display:flex;align-items:center;gap:10px;padding:10px 13px;border-bottom:.5px solid var(--b1);}
+.person:last-child{border-bottom:none;}
+.p-av{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--ds);font-size:.62rem;font-weight:800;flex-shrink:0;background:rgba(59,130,246,.12);color:var(--bl);border:1px solid rgba(59,130,246,.22);}
+.p-nm{font-size:.75rem;font-weight:600;color:var(--w);}
+.p-rl{font-size:.65rem;color:var(--t1);margin-top:1px;}
+.p-tn{font-size:.62rem;color:var(--t2);margin-top:1px;}
+.p-r{margin-left:auto;text-align:right;flex-shrink:0;}
+.p-sc{font-family:var(--mo);font-size:.85rem;font-weight:700;}
+.p-lb{font-size:.57rem;color:var(--t2);}
+.pchg{font-size:.58rem;font-weight:700;padding:2px 6px;border-radius:3px;margin-top:2px;display:inline-block;}
+.pc-stay{background:rgba(34,197,94,.1);color:var(--gn);}.pc-in{background:rgba(59,130,246,.1);color:var(--bl);}
+.pc-out{background:rgba(239,68,68,.1);color:var(--rd);}
+/* M&A timeline */
+.ma-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:.5px solid var(--b1);}
+.ma-item:last-child{border-bottom:none;}
+.ma-yr{font-family:var(--mo);font-size:.72rem;font-weight:700;color:var(--t2);min-width:36px;flex-shrink:0;margin-top:1px;}
+.ma-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.ma-tit{font-size:.76rem;font-weight:600;color:var(--w);margin-bottom:2px;}
+.ma-desc{font-size:.67rem;color:var(--t1);line-height:1.55;}
+.ma-val{font-family:var(--mo);font-size:.7rem;color:var(--t2);white-space:nowrap;margin-left:auto;flex-shrink:0;}
+/* governance */
+.gov-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:6px;margin-bottom:10px;}
+.gov-m{background:var(--s2);border-radius:var(--r);padding:9px;text-align:center;}
+.gv{font-family:var(--mo);font-size:.92rem;font-weight:700;display:block;margin-bottom:2px;}
+.gl{font-size:.59rem;color:var(--t2);}
+.gs{font-size:.56rem;color:var(--t2);}
+/* risk item */
+.risk-it{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);margin-bottom:7px;overflow:hidden;}
+.risk-hd{display:flex;align-items:flex-start;gap:9px;padding:10px 13px;cursor:pointer;}
+.risk-hd:hover{background:var(--s2);}
+.rh-icon{font-size:.95rem;flex-shrink:0;margin-top:1px;}
+.rh-nm{font-size:.77rem;font-weight:600;color:var(--w);margin-bottom:2px;}
+.rh-ds{font-size:.67rem;color:var(--t1);line-height:1.55;flex:1;}
+.rh-r{margin-left:auto;text-align:right;flex-shrink:0;}
+.rh-sc{font-family:var(--mo);font-size:.8rem;font-weight:700;}
+.rh-lb{font-size:.57rem;color:var(--t2);}
+.rh-tag{font-size:.58rem;font-weight:700;padding:2px 6px;border-radius:3px;margin-top:3px;display:inline-block;}
+.rt-hi{background:var(--rd-d);color:var(--rd);}.rt-md{background:var(--yl-d);color:var(--yl);}
+.rt-lo{background:var(--gn-d);color:var(--gn);}.rt-cr{background:var(--rd-d);color:var(--rd);}
+.risk-bd{display:none;padding:9px 13px 10px;border-top:1px solid var(--b1);background:var(--s2);font-size:.72rem;color:var(--t1);line-height:1.65;}
+.risk-bd.open{display:block;}
+.rb-row{display:flex;align-items:flex-start;gap:7px;margin-bottom:5px;}
+.rb-row:last-child{margin-bottom:0;}
+.rb-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.dr{background:var(--rd);}.dy{background:var(--yl);}.dg{background:var(--gn);}
+/* peers table */
+.peers-wrap{overflow-x:auto;}
+.pt{width:100%;border-collapse:collapse;font-size:.72rem;min-width:500px;}
+.pt th{padding:6px 10px;background:var(--s2);font-size:.58rem;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--t2);text-align:left;border-bottom:1px solid var(--b1);}
+.pt td{padding:7px 10px;border-bottom:.5px solid var(--b1);color:var(--t1);}
+.pt td.mono{font-family:var(--mo);}
+.pt tr.hl td{background:var(--bl-d);}
+.pt tr.hl td:first-child{border-left:2px solid var(--bl);}
+.ptag{padding:2px 6px;border-radius:3px;font-size:.58rem;font-weight:600;}
+.pt-cheap{background:var(--gn-d);color:var(--gn);}.pt-fair{background:var(--yl-d);color:var(--yl);}
+/* alerts */
+.al-item{display:flex;align-items:center;gap:9px;padding:7px 12px;border-bottom:.5px solid var(--b1);font-size:.72rem;}
+.al-item:last-child{border-bottom:none;}
+.al-txt{flex:1;color:var(--t1);}
+.al-s{font-size:.65rem;font-weight:600;white-space:nowrap;}
+/* suggestions */
+.sug-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r2);padding:13px 15px;margin-bottom:8px;}
+.sug-hd{display:flex;align-items:center;gap:8px;margin-bottom:7px;flex-wrap:wrap;}
+.sug-ic{font-size:.92rem;}
+.sug-tit{font-size:.78rem;font-weight:600;color:var(--w);flex:1;}
+.sug-ba{padding:2px 8px;border-radius:4px;font-size:.58rem;font-weight:700;}
+.sb-urg{background:var(--rd-d);color:var(--rd);border:1px solid var(--rd-b);}
+.sb-alt{background:var(--or-d);color:var(--or);border:1px solid var(--or-b);}
+.sb-med{background:var(--yl-d);color:var(--yl);border:1px solid var(--yl-b);}
+.sb-mrr{background:var(--gn-d);color:var(--gn);border:1px solid var(--gn-b);}
+.sug-desc{font-size:.73rem;color:var(--t1);line-height:1.65;margin-bottom:9px;}
+.sug-items{margin-bottom:9px;}
+.sug-si{display:flex;align-items:flex-start;gap:7px;font-size:.69rem;color:var(--t2);margin-bottom:4px;}
+.sug-si::before{content:'·';color:var(--bl);flex-shrink:0;font-size:.8rem;margin-top:-1px;}
+.sug-cta{padding:6px 14px;background:var(--bl-d);color:var(--bl);border:1px solid var(--bl-b);border-radius:5px;font-size:.7rem;font-weight:600;cursor:pointer;font-family:var(--bd);transition:all .12s;}
+.sug-cta:hover{background:var(--bl);color:#fff;}
+/* DRE */
+.dre{width:100%;border-collapse:collapse;font-size:.73rem;}
+.dre th{padding:6px 10px;background:var(--s2);font-size:.59rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--t2);text-align:left;border-bottom:1px solid var(--b1);}
+.dre th:not(:first-child){text-align:right;}
+.dre td{padding:6px 10px;border-bottom:.5px solid var(--b1);color:var(--t1);}
+.dre td:not(:first-child){font-family:var(--mo);text-align:right;}
+.dp{color:var(--gn)!important;}.dn{color:var(--rd)!important;}
+.dre tr.dt td{font-weight:600;color:var(--w);background:var(--s2);}
+.dre tr.de td{color:var(--bl);font-weight:600;}
+.dre tr.ds td:first-child{padding-left:18px;color:var(--t2);}
+.dre tr.dr td{color:var(--gn);font-weight:700;background:rgba(34,197,94,.04);}
+/* ciclo */
+.ciclo-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:.5px solid var(--b1);}
+.ciclo-row:last-child{border-bottom:none;}
+.ciclo-lbl{font-size:.68rem;color:var(--t1);width:130px;flex-shrink:0;}
+.ciclo-t{flex:1;height:16px;background:var(--s2);border-radius:3px;overflow:hidden;}
+.ciclo-f{height:100%;border-radius:3px;display:flex;align-items:center;padding-left:6px;}
+.ciclo-f span{font-family:var(--mo);font-size:.61rem;font-weight:700;color:#fff;}
+.ciclo-v{font-family:var(--mo);font-size:.67rem;font-weight:600;min-width:50px;text-align:right;}
+/* regime */
+.reg-g{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px;}
+@media(max-width:580px){.reg-g{grid-template-columns:1fr;}}
+.reg{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:11px;}
+.reg.best{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.03);}
+.reg-ba{font-size:.56rem;font-weight:700;padding:2px 6px;border-radius:3px;background:var(--gn);color:#052e16;display:inline-block;margin-bottom:4px;}
+.reg-nm{font-size:.74rem;font-weight:600;color:var(--w);margin-bottom:1px;}
+.reg-vl{font-family:var(--mo);font-size:1.2rem;font-weight:700;margin:3px 0 1px;}
+.reg-de{font-size:.65rem;color:var(--t1);}
+.reg-sv{font-size:.67rem;color:var(--gn);margin-top:3px;font-weight:600;}
+/* valuation */
+.vm-g{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:10px;}
+@media(max-width:680px){.vm-g{grid-template-columns:1fr 1fr;}}
+.vm{background:var(--s1);border:1px solid var(--b1);border-radius:7px;padding:9px 10px;}
+.vm-nm{font-size:.63rem;color:var(--t1);margin-bottom:2px;}
+.vm-vl{font-family:var(--mo);font-size:.85rem;font-weight:700;color:var(--w);margin-bottom:1px;}
+.vm-pc{font-size:.59rem;color:var(--t2);}
+.vm-bar{height:3px;background:var(--b1);border-radius:2px;overflow:hidden;margin-top:4px;}
+.vm-bf{height:100%;border-radius:2px;background:var(--bl);}
+.val-r{background:rgba(34,197,94,.04);border:1px solid rgba(34,197,94,.26);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;}
+.vr-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.vr-lb{font-size:.6rem;color:var(--t2);}
+.vr-vl{font-family:var(--mo);font-size:1.5rem;font-weight:700;color:var(--w);}
+.vr-md{font-family:var(--mo);font-size:1.1rem;font-weight:700;color:var(--gn);}
+/* criminal block */
+.crim-blk{background:var(--s1);border:1px solid rgba(168,85,247,.25);border-radius:var(--r2);overflow:hidden;margin-bottom:10px;}
+.crim-hd{background:rgba(168,85,247,.07);padding:10px 14px;border-bottom:1px solid rgba(168,85,247,.18);display:flex;align-items:center;gap:9px;}
+.crim-tit{font-family:var(--ds);font-size:.82rem;font-weight:700;color:var(--pu);}
+.crim-sb{font-size:.65rem;color:var(--t1);margin-top:1px;}
+.crim-bd{padding:11px 14px;}
+.crim-split{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px;}
+@media(max-width:600px){.crim-split{grid-template-columns:1fr;}}
+.crim-ct{font-size:.58rem;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--t2);margin-bottom:7px;}
+.crim-it{display:flex;align-items:center;gap:7px;padding:6px 9px;background:var(--s2);border-radius:6px;margin-bottom:4px;font-size:.72rem;}
+.ci-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.ci-ok{background:var(--gn);}.ci-wn{background:var(--yl);}
+.ci-al{background:var(--rd);}.ci-in{background:var(--bl);}
+.ci-lb{flex:1;color:var(--t1);}
+.ci-lb strong{color:var(--w);display:block;margin-bottom:1px;}
+.ci-src{font-size:.58rem;color:var(--t2);white-space:nowrap;}
+.crim-fr{background:rgba(168,85,247,.05);border:1px solid rgba(168,85,247,.14);border-radius:6px;padding:8px 11px;font-size:.69rem;color:var(--t1);line-height:1.62;}
+.crim-fr strong{color:var(--pu);}
+/* cross-alerts */
+.cx-al{border-radius:var(--r2);padding:11px 13px;margin-bottom:8px;border:1px solid;display:flex;align-items:flex-start;gap:9px;}
+.cx-r{background:rgba(239,68,68,.06);border-color:rgba(239,68,68,.18);}
+.cx-y{background:var(--yl-d);border-color:rgba(234,179,8,.18);}
+.cx-g{background:var(--gn-d);border-color:rgba(34,197,94,.18);}
+.cx-ic{font-size:.95rem;flex-shrink:0;margin-top:1px;}
+.cx-b{flex:1;}
+.cx-tit{font-family:var(--ds);font-size:.81rem;font-weight:700;margin-bottom:3px;}
+.cx-r .cx-tit{color:var(--rd);}.cx-y .cx-tit{color:var(--yl);}.cx-g .cx-tit{color:var(--gn);}
+.cx-txt{font-size:.73rem;color:var(--t1);line-height:1.65;}
+.cx-txt strong{color:var(--w);}
+.cx-act{margin-top:6px;font-size:.69rem;font-weight:600;padding:4px 10px;border-radius:4px;display:inline-block;background:var(--or-d);color:var(--or);border:1px solid var(--or-b);}
+/* grupo economico */
+.grp-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:7px;margin-bottom:9px;}
+.gc{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:11px 13px;}
+.gc.gc-rd{border-color:rgba(239,68,68,.28);}
+.gc-hd{display:flex;align-items:center;gap:7px;margin-bottom:7px;}
+.gc-nm{font-size:.74rem;font-weight:600;color:var(--w);}
+.gc-sc{font-family:var(--mo);font-size:.84rem;font-weight:700;margin-left:auto;}
+.gc-it{font-size:.68rem;color:var(--t1);line-height:1.65;}
+.gc-it span{display:block;}
+.gc-ok::before{content:'✓ ';color:var(--gn);}
+.gc-wn::before{content:'⚠ ';color:var(--yl);}
+.gc-al::before{content:'✕ ';color:var(--rd);}
+/* macro scenarios */
+.cen{padding:7px 10px;border-radius:6px;font-size:.72rem;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;}
+.ce-g{background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.15);}
+.ce-y{background:var(--yl-d);border:1px solid rgba(234,179,8,.15);}
+.ce-r{background:var(--rd-d);border:1px solid rgba(239,68,68,.15);}
+/* ins blk */
+.ins{border-radius:var(--r);padding:10px 12px;font-size:.72rem;color:var(--t1);line-height:1.65;margin-bottom:8px;}
+.ins-b{background:var(--bl-d);border:1px solid var(--bl-b);}
+.ins-g{background:var(--gn-d);border:1px solid var(--gn-b);}
+.ins-y{background:var(--yl-d);border:1px solid var(--yl-b);}
+.ins-r{background:var(--rd-d);border:1px solid var(--rd-b);}
+.ins-ic{font-size:.85rem;margin-right:6px;}
+.ins-tit{font-size:.72rem;font-weight:600;color:var(--w);margin-bottom:3px;}
+.ins strong{color:var(--w);}
+/* score gauge */
+.sg-wrap{text-align:center;padding:12px 0;}
+.sg-arc{height:12px;background:linear-gradient(90deg,#EF4444,#EAB308,#22C55E);border-radius:6px;position:relative;margin-bottom:6px;}
+.sg-mrk{position:absolute;top:-2px;width:3px;height:16px;background:#fff;border-radius:2px;box-shadow:0 0 4px rgba(0,0,0,.4);}
+.sg-sc{font-family:var(--mo);font-size:2rem;font-weight:700;}
+.sg-lb{font-size:.67rem;color:var(--t1);}
+
+
+/* ── HOME SPLIT RESPONSIVE ── */
+#hp-split{display:grid;grid-template-columns:1fr 1fr;}
+@media(max-width:700px){
+  #hp-split{grid-template-columns:1fr;}
+  #hp-split > div:first-child{border-right:none;border-bottom:1px solid var(--b1);}
+}
+@media(min-width:1400px){
+  #hp-split > div{padding:44px 48px 56px;}
+}
+
+</style>
+<script>
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('act'));document.getElementById(id).classList.add('act');window.scrollTo(0,0);}
+function showMod(m){
+  showPage('pg-an');
+  document.querySelectorAll('.mod').forEach(x=>x.classList.remove('act'));
+  document.querySelectorAll('.sub-t').forEach(x=>{x.classList.remove('act');});
+  document.querySelectorAll('.n-tab').forEach(x=>x.className='n-tab');
+  document.getElementById('mod-'+m).classList.add('act');
+  var sn=document.getElementById('sn-'+m);
+  if(sn){sn.style.display='flex';sn.classList.add('act');}
+  if(m==='cnpj'){document.getElementById('tab-cnpj').className='n-tab ao';setTab('cnpj','check');}
+  else{document.getElementById('tab-bal').className='n-tab ag';setTab('bal','ind');}
+}
+function setTab(m,t){
+  var mod=document.getElementById('mod-'+m);
+  if(!mod)return;
+  mod.querySelectorAll('.tab-p').forEach(p=>p.classList.remove('act'));
+  var el=document.getElementById(m+'-'+t);if(el)el.classList.add('act');
+  var sn=document.getElementById('sn-'+m);if(!sn)return;
+  sn.querySelectorAll('.st').forEach(s=>{s.className='st';});
+  var maps={
+    cnpj:{check:0,crim:1,soc:2,grp:3,crz:4},
+    bal:{ind:0,dre:1,ciclo:2,fis:3,val:4,eco:5,ppl:6,mac:7,gov:8,sug:9}
+  };
+  var idx=maps[m]?maps[m][t]:0;
+  var tabs=sn.querySelectorAll('.st');
+  if(tabs[idx]){tabs[idx].className='st '+(m==='cnpj'?'so':'sg');}
+}
+function tog(el){var b=el.nextElementSibling;if(b)b.classList.toggle('open');}
+function setEnt(type){
+  document.getElementById('eu').style.display=type==='upload'?'block':'none';
+  document.getElementById('et').style.display=type==='ticker'?'block':'none';
+  document.querySelectorAll('.tog-e').forEach(b=>b.classList.remove('t-act'));
+  document.getElementById('tb-'+type).classList.add('t-act');
+}
+function checkMob(){
+  // grid handled by CSS media queries
+}
+window.addEventListener('resize',checkMob);
+</script>
+</head>
+<body>
+
+<!-- ═══════ HOME ═══════ -->
+<div id="pg-home" class="page act">
+<nav class="nav">
+  <div class="nlogo" onclick="showPage('pg-home')"><span>R</span>ADAR</div>
+  <button class="nlnk" style="margin-left:20px">Produto</button>
+  <button class="nlnk">Preços</button>
+  <button class="nlnk">Contadores</button>
+  <div style="margin-left:auto;display:flex;gap:8px">
+    <button class="btn btn-ol" style="padding:6px 14px;font-size:.69rem">Entrar</button>
+    <button class="btn btn-or" style="padding:6px 14px;font-size:.69rem">Começar grátis</button>
+  </div>
+</nav>
+
+<div style="text-align:center;padding:44px 20px 32px;max-width:620px;margin:0 auto">
+  <div style="font-size:.59rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--or);margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px">
+    <span style="width:22px;height:1.5px;background:var(--or);display:block"></span>Inteligência empresarial brasileira<span style="width:22px;height:1.5px;background:var(--or);display:block"></span></div>
+  <h1 style="font-family:var(--ds);font-size:clamp(1.8rem,4vw,2.9rem);font-weight:800;line-height:1.07;margin-bottom:12px">Duas perguntas.<br>Uma plataforma.</h1>
+  <p style="font-size:.85rem;color:var(--t1);line-height:1.75">Escolha o que você precisa saber agora.</p>
+</div>
+
+<div style="border-top:1px solid var(--b1)">
+<div id="hp-split" style="display:grid;grid-template-columns:1fr 1fr;max-width:1200px;margin:0 auto">
+
+<!-- PORTAL 01 — CNPJ -->
+<div style="padding:36px 32px 48px;border-right:1px solid var(--b1);background:linear-gradient(160deg,rgba(249,115,22,.03) 0%,transparent 55%);display:flex;flex-direction:column;position:relative;overflow:hidden;min-width:0;box-sizing:border-box">
+  <div style="font-family:var(--ds);font-size:5.5rem;font-weight:800;color:rgba(249,115,22,.05);position:absolute;top:12px;right:18px;line-height:1;pointer-events:none">01</div>
+  <div style="margin-bottom:18px">
+    <div style="display:inline-flex;align-items:center;gap:6px;background:var(--or-d);border:1px solid var(--or-b);border-radius:5px;padding:4px 10px;margin-bottom:13px">
+      <span>🛡️</span><span style="font-size:.6rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--or)">Para quem vende, compra ou contrata</span></div>
+    <h2 style="font-family:var(--ds);font-size:1.45rem;font-weight:800;line-height:1.12;margin-bottom:10px">Posso <span style="color:var(--or)">vender tranquilo</span><br>para este CNPJ?</h2>
+    <p style="font-size:.79rem;color:var(--t1);line-height:1.72;max-width:360px">Verifique antes de fechar negócio. Fiscal, judicial, societário, trabalhista, criminal e reputacional — em 60 segundos. Score com raciocínio visível.</p>
+  </div>
+  <div style="margin-bottom:20px">
+    <div style="font-size:.58rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t2);margin-bottom:8px">O que você descobre</div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--t1)"><span style="color:var(--or);font-weight:700;width:14px;font-size:.65rem">✓</span>Dívida ativa federal, protestos, processos</div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--t1)"><span style="color:var(--or);font-weight:700;width:14px;font-size:.65rem">✓</span>Mandados de prisão e antecedentes dos sócios</div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--t1)"><span style="color:var(--or);font-weight:700;width:14px;font-size:.65rem">✓</span>Inquéritos policiais ativos e operações PF</div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--t1)"><span style="color:var(--or);font-weight:700;width:14px;font-size:.65rem">✓</span>Grupo econômico, padrões de fraude societária</div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--t1)"><span style="color:var(--or);font-weight:700;width:14px;font-size:.65rem">✓</span>Score com raciocínio visível — não caixa-preta</div>
+    </div>
+  </div>
+  <div style="margin-top:auto">
+    <div style="font-size:.65rem;font-weight:600;color:var(--t1);margin-bottom:6px">CNPJ, razão social ou nome fantasia:</div>
+    <div style="display:flex;background:var(--s2);border:1.5px solid var(--b2);border-radius:9px;overflow:hidden;box-shadow:0 4px 20px rgba(249,115,22,.06)" onfocusin="this.style.borderColor='var(--or)'" onfocusout="this.style.borderColor='var(--b2)'">
+      <div style="padding:12px 12px;font-size:.9rem;color:var(--t2)">🔍</div>
+      <input type="text" id="cnpj-in" placeholder="Ex: 02.916.265/0001-60 ou Nome fantasia..." style="flex:1;background:transparent;border:none;outline:none;padding:12px 4px;font-family:var(--bd);font-size:.82rem;color:var(--w)">
+      <button onclick="showMod('cnpj')" style="padding:11px 20px;background:var(--or);color:#fff;border:none;font-family:var(--ds);font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap">Analisar →</button>
+    </div>
+    <div style="margin-top:9px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      <span style="font-size:.6rem;color:var(--t2)">Exemplos:</span>
+      <span style="font-size:.65rem;color:var(--or);cursor:pointer;padding:2px 7px;border-radius:4px;background:var(--or-d);border:1px solid var(--or-b)" onclick="showMod('cnpj')">Empresa problemática</span>
+      <span style="font-size:.65rem;color:var(--or);cursor:pointer;padding:2px 7px;border-radius:4px;background:var(--or-d);border:1px solid var(--or-b)" onclick="showMod('cnpj')">Fornecedor SP</span>
+    </div>
+    <div style="margin-top:10px;font-size:.62rem;color:var(--t2);display:flex;align-items:center;gap:5px"><span style="color:var(--gn)">●</span>Gratuito — 3 consultas/mês no Free</div>
+  </div>
+</div>
+
+<!-- PORTAL 02 — BALANÇO -->
+<div style="padding:36px 32px 48px;background:linear-gradient(160deg,rgba(34,197,94,.02) 0%,transparent 55%);display:flex;flex-direction:column;position:relative;overflow:hidden;min-width:0;box-sizing:border-box">
+  <div style="font-family:var(--ds);font-size:5.5rem;font-weight:800;color:rgba(34,197,94,.05);position:absolute;top:12px;right:18px;line-height:1;pointer-events:none">02</div>
+  <div style="margin-bottom:18px">
+    <div style="display:inline-flex;align-items:center;gap:6px;background:var(--gn-d);border:1px solid var(--gn-b);border-radius:5px;padding:4px 10px;margin-bottom:13px">
+      <span>📊</span><span style="font-size:.6rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gn)">Para dono, contador e investidor</span></div>
+    <h2 style="font-family:var(--ds);font-size:1.45rem;font-weight:800;line-height:1.12;margin-bottom:10px">O que o <span style="color:var(--gn)">balanço está</span><br>tentando me dizer?</h2>
+    <p style="font-size:.79rem;color:var(--t1);line-height:1.72;max-width:360px">Em linguagem direta — sem jargão técnico. Por que o lucro some, como o banco vê sua empresa, quanto vale o negócio e o que fazer de concreto.</p>
+  </div>
+  <div style="margin-bottom:20px">
+    <div style="font-size:.58rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t2);margin-bottom:8px">O que você descobre</div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--t1)"><span style="color:var(--gn);font-weight:700;width:14px;font-size:.65rem">✓</span>Por que o lucro cai mesmo com receita crescendo</div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--t1)"><span style="color:var(--gn);font-weight:700;width:14px;font-size:.65rem">✓</span>Qual regime tributário economiza mais imposto</div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--t1)"><span style="color:var(--gn);font-weight:700;width:14px;font-size:.65rem">✓</span>Ecossistema, insiders, governança e M&A (bolsa)</div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--t1)"><span style="color:var(--gn);font-weight:700;width:14px;font-size:.65rem">✓</span>O que fazer e o que NÃO fazer — ações concretas</div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:.75rem;color:var(--t1)"><span style="color:var(--gn);font-weight:700;width:14px;font-size:.65rem">✓</span>Valuation 5 métodos + piso e teto</div>
+    </div>
+  </div>
+  <div style="margin-top:auto">
+    <div style="display:flex;background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:4px;gap:4px;margin-bottom:12px">
+      <button id="tb-upload" class="tog-e t-act" onclick="setEnt('upload')" style="flex:1;padding:8px;border-radius:5px;border:none;cursor:pointer;font-family:var(--bd);font-size:.71rem;font-weight:600;background:var(--gn);color:#052e16;display:flex;align-items:center;justify-content:center;gap:5px;transition:all .15s">📄 Upload balanço/DRE</button>
+      <button id="tb-ticker" class="tog-e" onclick="setEnt('ticker')" style="flex:1;padding:8px;border-radius:5px;border:none;cursor:pointer;font-family:var(--bd);font-size:.71rem;font-weight:600;background:transparent;color:var(--t1);display:flex;align-items:center;justify-content:center;gap:5px;transition:all .15s">📈 Ticker B3</button>
+    </div>
+    <div id="eu">
+      <div onclick="showMod('bal')" style="border:2px dashed var(--b2);border-radius:9px;padding:20px;text-align:center;cursor:pointer;background:var(--s2);transition:all .15s" onmouseover="this.style.borderColor='#22C55E';this.style.background='rgba(34,197,94,.04)'" onmouseout="this.style.borderColor='var(--b2)';this.style.background='var(--s2)'">
+        <div style="font-size:1.4rem;margin-bottom:6px">📂</div>
+        <div style="font-size:.75rem;font-weight:600;color:var(--w);margin-bottom:3px">Arraste o arquivo ou clique para selecionar</div>
+        <div style="font-size:.63rem;color:var(--t2);margin-bottom:10px">PDF, Excel, SPED ECD/ECF</div>
+        <div style="display:inline-flex;gap:5px"><span style="padding:2px 7px;background:var(--s3);border:1px solid var(--b1);border-radius:3px;font-size:.59rem;color:var(--t2)">.pdf</span><span style="padding:2px 7px;background:var(--s3);border:1px solid var(--b1);border-radius:3px;font-size:.59rem;color:var(--t2)">.xlsx</span><span style="padding:2px 7px;background:var(--s3);border:1px solid var(--b1);border-radius:3px;font-size:.59rem;color:var(--t2)">SPED</span></div>
+      </div>
+      <div style="margin-top:8px;text-align:center;font-size:.62rem;color:var(--t2)">Ou <span style="color:var(--gn);cursor:pointer;font-weight:600" onclick="showMod('bal')">ver demo com JBS (JBSS3) →</span></div>
+    </div>
+    <div id="et" style="display:none">
+      <div style="display:flex;background:var(--s2);border:1.5px solid var(--b2);border-radius:9px;overflow:hidden;box-shadow:0 4px 20px rgba(34,197,94,.05)" onfocusin="this.style.borderColor='var(--gn)'" onfocusout="this.style.borderColor='var(--b2)'">
+        <div style="padding:12px 12px;background:var(--s3);border-right:1px solid var(--b1);font-family:var(--mo);font-size:.69rem;color:var(--t2);display:flex;align-items:center">B3:</div>
+        <input type="text" id="tk-in" placeholder="JBSS3, PETR4, VALE3..." maxlength="6" style="flex:1;background:transparent;border:none;outline:none;padding:12px;font-family:var(--mo);font-size:.88rem;color:var(--w);text-transform:uppercase;letter-spacing:1px">
+        <button onclick="showMod('bal')" style="padding:11px 18px;background:var(--gn);color:#052e16;border:none;font-family:var(--ds);font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap">Analisar →</button>
+      </div>
+      <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        <span style="font-size:.6rem;color:var(--t2)">Tickers:</span>
+        <span style="font-size:.65rem;color:var(--gn);cursor:pointer;padding:2px 7px;border-radius:4px;background:var(--gn-d);border:1px solid var(--gn-b)" onclick="showMod('bal')">JBSS3</span>
+        <span style="font-size:.65rem;color:var(--gn);cursor:pointer;padding:2px 7px;border-radius:4px;background:var(--gn-d);border:1px solid var(--gn-b)" onclick="showMod('bal')">PETR4</span>
+        <span style="font-size:.65rem;color:var(--gn);cursor:pointer;padding:2px 7px;border-radius:4px;background:var(--gn-d);border:1px solid var(--gn-b)" onclick="showMod('bal')">VALE3</span>
+      </div>
+    </div>
+  </div>
+</div>
+</div><!-- /split -->
+</div><!-- /split-border -->
+</div><!-- /pg-home -->
+
+<!-- ═══════ ANALYSIS PAGE ═══════ -->
+<div id="pg-an" class="page">
+<nav class="nav">
+  <div class="nlogo" onclick="showPage('pg-home')"><span>R</span>ADAR</div>
+  <button class="n-tab ao" id="tab-cnpj" onclick="showMod('cnpj')">🛡️ Análise CNPJ</button>
+  <button class="n-tab" id="tab-bal" onclick="showMod('bal')">📊 Balanço / Ação</button>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:9px;padding-left:12px;border-left:1px solid var(--b1)">
+    <span class="plan-pill">Free</span>
+    <button class="btn btn-or" style="padding:5px 12px;font-size:.67rem">Ver Planos</button>
+  </div>
+</nav>
+<div id="sn-cnpj" class="snav act" style="display:flex">
+  <button class="st so" onclick="setTab('cnpj','check')">Verificações</button>
+  <button class="st" onclick="setTab('cnpj','crim')">Criminal</button>
+  <button class="st" onclick="setTab('cnpj','soc')">Sócios</button>
+  <button class="st" onclick="setTab('cnpj','grp')">Grupo Econômico</button>
+  <button class="st" onclick="setTab('cnpj','crz')">Alertas Cruzados</button>
+</div>
+<div id="sn-bal" class="snav" style="display:none">
+  <button class="st sg" onclick="setTab('bal','ind')">Diagnóstico</button>
+  <button class="st" onclick="setTab('bal','dre')">DRE</button>
+  <button class="st" onclick="setTab('bal','ciclo')">Ciclo de caixa</button>
+  <button class="st" onclick="setTab('bal','fis')">Regime tributário</button>
+  <button class="st" onclick="setTab('bal','val')">Valuation</button>
+  <button class="st" onclick="setTab('bal','eco')">Ecossistema</button>
+  <button class="st" onclick="setTab('bal','ppl')">Pessoas & M&A</button>
+  <button class="st" onclick="setTab('bal','mac')">Macro & Futuro</button>
+  <button class="st" onclick="setTab('bal','gov')">Governança</button>
+  <button class="st" onclick="setTab('bal','sug')">Sugestões</button>
+</div>
+<!-- ═══════ MOD CNPJ ═══════ -->
+<div class="mod act" id="mod-cnpj">
+<div class="wrap">
+<div class="co-hd">
+  <div style="display:flex;align-items:flex-start;gap:11px">
+    <div class="co-av av-rd">JFC</div>
+    <div>
+      <div class="co-nm">JF Comercial e Transportes Ltda.</div>
+      <div class="co-sb">CNPJ 08.441.921/0001-03 · Lucro Presumido · São Paulo/SP · 6 anos · CNAE 4930-2/02</div>
+      <div class="co-tg">
+        <span class="chip ch-rd">⚠ Mandado ativo — sócio</span>
+        <span class="chip ch-rd">Dívida R$1,2M</span>
+        <span class="chip ch-rd">Protesto 3×</span>
+        <span class="chip ch-rd">Ação penal ativa</span>
+        <span class="chip ch-yl">Inquérito MP</span>
+        <span class="chip ch-yl">Phoenix detectado</span>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="sc-big" style="color:var(--rd)">18</div>
+    <div class="sc-lb">Score / 100</div>
+  </div>
+</div>
+
+<!-- VERIFICAÇÕES -->
+<div class="tab-p act" id="cnpj-check">
+<div class="verd vr"><div class="v-row"><span class="v-em">🚨</span><div>
+  <div class="v-tit">Risco CRÍTICO — não venda a prazo. 7 alertas graves em 26 verificações.</div>
+  <div class="v-txt"><strong>Sócio majoritário Fábio Junqueira tem mandado de prisão ativo (BNMP) por estelionato.</strong> Empresa tem R$1,2M em dívida ativa federal + 3 protestos ativos + ação penal federal em curso. Padrão phoenix detectado: empresa anterior do mesmo sócio foi baixada em 2018 com R$480k de dívida — esta empresa abriu 3 meses depois, mesmo endereço e CNAE.</div>
+  <span class="v-act" style="background:var(--rd-d);color:var(--rd);border:1px solid var(--rd-b)">RECUSAR operação. Exigir cheque à vista com confirmação antes de liberar carga →</span>
+</div></div></div>
+
+<div class="stats">
+  <div class="stat"><span class="sv sv-rd">18</span><span class="sl">Score</span></div>
+  <div class="stat"><span class="sv sv-rd">Irregular</span><span class="sl">Situação RF</span></div>
+  <div class="stat"><span class="sv sv-rd">R$1,2M</span><span class="sl">Dívida fed.</span></div>
+  <div class="stat"><span class="sv sv-rd">3</span><span class="sl">Protestos</span></div>
+  <div class="stat"><span class="sv sv-rd">1</span><span class="sl">Ação penal</span></div>
+  <div class="stat"><span class="sv sv-rd">Mandado</span><span class="sl">Sócio principal</span></div>
+  <div class="stat"><span class="sv sv-rd">CEIS</span><span class="sl">Sancionada</span></div>
+  <div class="stat"><span class="sv sv-rd">Phoenix</span><span class="sl">Padrão fraude</span></div>
+</div>
+
+<div class="blk-t">Bloco 1 — Dados cadastrais</div>
+<div class="ck"><div class="ck-h" onclick="tog(this)"><div class="ck-ic ic-al">✕</div><div class="ck-tit">Situação cadastral — IRREGULAR (restrição ativa desde 03/2024)</div><div class="ck-src">Receita Federal</div></div><div class="ck-bd"><strong>CNPJ com restrição ativa</strong> — impossibilidade de emitir certidões, participar de licitações. Omissão de obrigações fiscais declaratórias. Situação anterior: ATIVA até fev/2024.</div></div>
+<div class="ck"><div class="ck-h" onclick="tog(this)"><div class="ck-ic ic-al">✕</div><div class="ck-tit">Padrão Phoenix — empresa irmã JFC Cargas Ltda. baixada com dívida em 2018</div><div class="ck-src">Receita Federal / Motor heurístico</div></div><div class="ck-bd"><strong>Padrão phoenix detectado:</strong> JFC Cargas Ltda. (CNPJ 04.211.835/0001-44) foi baixada em ago/2018 com R$480k de dívida ativa. Esta empresa foi aberta em nov/2018 — mesmo sócio, mesmo endereço, mesmo CNAE 4930-2/02. Clássica "testa fria".<div class="ck-cta">Consultar histórico completo do sócio →</div></div></div>
+
+<div class="blk-t">Bloco 2 — Dívida federal</div>
+<div class="ck"><div class="ck-h" onclick="tog(this)"><div class="ck-ic ic-al">✕</div><div class="ck-tit">PGFN — Dívida ativa R$1.243.600 inscrita (2 inscrições)</div><div class="ck-src">PGFN / Regularize</div></div><div class="ck-bd"><strong>R$1.243.600 em dívida ativa federal inscrita.</strong> Inscrição 1: R$890k — IRPJ/CSLL 2021-2022. Inscrição 2: R$353k — contribuições previdenciárias. Empresa sem CND ativa. Execução fiscal em andamento no TRF-3.</div></div>
+
+<div class="blk-t">Bloco 3 — Protestos</div>
+<div class="ck"><div class="ck-h" onclick="tog(this)"><div class="ck-ic ic-al">✕</div><div class="ck-tit">3 protestos ativos — R$287.400 total · SP e MG</div><div class="ck-src">Web search / CENPROT V2</div></div><div class="ck-bd"><strong>3 protestos ativos:</strong> (1) R$145k — Posto Gasolina Santa Helena, SP, jan/2024 · (2) R$87k — Transportadora Belo Ltda., MG, mar/2024 · (3) R$55k — Auto Peças Dinâmico, SP, jun/2024. Todos EM ABERTO.<div class="ck-cta">Relatório nacional (Plus) →</div></div></div>
+
+<div class="blk-t">Bloco 4 — Sanções governamentais</div>
+<div class="ck"><div class="ck-h" onclick="tog(this)"><div class="ck-ic ic-al">✕</div><div class="ck-tit">CEIS — Sancionada por inadimplência em contrato público · MG (2023)</div><div class="ck-src">CGU / CEIS</div></div><div class="ck-bd"><strong>Inscrita no CEIS</strong> em jun/2023 por inadimplência em contrato de prestação de serviços de transporte com a Secretaria de Saúde de MG. Sanção: declaração de inidoneidade. Prazo: 24 meses. Vence jun/2025.</div></div>
+
+<div class="blk-t">Bloco 5 — CAGED</div>
+<div class="ck"><div class="ck-h" onclick="tog(this)"><div class="ck-ic ic-al">✕</div><div class="ck-tit">CAGED — -8 funcionários em 6 meses. Quadro atual: 3 (era 11 em jan/2024)</div><div class="ck-src">CAGED / MTE</div></div><div class="ck-bd"><strong>Colapso do quadro de pessoal:</strong> empresa tinha 11 funcionários em jan/2024 e hoje tem 3. -8 em 6 meses. Correlaciona com inscrição da dívida ativa e restrição do CNPJ. Empresa em desintegração operacional.</div></div>
+
+<div class="blk-t">Bloco 6 — Processos judiciais</div>
+<div class="ck"><div class="ck-h" onclick="tog(this)"><div class="ck-ic ic-al">✕</div><div class="ck-tit">Ação penal federal ativa — CNPJ réu (estelionato, crime fiscal)</div><div class="ck-src">DataJud criminal · CNJ</div></div><div class="ck-bd"><strong>1 ação penal ativa na Justiça Federal (TRF-3):</strong> classes processuais: Ação Penal Pública Incondicionada. Crime: estelionato majorado + sonegação fiscal (arts. 171 e 1º da Lei 8.137/90). Réu: JF Comercial e Transportes Ltda. Distribuída: set/2023. Em fase de instrução.</div></div>
+<div class="ck"><div class="ck-h" onclick="tog(this)"><div class="ck-ic ic-al">✕</div><div class="ck-tit">8 processos trabalhistas — 40 em 4 anos · reclamantes em 4 estados</div><div class="ck-src">TST / CSJT</div></div><div class="ck-bd"><strong>40 processos trabalhistas em 4 anos de operação.</strong> Média: 10/ano. Polo: empresa sempre como ré. Tipos: reclamatória trabalhista (horas extras, FGTS não recolhido), execução de julgado. Reclamantes em SP, MG, RJ e PR — empresa opera multi-estado sem pagar direitos.</div></div>
+
+<div class="blk-t">Bloco 7 — Reputação e risco climático</div>
+<div class="ck"><div class="ck-h" onclick="tog(this)"><div class="ck-ic ic-wr">⚠</div><div class="ck-tit">Reclame Aqui — 12 reclamações · 0% resolvido · nota 1,2/5</div><div class="ck-src">Reclame Aqui V2</div></div><div class="ck-bd"><strong>12 reclamações abertas</strong> nos últimos 12 meses. Índice de solução: 0%. Nota: 1,2/5. Reclamações: "carga não entregue e sem resposta" (7), "cobrou e não buscou" (3), "motorista sumiu com mercadoria" (2). Risco de imagem crítico.</div></div>
+<div class="ck"><div class="ck-h" onclick="tog(this)"><div class="ck-ic ic-wr">⚠</div><div class="ck-tit">CEMADEN — Sede em zona de risco de enchente moderado</div><div class="ck-src">CEMADEN / INPE</div></div><div class="ck-bd">Endereço fiscal (Av. Presidente Kennedy, SP) está em área de risco de enchente grau 2 (moderado) no cadastro CEMADEN. Verificar se há depósito operacional e cobertura de seguro.</div></div>
+</div>
+
+<!-- CRIMINAL TAB -->
+<div class="tab-p" id="cnpj-crim">
+<div class="verd vr"><div class="v-row"><span class="v-em">🚨</span><div>
+  <div class="v-tit">Risco criminal CRÍTICO — sócio majoritário com mandado ativo por estelionato</div>
+  <div class="v-txt"><strong>Fábio Junqueira (70%) tem mandado de prisão ativo no BNMP/CNJ</strong> — tipo: definitivo, crime: estelionato majorado (art. 171 §2°), tribunal: TRF-3. Empresa tem ação penal ativa na Justiça Federal. Inquérito no MPSP.</div>
+  <span class="v-act" style="background:var(--rd-d);color:var(--rd);border:1px solid var(--rd-b)">Encerrar relação comercial — risco legal e reputacional para sua empresa →</span>
+</div></div></div>
+<div class="crim-blk">
+  <div class="crim-hd"><span style="font-size:.95rem">⚖️</span><div><div class="crim-tit">Situação Criminal — CNPJ e Sócios</div><div class="crim-sb">CNPJ → CPFs dos sócios → verificação em todas as bases</div></div></div>
+  <div class="crim-bd">
+    <div class="crim-split">
+      <div>
+        <div class="crim-ct">Empresa — por CNPJ</div>
+        <div class="crim-it"><div class="ci-dot ci-al"></div><div class="ci-lb"><strong>Ação penal ativa — TRF-3</strong>Estelionato majorado + crime fiscal. Fase: instrução.</div><div class="ci-src">DataJud criminal</div></div>
+        <div class="crim-it"><div class="ci-dot ci-al"></div><div class="ci-lb"><strong>Condenação corporativa</strong>Sem trânsito em julgado — processo em curso.</div><div class="ci-src">SEEU / CNJ</div></div>
+        <div class="crim-it"><div class="ci-dot ci-wn"></div><div class="ci-lb"><strong>Inquérito policial ativo</strong>MPSP — fraude fiscal + estelionato coletivo. Jun/2024.</div><div class="ci-src">MPSP</div></div>
+        <div class="crim-it"><div class="ci-dot ci-wn"></div><div class="ci-lb"><strong>Operação policial</strong>"Op. Garrafa Fria" PF SP ago/2024 — citada.</div><div class="ci-src">DOU + LLM</div></div>
+      </div>
+      <div>
+        <div class="crim-ct">Sócios — por CPF</div>
+        <div class="crim-it"><div class="ci-dot ci-al"></div><div class="ci-lb"><strong>Fábio Junqueira (70%)</strong>Mandado ATIVO — definitivo — estelionato TRF-3</div><div class="ci-src">BNMP / CNJ</div></div>
+        <div class="crim-it"><div class="ci-dot ci-al"></div><div class="ci-lb"><strong>Fábio Junqueira</strong>Antecedente federal positivo — condenação anterior 2017</div><div class="ci-src">SINIC / PF</div></div>
+        <div class="crim-it"><div class="ci-dot ci-ok"></div><div class="ci-lb"><strong>Marina Souza (30%)</strong>Sem mandado ativo · ficha federal limpa</div><div class="ci-src">BNMP · SINIC</div></div>
+        <div class="crim-it"><div class="ci-dot ci-ok"></div><div class="ci-lb"><strong>Sem pena em execução</strong>Nenhum sócio com regime ativo no SEEU</div><div class="ci-src">SEEU / CNJ</div></div>
+      </div>
+    </div>
+    <div class="crim-fr"><strong>Sigiloso por lei (RADAR não acessa):</strong> BO como suspeito · Inquérito com sigilo judicial · SINESP/sistemas internos · RIF COAF · Processos em segredo de justiça</div>
+  </div>
+</div>
+<div class="lock"><div class="lock-i">🔒</div><div class="lock-t">Certidão PC-SP · Condenações TJSP · Interpol · Histórico completo Fábio Junqueira por TJ</div><button class="btn btn-or" style="font-size:.69rem;padding:6px 14px">Plano COMPLIANCE →</button></div>
+</div>
+
+<!-- SÓCIOS -->
+<div class="tab-p" id="cnpj-soc">
+<div class="verd vr"><div class="v-row"><span class="v-em">⚠️</span><div>
+  <div class="v-tit">Sócio majoritário com mandado ativo e antecedente federal</div>
+  <div class="v-txt"><strong>Fábio Junqueira (70%):</strong> BNMP = mandado ATIVO por estelionato. SINIC/PF = condenação anterior em 2017 (já quitada, mas consta). Histórico de empresa anterior baixada com dívida (padrão phoenix). <strong>Marina Souza (30%):</strong> sem ocorrências.</div>
+</div></div></div>
+<div class="card" style="padding:12px 14px;margin-bottom:8px">
+  <div class="blk-t" style="margin-top:0">Verificações por CPF</div>
+  <div class="ck"><div class="ck-h" onclick="tog(this)"><div class="ck-ic ic-al">✕</div><div class="ck-tit">Fábio Junqueira — BNMP: mandado de prisão ATIVO · estelionato</div><div class="ck-src">BNMP / CNJ</div></div><div class="ck-bd"><strong>Mandado definitivo ativo.</strong> Tipo: definitivo. Crime imputado: estelionato majorado (art. 171 §2°). Tribunal emissor: TRF-3 São Paulo. Data de emissão: 12/11/2023. Flag recaptura: falso (ainda em aberto).</div></div>
+  <div class="ck"><div class="ck-h" onclick="tog(this)"><div class="ck-ic ic-al">✕</div><div class="ck-tit">Fábio Junqueira — SINIC/PF: antecedente criminal federal positivo (2017)</div><div class="ck-src">PF / SINIC</div></div><div class="ck-bd"><strong>Certidão POSITIVA.</strong> Registro: condenação em 2017 por crime fiscal (Lei 8.137/90) — processo cumprido e encerrado. O não fornecimento de certidão positiva não impediu novas atividades criminosas — sócio reincidiu.</div></div>
+  <div class="ck"><div class="ck-h" onclick="tog(this)"><div class="ck-ic ic-al">✕</div><div class="ck-tit">Fábio Junqueira — Empresa anterior JFC Cargas (phoenix)</div><div class="ck-src">Receita Federal</div></div><div class="ck-bd">Empresa anterior (CNPJ 04.211.835/0001-44) baixada em ago/2018 com R$480k de dívida ativa. Esta empresa abriu nov/2018 — 3 meses depois. Mesmo endereço, mesmo CNAE. Clássico padrão phoenix.</div></div>
+  <div class="ck"><div class="ck-h" onclick="tog(this)"><div class="ck-ic ic-ok">✓</div><div class="ck-tit">Marina Souza — Sem ocorrências em nenhuma base</div><div class="ck-src">BNMP · SINIC · SEEU</div></div><div class="ck-bd">Sócia minoritária (30%) sem mandado ativo (BNMP), ficha federal limpa (SINIC/PF), sem pena em execução (SEEU). Sem empresa anterior com problemas.</div></div>
+</div>
+</div>
+
+<!-- GRUPO ECONÔMICO -->
+<div class="tab-p" id="cnpj-grp">
+<div class="verd vr"><div class="v-row"><span class="v-em">🕸️</span><div>
+  <div class="v-tit">3 empresas vinculadas — todas com problemas</div>
+  <div class="v-txt">Fábio Junqueira aparece em 3 CNPJs além desta empresa. <strong>Todas têm dívida ativa ou estão irregulares.</strong> Padrão serial offender claro: mesmo sócio, mesmo CNAE, ciclo de abertura-falência-reabertura.</div>
+</div></div></div>
+<div class="grp-g">
+  <div class="gc gc-rd">
+    <div class="gc-hd"><div class="co-av av-rd" style="width:28px;height:28px;font-size:.62rem">JFC</div><div><div class="gc-nm">JF Comercial e Transportes</div><div style="font-size:.6rem;color:var(--t1)">Consultada · SP · 6 anos</div></div><div class="gc-sc" style="color:var(--rd)">18</div></div>
+    <div class="gc-it"><span class="gc-al">CNPJ irregular</span><span class="gc-al">Dívida R$1,2M</span><span class="gc-al">Mandado sócio</span><span class="gc-al">Ação penal ativa</span></div>
+  </div>
+  <div class="gc gc-rd">
+    <div class="gc-hd"><div class="co-av av-rd" style="width:28px;height:28px;font-size:.62rem">JFC</div><div><div class="gc-nm">JFC Cargas Ltda. (baixada)</div><div style="font-size:.6rem;color:var(--t1)">Baixada · SP · 2014–2018</div></div><div class="gc-sc" style="color:var(--rd)">—</div></div>
+    <div class="gc-it"><span class="gc-al">Baixada c/ dívida R$480k</span><span class="gc-al">Phoenix — origem desta empresa</span></div>
+  </div>
+  <div class="gc gc-rd">
+    <div class="gc-hd"><div class="co-av av-rd" style="width:28px;height:28px;font-size:.62rem">FJL</div><div><div class="gc-nm">FJ Logística e Serviços</div><div style="font-size:.6rem;color:var(--t1)">Ativa · RJ · 3 anos</div></div><div class="gc-sc" style="color:var(--rd)">22</div></div>
+    <div class="gc-it"><span class="gc-al">Dívida ativa R$220k</span><span class="gc-al">Irregular RF</span><span class="gc-wn">2 protestos ativos</span></div>
+  </div>
+</div>
+<div class="call ca-r"><strong>Perfil serial offender detectado:</strong> mesmo CPF com empresas de transporte abertas em sequência — cada uma com menos funcionários que a anterior, todas terminando em dívida ativa. 3 empresas, 3 resultados idênticos. Risco zero de melhora.</div>
+</div>
+
+<!-- ALERTAS CRUZADOS -->
+<div class="tab-p" id="cnpj-crz">
+<div class="verd vr"><div class="v-row"><span class="v-em">🔴</span><div>
+  <div class="v-tit">Alerta máximo — qualquer operação coloca sua empresa em risco</div>
+  <div class="v-txt">Operar com esta empresa expõe você a <strong>risco de cumplicidade involuntária</strong> em atividade criminosa investigada. A Lei Anticorrupção (12.846/2013) responsabiliza sua empresa pelos atos de seus fornecedores.</div>
+</div></div></div>
+<div class="cx-al cx-r"><span class="cx-ic">🔴</span><div class="cx-b"><div class="cx-tit">Risco legal — Lei Anticorrupção 12.846/2013</div><div class="cx-txt">Sua empresa pode ser responsabilizada por <strong>operar com fornecedor em investigação criminal.</strong> Sem due diligence documentada, você não tem defesa caso seja chamado a explicar a relação.</div><span class="cx-act">Gerar dossiê COMPLIANCE com validade jurídica →</span></div></div>
+<div class="cx-al cx-r"><span class="cx-ic">🔴</span><div class="cx-b"><div class="cx-tit">Risco de não entrega — sócio com mandado ativo pode ser preso a qualquer hora</div><div class="cx-txt">Se Fábio Junqueira for preso durante uma operação de sua carga, <strong>o veículo e a mercadoria ficam apreendidos.</strong> Não há seguro que cubra isso sem due diligence anterior documentada.</div></div></div>
+<div class="call ca-r"><strong>Recomendação RADAR:</strong> recusar ou encerrar relação comercial imediatamente. Documentar a análise realizada para fins da Lei Anticorrupção.</div>
+</div>
+
+</div><!-- /wrap cnpj -->
+</div><!-- /mod-cnpj -->
+<!-- ═══════ MOD BALANÇO / JBS ═══════ -->
+<div class="mod" id="mod-bal">
+<div class="wrap">
+
+<div class="co-hd">
+  <div style="display:flex;align-items:flex-start;gap:11px">
+    <div class="co-av av-bl">JBS</div>
+    <div>
+      <div class="co-nm">JBS N.V. — JBSS3 · B3 + NYSE</div>
+      <div class="co-sb">CNPJ 02.916.265/0001-60 · Lucro Real · Holding global · Receita 2024: R$417B · CNAE 1013-9/01</div>
+      <div class="co-tg">
+        <span class="chip ch-yl">Governança 41/100</span>
+        <span class="chip ch-gn">EBITDA +128%</span>
+        <span class="chip ch-gn">Receita +14,6%</span>
+        <span class="chip ch-rd">P/L 7x vs setor 15x</span>
+        <span class="chip ch-yl">Controlador histórico corrupção</span>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="sc-big" style="color:var(--yl)">C+</div>
+    <div class="sc-lb">Saúde financeira</div>
+  </div>
+</div>
+
+<!-- ── DIAGNÓSTICO ── -->
+<div class="tab-p act" id="bal-ind">
+<div class="verd vy"><div class="v-row"><span class="v-em">🟡</span><div>
+  <div class="v-tit">Empresa barata pelos números — governança penaliza o múltiplo</div>
+  <div class="v-txt">EBITDA de <strong>R$39B (+128% em 2024)</strong>, crescimento de 14,6% e dívida controlada em 2,3x. <strong>53% mais barata que a Tyson Foods.</strong> O desconto é 100% de governança — família com histórico de corrupção no controle. Se a NYSE normalizar a percepção, upside de 40–70%.</div>
+  <span class="v-act va-gn">Compra moderada com aporte parcelado · horizonte mínimo 3 anos →</span>
+</div></div></div>
+
+<div class="ind-g">
+  <div class="ind"><div class="ind-tp">
+    <div class="ind-nm">O preço está caro ou barato?</div><div class="ind-tc">P/L — setor: 15x</div>
+    <div class="ind-vl" style="color:var(--gn)">7x</div>
+    <div class="ruler"><div class="ruler-grad"></div><div class="rmk" style="left:10%"></div></div>
+    <div class="rlbl"><span>Baratíssimo</span><span>Justo</span><span>Caro</span></div>
+  </div><div class="sema"><div class="sstatus"><div class="sdot sg"></div><span style="color:var(--gn)">Muito barato</span></div><span class="stag st-u">53% abaixo do setor</span></div></div>
+
+  <div class="ind"><div class="ind-tp">
+    <div class="ind-nm">Quanto cresceu</div><div class="ind-tc">Receita 2024 — setor: 6%</div>
+    <div class="ind-vl" style="color:var(--gn)">+14,6%</div>
+    <div class="ruler"><div class="ruler-grad"></div><div class="rmk" style="left:68%"></div></div>
+    <div class="rlbl"><span>Encolhe</span><span>Estável</span><span>Forte</span></div>
+  </div><div class="sema"><div class="sstatus"><div class="sdot sg"></div><span style="color:var(--gn)">Excepcional</span></div><span class="stag st-u">2,4× acima da média</span></div></div>
+
+  <div class="ind"><div class="ind-tp">
+    <div class="ind-nm">Dividendo pago</div><div class="ind-tc">Yield — CDI: 10,75%</div>
+    <div class="ind-vl" style="color:var(--yl)">3,8%</div>
+    <div class="ruler"><div class="ruler-grad"></div><div class="rmk" style="left:35%"></div></div>
+    <div class="rlbl"><span>Zero</span><span>Médio</span><span>Alto</span></div>
+  </div><div class="sema"><div class="sstatus"><div class="sdot sy"></div><span style="color:var(--yl)">Médio</span></div><span class="stag st-e">Abaixo do CDI</span></div></div>
+
+  <div class="ind"><div class="ind-tp">
+    <div class="ind-nm">Quanto sobra de cada venda</div><div class="ind-tc">EBITDA margin — setor: 8%</div>
+    <div class="ind-vl" style="color:var(--gn)">9,4%</div>
+    <div class="ruler"><div class="ruler-grad"></div><div class="rmk" style="left:55%"></div></div>
+    <div class="rlbl"><span>Fraco</span><span>Médio</span><span>Bom</span></div>
+  </div><div class="sema"><div class="sstatus"><div class="sdot sg"></div><span style="color:var(--gn)">Acima do setor</span></div><span class="stag st-u">EBITDA R$39B</span></div></div>
+
+  <div class="ind"><div class="ind-tp">
+    <div class="ind-nm">Quanto a empresa deve</div><div class="ind-tc">Dívida/EBITDA — limite: 3×</div>
+    <div class="ind-vl" style="color:var(--gn)">2,3x</div>
+    <div class="ruler" style=""><div class="ruler-grad"></div><div class="rmk" style="left:42%"></div></div>
+    <div class="rlbl"><span>Sem dívida</span><span>Saudável</span><span>Risco</span></div>
+  </div><div class="sema"><div class="sstatus"><div class="sdot sg"></div><span style="color:var(--gn)">Controlada</span></div><span class="stag st-u">Dentro do limite</span></div></div>
+
+  <div class="ind"><div class="ind-tp">
+    <div class="ind-nm">Retorno sobre o capital</div><div class="ind-tc">ROE — setor: 12%</div>
+    <div class="ind-vl" style="color:var(--gn)">23,2%</div>
+    <div class="ruler"><div class="ruler-grad"></div><div class="rmk" style="left:78%"></div></div>
+    <div class="rlbl"><span>Fraco</span><span>Médio</span><span>Excepcional</span></div>
+  </div><div class="sema"><div class="sstatus"><div class="sdot sg"></div><span style="color:var(--gn)">Excepcional</span></div><span class="stag st-u">1,9× acima do setor</span></div></div>
+</div>
+
+<div class="blk-t">CEO entregou o que prometeu? — Tomazoni 2021–2024</div>
+<div class="card" style="overflow:hidden;margin-bottom:10px">
+  <div class="tr-row" style="background:var(--s2)"><span class="tr-year" style="color:var(--t2);font-weight:700">Ano</span><span style="color:var(--t2);font-weight:700;font-size:.7rem">Prometeu</span><span style="color:var(--t2);font-weight:700;font-size:.7rem">Entregou</span><span style="color:var(--t2);font-weight:700;font-size:.7rem">Resultado</span></div>
+  <div class="tr-row"><span class="tr-year">2021</span><span class="tr-prom">Crescimento 8–12%, margem 7–9%</span><span class="tr-entregou">+47% · 8,1%</span><span class="td-p">Superou muito</span></div>
+  <div class="tr-row"><span class="tr-year">2022</span><span class="tr-prom">Manter crescimento, expansão EUA/Aus</span><span class="tr-entregou">+12% · 7,4%</span><span class="td-e">Entregou</span></div>
+  <div class="tr-row"><span class="tr-year">2023</span><span class="tr-prom">Recuperação de margem</span><span class="tr-entregou">-3% · 4,6%</span><span class="td-n">Abaixo</span></div>
+  <div class="tr-row"><span class="tr-year">2024</span><span class="tr-prom">Recuperação forte, EBITDA +50–70%</span><span class="tr-entregou">+14,6% · EBITDA+128%</span><span class="td-p">Superou muito</span></div>
+  <div style="padding:7px 12px;background:var(--s2);font-size:.71rem;color:var(--t1);border-top:.5px solid var(--b1)"><strong style="color:var(--gn)">3 de 4 anos entregou ou superou.</strong> O miss de 2023 foi o ciclo do boi americano — fora do controle da gestão.</div>
+</div>
+
+<div class="acoes"><div class="acoes-tit">🎯 O que fazer</div>
+  <div class="acao"><div class="anum any">1</div><div><strong>Entre em parcelas</strong><span> — evento de governança pode derrubar 20–30%. Aportes mensais por 6–12 meses protegem.</span></div></div>
+  <div class="acao"><div class="anum ang">2</div><div><strong>Horizonte mínimo 3 anos</strong><span> — expansão de múltiplo via NYSE leva tempo e precisa de consistência.</span></div></div>
+  <div class="acao"><div class="anum ang">3</div><div><strong>Acompanhe o ciclo proteico</strong><span> — ciclo do boi EUA melhora 2026–2027. Catalisador independente da governança.</span></div></div>
+</div>
+<div class="evitar"><div class="evitar-tit">🚫 O que NÃO fazer</div>
+  <div class="ev-item"><span>❌</span><div><strong>Não trate como ação de dividendo estável</strong> — yield 3,8% varia muito; em anos ruins cai para 0,5%.</div></div>
+  <div class="ev-item"><span>❌</span><div><strong>Não ignore o risco do controlador</strong> — 25 países com família controladora e histórico de corrupção = risco estrutural.</div></div>
+  <div class="ev-item"><span>❌</span><div><strong>Não concentre mais de 5–8% da carteira</strong> — risco de cauda pode derrubar 30–50% em um dia.</div></div>
+</div>
+</div>
+
+<!-- ── DRE ── -->
+<div class="tab-p" id="bal-dre">
+<div class="verd vg"><div class="v-row"><span class="v-em">📋</span><div>
+  <div class="v-tit">A receita cresceu 14,6% e o EBITDA explodiu +128%</div>
+  <div class="v-txt">2024 foi o melhor ano da JBS desde 2021. Seara e Pilgrim's puxaram o resultado. <strong>Beef NA ainda arrasta — mas ciclo do boi EUA melhora em 2026.</strong></div>
+</div></div></div>
+<div class="card" style="overflow:hidden;margin-bottom:10px">
+<table class="dre">
+  <thead><tr><th>Item</th><th>2024</th><th>2023</th><th>Variação</th></tr></thead>
+  <tbody>
+    <tr class="dt"><td>Receita Bruta</td><td class="dp">R$417B</td><td>R$364B</td><td class="dp">+14,6%</td></tr>
+    <tr class="ds"><td>(-) Impostos e devoluções</td><td class="dn">(R$42B)</td><td>(R$37B)</td><td></td></tr>
+    <tr class="dt"><td>Receita Líquida</td><td>R$375B</td><td>R$327B</td><td class="dp">+14,6%</td></tr>
+    <tr class="ds"><td>(-) CPV — abate e processamento</td><td class="dn">(R$301B)</td><td>(R$275B)</td><td></td></tr>
+    <tr class="de"><td>EBITDA</td><td class="dp">R$39B</td><td>R$17B</td><td class="dp">+128%</td></tr>
+    <tr class="ds"><td>(-) Depreciação</td><td class="dn">(R$14B)</td><td>(R$12B)</td><td></td></tr>
+    <tr class="ds"><td>(-) Despesas financeiras</td><td class="dn">(R$9B)</td><td>(R$11B)</td><td></td></tr>
+    <tr class="ds"><td style="color:var(--yl)">(-) Provisão controladores (2017)</td><td class="dn" style="color:var(--yl)">(R$1,8B)</td><td>(R$0B)</td><td class="dn">Retorno risco</td></tr>
+    <tr class="dr"><td>Lucro Líquido</td><td>R$14,2B</td><td>R$-5,3B</td><td class="dp">Virada</td></tr>
+  </tbody>
+</table>
+</div>
+<div class="call ca-b"><strong>Por que o lucro voltou:</strong> Seara bateu recorde de margem (18,1%), Pilgrim's Pride bateu recorde histórico, ciclo do boi Austrália favorável. Beef NA ainda tem margem de apenas 3,2% — quando ciclo boi EUA virar em 2026, EBITDA tem potencial de mais R$8–12B/ano adicional.</div>
+</div>
+
+<!-- ── CICLO ── -->
+<div class="tab-p" id="bal-ciclo">
+<div class="verd vy"><div class="v-row"><span class="v-em">🔄</span><div>
+  <div class="v-tit">Ciclo de caixa controlado — dívida 2,3× EBITDA, dentro do limite dos covenants</div>
+  <div class="v-txt">Para empresa de R$417B de receita o ciclo é saudável. <strong>Principal cuidado: Beef NA com margem 3,2% — se ciclo do boi EUA piorar mais, covenant de 3,5× EBITDA fica sob pressão.</strong></div>
+</div></div></div>
+<div class="card" style="padding:12px 14px;margin-bottom:10px">
+  <div class="blk-t" style="margin-top:0">Ciclo financeiro consolidado</div>
+  <div class="ciclo-row"><div class="ciclo-lbl">PMR (receber)</div><div class="ciclo-t"><div class="ciclo-f" style="width:55%;background:var(--gn)"><span>28 dias</span></div></div><div class="ciclo-v" style="color:var(--gn)">28d</div></div>
+  <div class="ciclo-row"><div class="ciclo-lbl">PMP (pagar)</div><div class="ciclo-t"><div class="ciclo-f" style="width:72%;background:var(--yl)"><span>38 dias</span></div></div><div class="ciclo-v" style="color:var(--yl)">38d</div></div>
+  <div class="ciclo-row"><div class="ciclo-lbl">Estoque</div><div class="ciclo-t"><div class="ciclo-f" style="width:40%;background:var(--bl)"><span>18 dias</span></div></div><div class="ciclo-v" style="color:var(--bl)">18d</div></div>
+  <div class="ciclo-row"><div class="ciclo-lbl">NCG</div><div class="ciclo-t"><div class="ciclo-f" style="width:30%;background:var(--gn)"><span>R$8B</span></div></div><div class="ciclo-v" style="color:var(--gn)">R$8B</div></div>
+  <div class="ciclo-row"><div class="ciclo-lbl">Cobertura de juros</div><div class="ciclo-t"><div class="ciclo-f" style="width:80%;background:var(--gn)"><span>4,3× EBITDA</span></div></div><div class="ciclo-v" style="color:var(--gn)">4,3×</div></div>
+</div>
+<div class="call ca-g"><strong>Ponto positivo:</strong> JBS recebe em 28 dias mas paga fornecedores em 38 — ciclo favorável. Alavancagem caiu de 3,1× (2023) para 2,3× (2024). Buyback de US$400M aprovado sinaliza confiança da gestão no caixa.</div>
+</div>
+
+<!-- ── REGIME TRIBUTÁRIO ── -->
+<div class="tab-p" id="bal-fis">
+<div class="verd vg"><div class="v-row"><span class="v-em">📑</span><div>
+  <div class="v-tit">JBS é Lucro Real — correto para seu porte. Atenção à Reforma Tributária LC 214/2025</div>
+  <div class="v-txt">Para empresas com R$417B de receita, <strong>Lucro Real é obrigatório.</strong> O impacto da LC 214/2025 (IBS/CBS) para frigoríficos e exportadores de proteína está sendo calculado — estimativa de impacto de 0,3–0,8pp na margem efetiva até 2033.</div>
+</div></div></div>
+<div class="reg-g">
+  <div class="reg"><div class="reg-nm">Simples Nacional</div><div style="font-size:.65rem;color:var(--t2);margin-bottom:3px">Fora do escopo</div><div class="reg-vl" style="color:var(--t2)">N/A</div><div class="reg-de">Limite R$4,8M/ano — não se aplica</div></div>
+  <div class="reg"><div class="reg-nm">Lucro Presumido</div><div style="font-size:.65rem;color:var(--t2);margin-bottom:3px">Fora do escopo</div><div class="reg-vl" style="color:var(--t2)">N/A</div><div class="reg-de">Limite R$78M/ano — não se aplica</div></div>
+  <div class="reg best"><div class="reg-ba">Regime atual correto</div><div class="reg-nm">Lucro Real</div><div style="font-size:.65rem;color:var(--t1);margin-bottom:3px">Obrigatório para S/A</div><div class="reg-vl" style="color:var(--gn)">R$9,8B/ano</div><div class="reg-de">Alíquota efetiva 2,35% sobre receita bruta</div><div class="reg-sv">Otimizado — dedução de prejuízo acumulado</div></div>
+</div>
+<div class="call ca-b"><strong>LC 214/2025 (IBS/CBS):</strong> transição começa 2026. Para exportadores de carne (CNAE 1013-9), o impacto estimado é de +0,3 a +0,8pp na carga efetiva sobre receita interna até 2033. JBS deve beneficiar de crédito de IBS sobre insumos — análise detalhada disponível no módulo COMPLIANCE fiscal.</div>
+</div>
+
+<!-- ── VALUATION ── -->
+<div class="tab-p" id="bal-val">
+<div class="verd vy"><div class="v-row"><span class="v-em">💰</span><div>
+  <div class="v-tit">Ação vale entre R$36 (piso) e R$73 (teto) — desconto é de governança</div>
+  <div class="v-txt">Preço atual: ~R$43. Valor médio ponderado RADAR: <strong>R$52.</strong> PEG de 0,5 é o mais baixo do setor global. <strong>Se múltiplo ir a 12× (nível Tyson), ação vai a R$73 (+70%) sem crescimento operacional.</strong></div>
+</div></div></div>
+<div class="vm-g">
+  <div class="vm"><div class="vm-nm">Múltiplo EBITDA</div><div class="vm-vl">R$58</div><div class="vm-pc">Peso 40% · 7,5× EBITDA</div><div class="vm-bar"><div class="vm-bf" style="width:80%"></div></div></div>
+  <div class="vm"><div class="vm-nm">Transações M&A</div><div class="vm-vl">R$51</div><div class="vm-pc">Peso 25% · peers globais</div><div class="vm-bar"><div class="vm-bf" style="width:60%"></div></div></div>
+  <div class="vm"><div class="vm-nm">PL Ajustado</div><div class="vm-vl">R$36</div><div class="vm-pc">Peso 20% · BV por ação</div><div class="vm-bar"><div class="vm-bf" style="width:40%"></div></div></div>
+  <div class="vm"><div class="vm-nm">DCF</div><div class="vm-vl">R$63</div><div class="vm-pc">Peso 10% · WACC 11%</div><div class="vm-bar"><div class="vm-bf" style="width:20%"></div></div></div>
+  <div class="vm"><div class="vm-nm">Múltiplo Receita</div><div class="vm-vl">R$41</div><div class="vm-pc">Peso 5% · piso negoc.</div><div class="vm-bar"><div class="vm-bf" style="width:10%"></div></div></div>
+</div>
+<div class="val-r">
+  <div class="vr-row">
+    <div><div class="vr-lb">Piso</div><div class="vr-vl">R$36</div></div>
+    <div style="color:var(--t2);font-size:1.1rem">—</div>
+    <div style="flex:1"><div class="vr-lb" style="margin-bottom:3px">Valor médio ponderado RADAR</div><div class="vr-md">R$52 / ação</div></div>
+    <div><div class="vr-lb">Teto (múltiplo Tyson)</div><div class="vr-vl">R$73</div></div>
+  </div>
+  <div style="font-size:.72rem;color:var(--t1);margin-top:8px;line-height:1.65"><strong style="color:var(--w)">O que valoriza:</strong> PEG 0,5, maior produtor global, ecossistema circular único, NYSE listing.<br><strong style="color:var(--w)">O que desvaloriza:</strong> controlador histórico de corrupção, conselho não independente (-40% no múltiplo).<br><strong style="color:var(--gn)">Gatilho de valorização:</strong> 2 anos consecutivos sem escândalo + NYSE analistas cobrindo = múltiplo sobe.</div>
+</div>
+</div>
+
+<!-- ── ECOSSISTEMA ── -->
+<div class="tab-p" id="bal-eco">
+<div class="verd vg"><div class="v-row"><span class="v-em">🌐</span><div>
+  <div class="v-tit">Ecossistema de economia circular — o fosso que nenhum concorrente replica</div>
+  <div class="v-txt">A JBS não vende carne — ela monetiza <strong>100% do animal.</strong> Couro virou o maior curtume do mundo. Gordura virou biodiesel. Ossos viraram colágeno para farmacêuticas. Isso cria margens que uma empresa de carne pura jamais terá.</div>
+</div></div></div>
+
+<div class="eco-bar-wrap">
+  <div style="font-size:.68rem;font-weight:600;color:var(--t1);margin-bottom:8px">Composição da receita — R$417B (2024)</div>
+  <div class="eco-bar">
+    <div class="eco-seg" style="width:22%;background:#1F6FEB">Beef NA 22%</div>
+    <div class="eco-seg" style="width:18%;background:#238636">Seara 18%</div>
+    <div class="eco-seg" style="width:17%;background:#8957E5">PPC 17%</div>
+    <div class="eco-seg" style="width:13%;background:#F0883E">Pork USA 13%</div>
+    <div class="eco-seg" style="width:11%;background:#0277BD">Aus. 11%</div>
+    <div class="eco-seg" style="width:10%;background:#2EA043">JBS BR 10%</div>
+    <div class="eco-seg" style="width:9%;background:#484F58">Outros 9%</div>
+  </div>
+  <div class="eco-legend" style="margin-top:8px">
+    <div class="cl-item"><div class="cl-dot" style="background:#1F6FEB"></div>Beef North America</div>
+    <div class="cl-item"><div class="cl-dot" style="background:#238636"></div>Seara Brasil</div>
+    <div class="cl-item"><div class="cl-dot" style="background:#8957E5"></div>Pilgrim's Pride</div>
+    <div class="cl-item"><div class="cl-dot" style="background:#F0883E"></div>Pork USA</div>
+    <div class="cl-item"><div class="cl-dot" style="background:#0277BD"></div>JBS Australia</div>
+    <div class="cl-item"><div class="cl-dot" style="background:#2EA043"></div>JBS Brasil Boi</div>
+    <div class="cl-item"><div class="cl-dot" style="background:#484F58"></div>Couros, Colágeno, Biotech</div>
+  </div>
+</div>
+
+<div class="eco-layer-tit">Proteína animal — núcleo</div>
+<div class="eco-grid">
+  <div class="eco-card"><div class="eco-top"><div class="eco-nm">Seara</div><div class="eco-sub">Aves, suínos e processados. Maior marca de frios do Brasil.</div><div class="eco-flags"><span class="eco-flag ef-br">Brasil</span><span class="eco-flag eco-moat">Maior margem do grupo</span></div></div><div class="eco-mets"><div class="eco-m"><span class="eco-mv" style="color:var(--gn)">R$75B</span><span class="eco-ml">Receita 2024</span></div><div class="eco-m"><span class="eco-mv" style="color:var(--gn)">18,1%</span><span class="eco-ml">EBITDA margin</span><span class="eco-tr et-up">↑ Recorde</span></div><div class="eco-m"><span class="eco-mv" style="color:var(--bl)">18%</span><span class="eco-ml">% do grupo</span></div><div class="eco-m"><span class="eco-mv" style="color:var(--gn)">+22%</span><span class="eco-ml">Cresc. a.a.</span></div></div></div>
+  <div class="eco-card"><div class="eco-top"><div class="eco-nm">Pilgrim's Pride (PPC)</div><div class="eco-sub">Maior produtora de frango EUA. JBS controla 83%. Listada Nasdaq.</div><div class="eco-flags"><span class="eco-flag ef-us">EUA</span><span class="eco-flag ef-eu">Europa</span><span class="eco-flag eco-moat">Recorde histórico 2025</span></div></div><div class="eco-mets"><div class="eco-m"><span class="eco-mv" style="color:var(--gn)">US$22B</span><span class="eco-ml">Receita 2024</span></div><div class="eco-m"><span class="eco-mv" style="color:var(--gn)">12,4%</span><span class="eco-ml">EBITDA margin</span><span class="eco-tr et-up">↑ Recorde</span></div><div class="eco-m"><span class="eco-mv" style="color:var(--bl)">17%</span><span class="eco-ml">% do grupo</span></div><div class="eco-m"><span class="eco-mv" style="color:var(--gn)">+18%</span><span class="eco-ml">Cresc. a.a.</span></div></div></div>
+  <div class="eco-card"><div class="eco-top"><div class="eco-nm">Beef North America</div><div class="eco-sub">3ª maior indústria de boi dos EUA. Swift, 1855, Gold Kist.</div><div class="eco-flags"><span class="eco-flag ef-us">EUA</span><span class="eco-flag" style="background:rgba(234,179,8,.1);color:var(--yl)">Ciclo difícil</span></div></div><div class="eco-mets"><div class="eco-m"><span class="eco-mv" style="color:var(--yl)">US$19B</span><span class="eco-ml">Receita 2024</span></div><div class="eco-m"><span class="eco-mv" style="color:var(--rd)">3,2%</span><span class="eco-ml">EBITDA margin</span><span class="eco-tr et-dn">↓ Ciclo ruim</span></div><div class="eco-m"><span class="eco-mv" style="color:var(--bl)">22%</span><span class="eco-ml">% do grupo</span></div><div class="eco-m"><span class="eco-mv" style="color:var(--yl)">-5%</span><span class="eco-ml">Cresc. a.a.</span></div></div></div>
+  <div class="eco-card"><div class="eco-top"><div class="eco-nm">JBS Australia</div><div class="eco-sub">Boi, suíno (Rivalea) e salmão (Huon Aquaculture). AMH.</div><div class="eco-flags"><span class="eco-flag ef-au">Austrália</span><span class="eco-flag eco-moat">Ciclo favorável 2025</span></div></div><div class="eco-mets"><div class="eco-m"><span class="eco-mv" style="color:var(--gn)">A$6B</span><span class="eco-ml">Receita 2024</span></div><div class="eco-m"><span class="eco-mv" style="color:var(--gn)">12,7%</span><span class="eco-ml">EBITDA margin</span><span class="eco-tr et-up">↑ Favorável</span></div><div class="eco-m"><span class="eco-mv" style="color:var(--bl)">11%</span><span class="eco-ml">% do grupo</span></div><div class="eco-m"><span class="eco-mv" style="color:var(--gn)">+14%</span><span class="eco-ml">Cresc. a.a.</span></div></div></div>
+</div>
+
+<div class="eco-layer-tit">Economia circular — o fosso invisível</div>
+<div class="eco-grid" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr))">
+  <div class="eco-card"><div class="eco-top"><div class="eco-nm" style="font-size:.75rem">JBS Couros</div><div class="eco-sub">Maior curtume do mundo. BMW, Mercedes, moda.</div><div class="eco-flags"><span class="eco-flag eco-moat">Insumo custo zero</span></div></div><div class="eco-mets"><div class="eco-m"><span class="eco-mv" style="color:var(--gn)">~R$8B</span><span class="eco-ml">Receita est.</span></div><div class="eco-m"><span class="eco-mv" style="color:var(--gn)">~25%</span><span class="eco-ml">Margem</span></div></div></div>
+  <div class="eco-card"><div class="eco-top"><div class="eco-nm" style="font-size:.75rem">JBS Colágeno</div><div class="eco-sub">Colágeno bovino para farma, cosmético e alimentos.</div><div class="eco-flags"><span class="eco-flag eco-moat">Resíduo → farma</span></div></div><div class="eco-mets"><div class="eco-m"><span class="eco-mv" style="color:var(--gn)">~R$3B</span><span class="eco-ml">Receita est.</span></div><div class="eco-m"><span class="eco-mv" style="color:var(--gn)">~30%</span><span class="eco-ml">Margem</span></div></div></div>
+  <div class="eco-card"><div class="eco-top"><div class="eco-nm" style="font-size:.75rem">Biodiesel + Biogás</div><div class="eco-sub">Sebo animal → biodiesel. Biogás das plantas industriais.</div><div class="eco-flags"><span class="eco-flag ef-br">Brasil</span><span class="eco-flag eco-moat">Reduz custo energético</span></div></div><div class="eco-mets"><div class="eco-m"><span class="eco-mv" style="color:var(--gn)">~R$2B</span><span class="eco-ml">Receita est.</span></div><div class="eco-m"><span class="eco-mv" style="color:var(--gn)">~20%</span><span class="eco-ml">Margem</span></div></div></div>
+  <div class="eco-card"><div class="eco-top"><div class="eco-nm" style="font-size:.75rem">Wild Fork D2C</div><div class="eco-sub">Varejo próprio de proteínas congeladas. EUA, CA, MX.</div><div class="eco-flags"><span class="eco-flag ef-us">EUA</span><span class="eco-flag eco-moat">Canal direto consumidor</span></div></div><div class="eco-mets"><div class="eco-m"><span class="eco-mv" style="color:var(--bl)">~US$400M</span><span class="eco-ml">Receita est.</span></div><div class="eco-m"><span class="eco-mv" style="color:var(--gn)">+60%</span><span class="eco-ml">Cresc. a.a.</span></div></div></div>
+</div>
+<div class="ins ins-b"><span class="ins-ic">💡</span><span class="ins-tit">O fosso competitivo em uma frase: </span>Uma empresa de carne pura tem margem de 2–4%. A JBS tem 9,4% porque <strong>monetiza resíduos que custam zero</strong> — couro, gordura e ossos já foram "pagos" no abate. <strong>Nenhum concorrente replica isso sem 70 anos de aquisições.</strong></div>
+</div>
+
+<!-- ── PESSOAS & M&A ── -->
+<div class="tab-p" id="bal-ppl">
+<div class="verd vy"><div class="v-row"><span class="v-em">👥</span><div>
+  <div class="v-tit">280 mil funcionários — maior empregadora do Brasil, desafio cultural nos EUA</div>
+  <div class="v-txt">Glassdoor EUA 3,1/5 com alta rotatividade nas operações que geram <strong>55% da receita.</strong> Funcionários insatisfeitos = mais processos OSHA, dificuldade de recrutar gestores, risco de paralisações. Isso não é detalhe de RH — é risco de execução.</div>
+</div></div></div>
+
+<div class="blk-t">Índices públicos de clima</div>
+<div class="ppl-g">
+  <div class="ppl-m"><span class="pm-v" style="color:var(--yl)">3,7/5</span><span class="pm-l">Glassdoor global</span><span class="pm-s">764 avaliações</span></div>
+  <div class="ppl-m"><span class="pm-v" style="color:var(--rd)">3,1/5</span><span class="pm-l">Glassdoor EUA</span><span class="pm-s">448 avaliações</span></div>
+  <div class="ppl-m"><span class="pm-v" style="color:var(--yl)">70%</span><span class="pm-l">Recomendam</span><span class="pm-s">Global</span></div>
+  <div class="ppl-m"><span class="pm-v" style="color:var(--rd)">Alto</span><span class="pm-l">Turnover EUA</span><span class="pm-s">Reviews</span></div>
+  <div class="ppl-m"><span class="pm-v" style="color:var(--rd)">Ausente</span><span class="pm-l">GPTW Brasil</span><span class="pm-s">Não participa</span></div>
+</div>
+
+<div class="blk-t">Liderança — quem decide na JBS</div>
+<div class="card" style="overflow:hidden;margin-bottom:10px">
+  <div class="person"><div class="p-av">GT</div><div style="flex:1"><div class="p-nm">Gilberto Tomazoni — Global CEO</div><div class="p-rl">CEO desde 2018 · Ex-presidente Sadia (27 anos) · profissional externo</div><div class="p-tn">Alta credibilidade com mercado. Reconduzido jun/2025.</div></div><div class="p-r"><div class="p-sc" style="color:var(--gn)">74/100</div><div class="p-lb">Score liderança</div><div class="pchg pc-stay">Reconduzido</div></div></div>
+  <div class="person"><div class="p-av">GC</div><div style="flex:1"><div class="p-nm">Guilherme Cavalcanti — Global CFO</div><div class="p-rl">CFO desde 2018 · disciplina financeira comprovada</div><div class="p-tn">Compra de ações em mai/2026 = sinal positivo.</div></div><div class="p-r"><div class="p-sc" style="color:var(--gn)">Estável</div><div class="p-lb">Continuidade</div><div class="pchg pc-stay">Reconduzido</div></div></div>
+  <div class="person"><div class="p-av" style="background:rgba(234,179,8,.12);color:var(--yl);border-color:rgba(234,179,8,.25)">WBF</div><div style="flex:1"><div class="p-nm">Wesley Batista Filho — CEO JBS USA</div><div class="p-rl">Filho do controlador · geração 2 · comanda 55% da receita</div><div class="p-tn">Risco nepotismo — habilidade não testada em ciclo difícil.</div></div><div class="p-r"><div class="p-sc" style="color:var(--yl)">Observar</div><div class="p-lb">Geração 2</div><div class="pchg pc-in">Promovido 2024</div></div></div>
+  <div class="person"><div class="p-av" style="background:rgba(239,68,68,.12);color:var(--rd);border-color:rgba(239,68,68,.22)">GX</div><div style="flex:1"><div class="p-nm">Gilberto Xandó — Ex-presidente JBS Brasil</div><div class="p-rl">Saiu fev/2025 → CEO Wild Fork North America</div><div class="p-tn">Presidência Brasil acumulada por Tomazoni. Vacância relevante.</div></div><div class="p-r"><div class="p-sc" style="color:var(--yl)">Monitorar</div><div class="p-lb">Vacância</div><div class="pchg pc-out">Saiu fev/2025</div></div></div>
+  <div style="padding:8px 13px;background:var(--s2);font-size:.7rem;color:var(--t1);border-top:.5px solid var(--b1)">⚠️ <strong style="color:var(--yl)">Alerta:</strong> Wesley e Joesley Batista foram eleitos ao conselho da JBS S.A. após NYSE listing — família explicitamente no board.</div>
+</div>
+
+<div class="blk-t">M&A — 50 aquisições em 18 anos</div>
+<div class="card" style="padding:12px 14px;overflow:hidden;margin-bottom:10px">
+  <div class="ma-item"><span class="ma-yr">2007</span><div class="ma-dot" style="background:var(--bl)"></div><div><div class="ma-tit">Swift Company — entrada nos EUA</div><div class="ma-desc">Faturamento 5× maior que a JBS na época. Virou JBS USA — ponto de entrada na maior economia do mundo.</div></div><span class="ma-val">US$1,5B</span></div>
+  <div class="ma-item"><span class="ma-yr">2009</span><div class="ma-dot" style="background:var(--bl)"></div><div><div class="ma-tit">Pilgrim's Pride (falência)</div><div class="ma-desc">Maior produtora de frango EUA — comprada em crise. Hoje é a unidade mais lucrativa do grupo.</div></div><span class="ma-val">US$2,8B</span></div>
+  <div class="ma-item"><span class="ma-yr">2013</span><div class="ma-dot" style="background:var(--gn)"></div><div><div class="ma-tit">🏆 Seara Alimentos — melhor aquisição da história</div><div class="ma-desc">Entrada em aves e suínos. Hoje: unidade de maior margem (18,1%) e maior crescimento (+22%). Preço pago foi barato para o que entregou.</div></div><span class="ma-val">R$5,9B</span></div>
+  <div class="ma-item"><span class="ma-yr">2021</span><div class="ma-dot" style="background:var(--or)"></div><div><div class="ma-tit">Huon Aquaculture — entrada em salmão</div><div class="ma-desc">Maior produtor de salmão da Austrália. Entrada em aquicultura — proteína de maior crescimento global.</div></div><span class="ma-val">A$425M</span></div>
+  <div class="ma-item"><span class="ma-yr">2022</span><div class="ma-dot" style="background:var(--pu)"></div><div><div class="ma-tit">Rigamonti + Kings — charcutaria italiana premium</div><div class="ma-desc">Denominação de origem. Alta margem (~18%). Portfólio premium para Europa e EUA.</div></div><span class="ma-val">N/D</span></div>
+</div>
+</div>
+
+<!-- ── MACRO & FUTURO ── -->
+<div class="tab-p" id="bal-mac">
+<div class="verd vg"><div class="v-row"><span class="v-em">🌍</span><div>
+  <div class="v-tit">Vento estrutural favorável — proteína global cresce por décadas</div>
+  <div class="v-txt">1,5B de pessoas da classe média asiática entrando no consumo de carne até 2050. JBS é o maior produtor — posição privilegiada. <strong>Riscos de curto prazo: ciclo boi EUA, tarifas Trump e impacto do Ozempic.</strong></div>
+</div></div></div>
+
+<div class="g2">
+  <div class="card" style="padding:12px 14px">
+    <div class="blk-t" style="margin-top:0">Macro — como o ambiente afeta a JBS</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="font-size:.73rem;color:var(--t1)"><span style="font-size:.85rem;margin-right:6px">💵</span><strong style="color:var(--w)">Dólar forte beneficia diretamente</strong> — 67% da receita em moeda estrangeira. Cada R$0,10 de alta gera ~R$500M de receita adicional.</div>
+      <div style="font-size:.73rem;color:var(--t1)"><span style="font-size:.85rem;margin-right:6px">🐄</span><strong style="color:var(--w)">Ciclo boi EUA em recuperação</strong> — rebanho no mínimo histórico. Melhora esperada 2026–2027. Upside de R$8–12B/ano no EBITDA.</div>
+      <div style="font-size:.73rem;color:var(--t1)"><span style="font-size:.85rem;margin-right:6px">🏛️</span><strong style="color:var(--w)">Tarifas Trump</strong> — risco de 3–7% da receita de exportação brasileira. Governo negociando exceções.</div>
+      <div style="font-size:.73rem;color:var(--t1)"><span style="font-size:.85rem;margin-right:6px">💊</span><strong style="color:var(--w)">GLP-1 (Ozempic)</strong> — 40M usuários EUA. Favorece frango e peixe. Pilgrim's e Huon beneficiados.</div>
+    </div>
+  </div>
+  <div class="card" style="padding:12px 14px">
+    <div class="blk-t" style="margin-top:0">Projeção 4 trimestres + cenários</div>
+    <div style="font-size:.72rem;color:var(--t1);margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:.5px solid var(--b1)"><span>Receita 2025E</span><div style="display:flex;gap:5px;align-items:center"><span style="font-family:var(--mo);color:var(--w)">R$450B</span><span style="background:rgba(34,197,94,.1);color:var(--gn);font-size:.58rem;padding:1px 5px;border-radius:2px">+8%</span></div></div>
+      <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:.5px solid var(--b1)"><span>EBITDA 2025E</span><div style="display:flex;gap:5px;align-items:center"><span style="font-family:var(--mo);color:var(--w)">R$44B</span><span style="background:rgba(34,197,94,.1);color:var(--gn);font-size:.58rem;padding:1px 5px;border-radius:2px">+13%</span></div></div>
+      <div style="display:flex;justify-content:space-between;padding:5px 0"><span>P/L projetado dez/2025</span><div style="display:flex;gap:5px;align-items:center"><span style="font-family:var(--mo);color:var(--w)">5,6×</span><span style="background:var(--yl-d);color:var(--yl);font-size:.58rem;padding:1px 5px;border-radius:2px">Muito barato</span></div></div>
+    </div>
+    <div class="cen ce-g"><strong style="color:var(--gn)">🟢 Otimista (45%) — R$62</strong><span style="font-size:.68rem;color:var(--t1)">Governança melhora via NYSE, ciclo boi recupera</span></div>
+    <div class="cen ce-y"><strong style="color:var(--yl)">🟡 Base (35%) — R$48</strong><span style="font-size:.68rem;color:var(--t1)">Crescimento moderado, governança estável</span></div>
+    <div class="cen ce-r"><strong style="color:var(--rd)">🔴 Negativo (20%) — R$28</strong><span style="font-size:.68rem;color:var(--t1)">Novo escândalo ou tarifas implementadas</span></div>
+  </div>
+</div>
+</div>
+
+<!-- ── GOVERNANÇA ── -->
+<div class="tab-p" id="bal-gov">
+<div class="verd vr"><div class="v-row"><span class="v-em">🏛️</span><div>
+  <div class="v-tit">Maior risco da JBS não é operacional — é quem a controla</div>
+  <div class="v-txt">NYSE listing cria supervisão americana. Mas <strong>os mesmos controladores que foram presos por corrupção em 2017</strong> continuam com 42% e agora estão explicitamente no conselho. O risco estrutural não desapareceu.</div>
+</div></div></div>
+
+<div class="gov-g">
+  <div class="gov-m"><span class="gv" style="color:var(--rd)">41/100</span><span class="gl">Score gov.</span><span class="gs">Estimativa RADAR</span></div>
+  <div class="gov-m"><span class="gv" style="color:var(--rd)">42%</span><span class="gl">Controle familiar</span><span class="gs">J&F Investimentos</span></div>
+  <div class="gov-m"><span class="gv" style="color:var(--yl)">58%</span><span class="gl">Free float</span><span class="gs">Mercado</span></div>
+  <div class="gov-m"><span class="gv" style="color:var(--gn)">100%</span><span class="gl">Tag along</span><span class="gs">Proteção minoritário</span></div>
+  <div class="gov-m"><span class="gv" style="color:var(--rd)">Não</span><span class="gl">Conselho indep.</span><span class="gs">Família no board</span></div>
+  <div class="gov-m"><span class="gv" style="color:var(--gn)">N1+NYSE</span><span class="gl">Nível gov.</span><span class="gs">Dupla listagem</span></div>
+</div>
+
+<div class="blk-t">Cada risco em linguagem direta — sem eufemismo</div>
+<div class="risk-it">
+  <div class="risk-hd" onclick="tog(this)"><span class="rh-icon">👨‍👩‍👦</span><div style="flex:1"><div class="rh-nm">Controle familiar de 42% — o que significa para você</div><div class="rh-ds">De cada 100 ações, os Batistas controlam 42 — suficiente para tomar qualquer decisão sem precisar de outros acionistas. Aprovam remuneração, aquisições bilionárias e elegem o conselho.</div></div><div class="rh-r"><div class="rh-sc" style="color:var(--rd)">Alto</div><div class="rh-lb">Nível de risco</div><div class="rh-tag rt-hi">Risco alto</div></div></div>
+  <div class="risk-bd"><div class="rb-row"><div class="rb-dot dr"></div><span><strong>Partes relacionadas:</strong> NYSE obriga divulgar negócios entre JBS e empresas dos Batistas (J&F, Banco Original, Eldorado) — mas não proíbe.</span></div><div class="rb-row"><div class="rb-dot dg"></div><span><strong>Tag along 100% protege em OPA:</strong> se os Batistas venderem o controle, você recebe o mesmo preço que eles.</span></div></div>
+</div>
+<div class="risk-it">
+  <div class="risk-hd" onclick="tog(this)"><span class="rh-icon">⚖️</span><div style="flex:1"><div class="rh-nm">Histórico de corrupção — os mesmos controladores ainda estão no comando</div><div class="rh-ds">Em 2017, os Batistas admitiram propinas a mais de 1.800 políticos. A JBS pagou R$10,3B de multa. Ações caíram 30% em um dia. Os mesmos controladores, com a mesma concentração de poder, continuam no topo.</div></div><div class="rh-r"><div class="rh-sc" style="color:var(--rd)">Crítico</div><div class="rh-lb">Risco de cauda</div><div class="rh-tag rt-cr">Risco crítico</div></div></div>
+  <div class="risk-bd"><div class="rb-row"><div class="rb-dot dr"></div><span><strong>25 países, 600 plantas:</strong> escala cria risco regulatório e compliance permanente em múltiplas jurisdições.</span></div><div class="rb-row"><div class="rb-dot dg"></div><span><strong>NYSE cria incentivo econômico para comportamento correto</strong> — mas não elimina a possibilidade de reincidência.</span></div><div class="rb-row"><div class="rb-dot dy"></div><span><strong>Como monitorar:</strong> configure alerta "JBS + SEC + investigation" ou "JBS + DOJ" — qualquer notícia é sinal de saída imediata.</span></div></div>
+</div>
+<div class="risk-it">
+  <div class="risk-hd" onclick="tog(this)"><span class="rh-icon">🆓</span><div style="flex:1"><div class="rh-nm">Tag along 100% e free float 58% — a proteção do minoritário</div><div class="rh-ds">Se alguém comprar o controle, você recebe o mesmo preço que os Batistas receberem. Proteção real em caso de OPA.</div></div><div class="rh-r"><div class="rh-sc" style="color:var(--gn)">Positivo</div><div class="rh-lb">Proteção</div><div class="rh-tag rt-lo">Ponto positivo</div></div></div>
+  <div class="risk-bd"><div class="rb-row"><div class="rb-dot dg"></div><span>Tag along 100% é uma das melhores proteções que um minoritário pode ter.</span></div><div class="rb-row"><div class="rb-dot dy"></div><span>Free float 58% com controle de 42% faz a ação ser mais volátil.</span></div></div>
+</div>
+
+<div class="blk-t">Comparativo com peers globais</div>
+<div class="card" style="overflow:hidden;margin-bottom:10px">
+  <div class="peers-wrap">
+  <table class="pt">
+    <thead><tr><th>Empresa</th><th>País</th><th>Receita</th><th>P/L</th><th>CAGR 5a</th><th>PEG</th><th>Avaliação</th></tr></thead>
+    <tbody>
+      <tr class="hl"><td style="color:var(--bl);font-weight:600">JBS N.V. (JBSS3)</td><td>BR/NL</td><td class="mono">US$86B</td><td class="mono">7×</td><td class="mono">14%</td><td class="mono">0,5</td><td><span class="ptag pt-cheap">Muito barato</span></td></tr>
+      <tr><td>Tyson Foods (TSN)</td><td>EUA</td><td class="mono">US$53B</td><td class="mono">12×</td><td class="mono">4%</td><td class="mono">3,0</td><td><span class="ptag pt-fair">Justo</span></td></tr>
+      <tr><td>Marfrig (MRFG3)</td><td>Brasil</td><td class="mono">R$95B</td><td class="mono">4×</td><td class="mono">8%</td><td class="mono">0,5</td><td><span class="ptag pt-cheap">Barato</span></td></tr>
+      <tr><td>Minerva (BEEF3)</td><td>Brasil</td><td class="mono">R$35B</td><td class="mono">8×</td><td class="mono">11%</td><td class="mono">0,7</td><td><span class="ptag pt-cheap">Barato</span></td></tr>
+      <tr><td>WH Group (0288.HK)</td><td>China</td><td class="mono">US$28B</td><td class="mono">9×</td><td class="mono">6%</td><td class="mono">1,5</td><td><span class="ptag pt-fair">Justo</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div style="padding:7px 12px;background:var(--s2);font-size:.7rem;color:var(--t1);border-top:.5px solid var(--b1)">💡 <strong style="color:var(--w)">Conclusão:</strong> JBS tem o PEG mais baixo do grupo (0,5). Se múltiplo for a 12× (nível Tyson), ação vai a R$73 (+70%). O desconto é 100% de governança.</div>
+</div>
+
+<div class="blk-t">Monitor de alertas</div>
+<div class="card" style="overflow:hidden;margin-bottom:10px">
+  <div class="al-item"><span>🔴</span><span class="al-txt">Nova investigação SEC, DOJ, CGU ou PF contra executivos ou controladores</span><span class="al-s" style="color:var(--rd)">CRÍTICO — sinal de saída</span></div>
+  <div class="al-item"><span>🔴</span><span class="al-txt">Saída simultânea de mais de 1 C-level em menos de 6 meses</span><span class="al-s" style="color:var(--rd)">CRÍTICO</span></div>
+  <div class="al-item"><span>🟡</span><span class="al-txt">Novo fato relevante CVM / 6-K SEC publicado</span><span class="al-s" style="color:var(--yl)">MONITORAR</span></div>
+  <div class="al-item"><span>🟡</span><span class="al-txt">CAGED mensal: queda no saldo por 3 meses consecutivos</span><span class="al-s" style="color:var(--yl)">MONITORAR</span></div>
+  <div class="al-item"><span>🟡</span><span class="al-txt">Tarifa Trump sobre proteína brasileira implementada</span><span class="al-s" style="color:var(--yl)">MONITORAR</span></div>
+  <div class="al-item"><span>🟢</span><span class="al-txt">CFO ou Tomazoni comprando ações acima de R$5M</span><span class="al-s" style="color:var(--gn)">POSITIVO</span></div>
+  <div class="al-item"><span>🟢</span><span class="al-txt">Analista americano iniciando cobertura com recomendação de compra</span><span class="al-s" style="color:var(--gn)">POSITIVO</span></div>
+</div>
+</div>
+
+<!-- ── SUGESTÕES ── -->
+<div class="tab-p" id="bal-sug">
+<div class="verd vp"><div class="v-row"><span class="v-em">💡</span><div>
+  <div class="v-tit">10 módulos para validação — roadmap do RADAR bolsa</div>
+  <div class="v-txt">Cada card representa uma frente do produto. As marcadas Urgente já existem como demo ou têm esforço mínimo. As de MRR geram receita recorrente sem esforço incremental por análise.</div>
+</div></div></div>
+
+<div class="sug-card">
+  <div class="sug-hd"><span class="sug-ic">🔄</span><span class="sug-tit">Análise de disrupção — já existe como demo separado</span><span class="sug-ba sb-urg">Urgente · integrar como 6ª aba</span></div>
+  <div class="sug-desc">Cobre plant-based (colapsou), carne cultivada, GLP-1, marketplace, Gen Z, BigTechs e IA. 4 camadas de ameaça com nível de risco, prazo e como a empresa responde. Matriz impacto × prazo. Velocidade de adaptação da JBS por frente.</div>
+  <div class="sug-items"><div class="sug-si">Nota de adaptação: 8,2 em plant-based (vendeu Planterra EUA, manteve Vivera Europa)</div><div class="sug-si">Nota canal digital: 4,1 — Wild Fork cresce mas ainda &lt;1% da receita</div></div>
+  <button class="sug-cta">Integrar ao RADAR como aba Disrupção →</button>
+</div>
+
+<div class="sug-card">
+  <div class="sug-hd"><span class="sug-ic">🤖</span><span class="sug-tit">IA lê fato relevante CVM e resume em 3 pontos em 30 segundos</span><span class="sug-ba sb-urg">Alta prioridade · diferenciador</span></div>
+  <div class="sug-desc">Fatos relevantes saem em PDF técnico de 20 páginas. A IA lê automaticamente, extrai os 3 pontos mais importantes e explica o impacto em linguagem simples — em menos de 30 segundos após publicação na CVM.</div>
+  <div class="sug-items"><div class="sug-si">O que mudou? Por que importa? O que você deve fazer?</div><div class="sug-si">Alerta WhatsApp/e-mail com resumo já processado — não o PDF bruto</div><div class="sug-si">Histórico de todos os fatos relevantes com impacto classificado</div></div>
+  <button class="sug-cta">Criar módulo de fatos relevantes com IA →</button>
+</div>
+
+<div class="sug-card">
+  <div class="sug-hd"><span class="sug-ic">📡</span><span class="sug-tit">Monitoramento de carteira — alerta automático para cada ticker</span><span class="sug-ba sb-mrr">Maior MRR recorrente · R$49–149/mês</span></div>
+  <div class="sug-desc">Carteira de até 20 ações monitoradas em background. O RADAR dispara alertas quando qualquer indicador relevante mudar: novo fato relevante, insider buying, CAGED, notícia negativa, variação de score.</div>
+  <div class="sug-items"><div class="sug-si">Alertas configuráveis por tipo: fato relevante, insider, resultado, notícia</div><div class="sug-si">R$49–149/mês — MRR recorrente sem esforço adicional por análise</div></div>
+  <button class="sug-cta">Detalhar módulo de monitoramento →</button>
+</div>
+
+<div class="sug-card">
+  <div class="sug-hd"><span class="sug-ic">🗺️</span><span class="sug-tit">Mapa geográfico interativo de operações por país</span><span class="sug-ba sb-alt">Alto valor — empresas globais</span></div>
+  <div class="sug-desc">Mapa D3.js com bolhas proporcionais à receita por país. Clicar no Brasil abre Seara + Friboi + regulação MAPA. EUA abre Swift + Pilgrim's + FDA/USDA. Heatmap de risco geopolítico por jurisdição.</div>
+  <button class="sug-cta">Criar mapa de operações globais →</button>
+</div>
+
+<div class="sug-card">
+  <div class="sug-hd"><span class="sug-ic">📅</span><span class="sug-tit">Timeline M&A interativa com ROI implícito de cada deal</span><span class="sug-ba sb-alt">Alto valor — educativo + decisório</span></div>
+  <div class="sug-desc">50+ aquisições com valor pago, receita atual da unidade, múltiplo implícito e qualidade de integração. Ver quais foram as 3 melhores e piores aquisições da história.</div>
+  <div class="sug-items"><div class="sug-si">ROI implícito: Seara por R$5,9B → receita atual R$75B → múltiplo de saída 12,7×</div><div class="sug-si">Filtro por setor (boi, frango, processados, biotech) e por região</div></div>
+  <button class="sug-cta">Criar timeline M&A interativa →</button>
+</div>
+
+<div class="sug-card">
+  <div class="sug-hd"><span class="sug-ic">🔮</span><span class="sug-tit">Simulador DCF editável com sliders — preço justo em tempo real</span><span class="sug-ba sb-alt">Plano Elite · diferenciação</span></div>
+  <div class="sug-desc">Sliders interativos: crescimento (5–25%), margem EBITDA (7–15%), WACC (9–14%). Preço justo atualiza em tempo real. Premissas pré-carregadas: otimista, base, pessimista. Educativo e poderoso.</div>
+  <button class="sug-cta">Criar simulador DCF interativo →</button>
+</div>
+
+<div class="sug-card">
+  <div class="sug-hd"><span class="sug-ic">🐄</span><span class="sug-tit">Painel do ciclo proteico — driver de curto prazo da JBS</span><span class="sug-ba sb-med">Diferenciador setorial</span></div>
+  <div class="sug-desc">Posição atual de cada ciclo (boi EUA no fundo, frango no pico, suíno normal), impacto histórico na margem de cada unidade e projeção de recuperação. Único produto que explica por que o resultado trimestral surpreende.</div>
+  <button class="sug-cta">Criar painel do ciclo proteico →</button>
+</div>
+
+<div class="sug-card">
+  <div class="sug-hd"><span class="sug-ic">🌱</span><span class="sug-tit">Score ESG automático — construído de fontes públicas obrigatórias</span><span class="sug-ba sb-med">Não depende de relatório da empresa</span></div>
+  <div class="sug-desc">E: IBAMA, INPE desmatamento, emissões. S: CAGED, processos TST, Glassdoor, acidentes de trabalho (OSHA). G: composição conselho, independência, remuneração. Nenhum dado vem do relatório de sustentabilidade que a empresa escolhe publicar.</div>
+  <button class="sug-cta">Criar score ESG automático →</button>
+</div>
+
+<div class="sug-card">
+  <div class="sug-hd"><span class="sug-ic">📊</span><span class="sug-tit">Matriz bolha intragrupo — qual unidade puxa e qual arrasta</span><span class="sug-ba sb-med">Visual e imediato</span></div>
+  <div class="sug-desc">Crescimento × margem × receita para cada unidade de negócio. Seara (18,1% EBITDA) e Pilgrim's (recorde) vs Beef NA (3,2%). Evolução histórica e projeção por unidade para 2026.</div>
+  <button class="sug-cta">Criar matriz bolha intragrupo →</button>
+</div>
+
+<div class="sug-card">
+  <div class="sug-hd"><span class="sug-ic">📈</span><span class="sug-tit">FIIs — análise de 300+ fundos imobiliários</span><span class="sug-ba sb-med">Reutiliza infraestrutura CVM</span></div>
+  <div class="sug-desc">Mesma infraestrutura CVM reaproveitada para análise comparativa de FIIs. Base de investidores crescente no Brasil. Dividend yield, P/VPA, vacância, gestora. Custo de desenvolvimento baixo.</div>
+  <button class="sug-cta">Avaliar viabilidade de módulo FIIs →</button>
+</div>
+
+</div><!-- /sug -->
+
+</div><!-- /wrap bal -->
+</div><!-- /mod-bal -->
+
+</div><!-- /pg-an -->
+
+<script>
+checkMob();
+// Set initial display for subnav
+document.getElementById('sn-bal').style.display='none';
+</script>
+</body>
+</html>

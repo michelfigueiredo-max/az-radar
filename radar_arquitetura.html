@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>RADAR — Arquitetura & Mapa de Versões</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07090D;--s1:#0D1117;--s2:#131920;--s3:#1A2230;
+  --b1:#1E2A3A;--b2:#243446;
+  --or:#F97316;--or-d:rgba(249,115,22,.08);--or-b:rgba(249,115,22,.2);
+  --gn:#22C55E;--gn-d:rgba(34,197,94,.08);--gn-b:rgba(34,197,94,.2);
+  --bl:#3B82F6;--bl-d:rgba(59,130,246,.09);--bl-b:rgba(59,130,246,.2);
+  --rd:#EF4444;--rd-d:rgba(239,68,68,.08);--rd-b:rgba(239,68,68,.2);
+  --yl:#EAB308;--yl-d:rgba(234,179,8,.08);--yl-b:rgba(234,179,8,.2);
+  --pu:#A855F7;--pu-d:rgba(168,85,247,.08);--pu-b:rgba(168,85,247,.2);
+  --tl:#14B8A6;
+  --w:#F1F5F9;--t1:#94A3B8;--t2:#475569;
+  --ds:'Syne',sans-serif;--bd:'DM Sans',sans-serif;--mo:'JetBrains Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:var(--bd);color:var(--w);font-size:13px;line-height:1.5;}
+.page{max-width:1100px;margin:0 auto;padding:32px 20px 80px;}
+/* NAV TABS */
+.tabs{display:flex;gap:4px;margin-bottom:28px;background:var(--s1);padding:4px;border-radius:10px;border:1px solid var(--b1);}
+.tab{flex:1;padding:10px;text-align:center;border-radius:7px;cursor:pointer;font-size:.72rem;font-weight:600;color:var(--t1);transition:all .15s;}
+.tab.act{background:var(--s3);color:var(--w);}
+.tab:hover:not(.act){color:var(--w);}
+.view{display:none;}.view.act{display:block;}
+/* SECTION */
+.sec-title{font-family:var(--ds);font-size:1.4rem;font-weight:800;color:var(--w);margin-bottom:6px;}
+.sec-sub{font-size:.8rem;color:var(--t1);margin-bottom:28px;line-height:1.6;}
+.blk-lbl{font-size:.59rem;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--t2);margin:24px 0 10px;display:flex;align-items:center;gap:8px;}
+.blk-lbl::after{content:'';flex:1;height:.5px;background:var(--b1);}
+/* ARCHITECTURE LAYERS */
+.arch{display:flex;flex-direction:column;gap:6px;margin-bottom:28px;}
+.layer{border-radius:10px;overflow:hidden;border:1px solid;}
+.layer-hd{display:flex;align-items:center;gap:12px;padding:12px 16px;}
+.layer-num{font-family:var(--mo);font-size:.72rem;font-weight:700;width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.layer-nm{font-size:.85rem;font-weight:700;}
+.layer-comp{font-size:.72rem;color:var(--t1);margin-left:auto;}
+.layer-bd{padding:10px 16px 12px;font-size:.74rem;color:var(--t1);line-height:1.65;border-top:1px solid;}
+.layer-bd strong{color:var(--w);}
+.l1{background:rgba(59,130,246,.06);border-color:rgba(59,130,246,.2);}
+.l1 .layer-hd{background:rgba(59,130,246,.07);}
+.l1 .layer-num{background:rgba(59,130,246,.15);color:var(--bl);}
+.l1 .layer-nm{color:var(--bl);}
+.l1 .layer-bd{border-color:rgba(59,130,246,.12);}
+.l2{background:rgba(249,115,22,.05);border-color:rgba(249,115,22,.2);}
+.l2 .layer-hd{background:rgba(249,115,22,.07);}
+.l2 .layer-num{background:rgba(249,115,22,.15);color:var(--or);}
+.l2 .layer-nm{color:var(--or);}
+.l2 .layer-bd{border-color:rgba(249,115,22,.12);}
+.l3{background:rgba(234,179,8,.05);border-color:rgba(234,179,8,.2);}
+.l3 .layer-hd{background:rgba(234,179,8,.07);}
+.l3 .layer-num{background:rgba(234,179,8,.15);color:var(--yl);}
+.l3 .layer-nm{color:var(--yl);}
+.l3 .layer-bd{border-color:rgba(234,179,8,.12);}
+.l4{background:rgba(34,197,94,.05);border-color:rgba(34,197,94,.2);}
+.l4 .layer-hd{background:rgba(34,197,94,.07);}
+.l4 .layer-num{background:rgba(34,197,94,.15);color:var(--gn);}
+.l4 .layer-nm{color:var(--gn);}
+.l4 .layer-bd{border-color:rgba(34,197,94,.12);}
+.l5{background:rgba(168,85,247,.05);border-color:rgba(168,85,247,.2);}
+.l5 .layer-hd{background:rgba(168,85,247,.07);}
+.l5 .layer-num{background:rgba(168,85,247,.15);color:var(--pu);}
+.l5 .layer-nm{color:var(--pu);}
+.l5 .layer-bd{border-color:rgba(168,85,247,.12);}
+.l6{background:rgba(20,184,166,.05);border-color:rgba(20,184,166,.2);}
+.l6 .layer-hd{background:rgba(20,184,166,.07);}
+.l6 .layer-num{background:rgba(20,184,166,.15);color:var(--tl);}
+.l6 .layer-nm{color:var(--tl);}
+.l6 .layer-bd{border-color:rgba(20,184,166,.12);}
+/* ARROW */
+.arrow{text-align:center;font-size:.9rem;color:var(--t2);margin:2px 0;}
+/* FLOW */
+.flow{display:flex;flex-direction:column;gap:4px;margin-bottom:24px;}
+.flow-step{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:var(--s1);border:1px solid var(--b1);border-radius:8px;}
+.fs-num{font-family:var(--mo);font-size:.68rem;font-weight:700;width:22px;height:22px;border-radius:5px;background:var(--s3);color:var(--t1);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.fs-act{font-size:.75rem;font-weight:600;color:var(--w);flex:1;}
+.fs-resp{font-size:.67rem;color:var(--bl);white-space:nowrap;flex-shrink:0;}
+.fs-out{font-size:.68rem;color:var(--t1);margin-top:2px;}
+/* VERSION MAP */
+.vm-legend{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
+.vm-li{display:flex;align-items:center;gap:6px;font-size:.72rem;color:var(--t1);}
+.vm-dot{width:10px;height:10px;border-radius:3px;}
+.vm-grid{display:grid;gap:10px;margin-bottom:24px;}
+.vm-mod{background:var(--s1);border:1px solid var(--b1);border-radius:10px;overflow:hidden;}
+.vm-mod-hd{padding:10px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--b1);}
+.vm-mod-ic{font-size:1rem;}
+.vm-mod-nm{font-size:.82rem;font-weight:700;color:var(--w);}
+.vm-items{padding:10px 14px;display:flex;flex-direction:column;gap:5px;}
+.vm-item{display:flex;align-items:center;gap:8px;font-size:.72rem;}
+.vm-badge{padding:2px 8px;border-radius:4px;font-size:.6rem;font-weight:700;flex-shrink:0;min-width:28px;text-align:center;}
+.v1b{background:var(--gn-d);color:var(--gn);border:1px solid var(--gn-b);}
+.v2b{background:var(--bl-d);color:var(--bl);border:1px solid var(--bl-b);}
+.v3b{background:var(--pu-d);color:var(--pu);border:1px solid var(--pu-b);}
+.vm-feat{color:var(--t1);flex:1;}
+.vm-cost{font-family:var(--mo);font-size:.63rem;color:var(--t2);white-space:nowrap;}
+/* CONTRACT */
+.code-block{background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:14px 16px;font-family:var(--mo);font-size:.72rem;color:var(--bl);line-height:1.8;margin-bottom:16px;overflow-x:auto;}
+.code-block .cm{color:var(--t2);}
+.code-block .kw{color:var(--pu);}
+.code-block .ty{color:var(--tl);}
+.code-block .st{color:var(--or);}
+/* TTL TABLE */
+.ttl-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:7px;margin-bottom:20px;}
+.ttl-c{background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px;}
+.ttl-v{font-family:var(--mo);font-size:.85rem;font-weight:700;min-width:52px;flex-shrink:0;}
+.ttl-nm{font-size:.72rem;color:var(--t1);}
+.ttl-src{font-size:.6rem;color:var(--t2);margin-top:1px;}
+/* MODULES OVERVIEW */
+.mods-g{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:24px;}
+@media(max-width:640px){.mods-g{grid-template-columns:1fr;}}
+.mod-c{border-radius:10px;padding:16px;border:1px solid;}
+.mod-espelho{background:rgba(34,197,94,.05);border-color:rgba(34,197,94,.22);}
+.mod-radar{background:rgba(249,115,22,.05);border-color:rgba(249,115,22,.22);}
+.mod-compliance{background:rgba(234,179,8,.05);border-color:rgba(234,179,8,.22);}
+.mod-monitor{background:rgba(239,68,68,.05);border-color:rgba(239,68,68,.22);}
+.mod-nm{font-family:var(--ds);font-size:1rem;font-weight:800;margin-bottom:4px;}
+.mod-tag{font-size:.6rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;opacity:.8;margin-bottom:8px;}
+.mod-desc{font-size:.73rem;color:var(--t1);line-height:1.6;margin-bottom:10px;}
+.mod-items{display:flex;flex-direction:column;gap:3px;}
+.mod-item{font-size:.69rem;color:var(--t1);display:flex;gap:6px;}
+.mod-item::before{content:'→';opacity:.5;flex-shrink:0;}
+/* header */
+header{background:rgba(7,9,13,.97);border-bottom:1px solid var(--b1);padding:14px 20px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;}
+.hlogo{font-family:var(--ds);font-size:.92rem;font-weight:800;letter-spacing:2px;}
+.hlogo span{color:var(--or);}
+.htag{font-size:.67rem;color:var(--t2);}
+</style>
+</head>
+<body>
+<header>
+  <div class="hlogo"><span>R</span>ADAR</div>
+  <div class="htag">Arquitetura Técnica & Mapa de Versões · Product Specification Document v1.0</div>
+</header>
+
+<div class="page">
+
+<div class="tabs">
+  <div class="tab act" onclick="setView('v-overview')">📦 Visão Geral</div>
+  <div class="tab" onclick="setView('v-arch')">🏗️ Arquitetura</div>
+  <div class="tab" onclick="setView('v-flow')">🔄 Fluxos</div>
+  <div class="tab" onclick="setView('v-versions')">📋 Mapa de Versões</div>
+  <div class="tab" onclick="setView('v-roadmap')">🗺️ Roadmap</div>
+</div>
+
+<!-- ═══ OVERVIEW ═══ -->
+<div id="v-overview" class="view act">
+  <div class="sec-title">RADAR — Inteligência Empresarial Brasileira</div>
+  <div class="sec-sub">Plataforma de diagnóstico empresarial com 4 módulos, 17+ fontes V1 e motor de score com 10 camadas. Entrega veredicto e ação — não dado bruto.</div>
+
+  <div class="blk-lbl">Os 4 Módulos do Produto</div>
+  <div class="mods-g">
+    <div class="mod-c mod-espelho">
+      <div class="mod-nm" style="color:var(--gn)">ESPELHO</div>
+      <div class="mod-tag" style="color:var(--gn)">Conheça sua empresa</div>
+      <div class="mod-desc">PME analisa o próprio balanço, DRE, benchmark setorial. Simula como o banco vê a empresa — aponta o que melhorar antes de protocolar crédito.</div>
+      <div class="mod-items">
+        <div class="mod-item">Diagnóstico 6 indicadores com régua</div>
+        <div class="mod-item">Ciclo de caixa com impacto em R$</div>
+        <div class="mod-item">Comparativo de regimes tributários</div>
+        <div class="mod-item">Valuation 5 métodos + piso/teto</div>
+      </div>
+    </div>
+    <div class="mod-c mod-radar">
+      <div class="mod-nm" style="color:var(--or)">RADAR</div>
+      <div class="mod-tag" style="color:var(--or)">Conheça seu cliente/fornecedor</div>
+      <div class="mod-desc">Análise completa de CNPJ terceiro. Score com 10 camadas incluindo bloco criminal. Veredicto em linguagem direta com ação concreta.</div>
+      <div class="mod-items">
+        <div class="mod-item">26+ verificações por CNPJ</div>
+        <div class="mod-item">Bloco criminal (BNMP + SINIC + SEEU)</div>
+        <div class="mod-item">Grupo econômico e padrões de fraude</div>
+        <div class="mod-item">Alertas cruzados CNPJ × balanço</div>
+      </div>
+    </div>
+    <div class="mod-c mod-compliance">
+      <div class="mod-nm" style="color:var(--yl)">COMPLIANCE</div>
+      <div class="mod-tag" style="color:var(--yl)">Proteção legal documentada</div>
+      <div class="mod-desc">Due diligence rastreável com validade jurídica para Lei Anticorrupção 12.846/2013. PEP, OFAC, certidões estaduais.</div>
+      <div class="mod-items">
+        <div class="mod-item">Dossiê com validade jurídica R$200–500</div>
+        <div class="mod-item">PEP + OFAC + Interpol</div>
+        <div class="mod-item">Certidão PC estadual por sócio</div>
+        <div class="mod-item">ESG rating automático (V2)</div>
+      </div>
+    </div>
+    <div class="mod-c mod-monitor">
+      <div class="mod-nm" style="color:var(--rd)">MONITOR</div>
+      <div class="mod-tag" style="color:var(--rd)">Vigilância contínua</div>
+      <div class="mod-desc">Alertas automáticos de mudança de risco na carteira de CNPJs e tickers. Função transversal a todos os módulos.</div>
+      <div class="mod-items">
+        <div class="mod-item">Monitoramento de CNPJs (Plus: 5 · Pro: ilimitado)</div>
+        <div class="mod-item">Carteira de tickers bolsa R$49–149/mês (V2)</div>
+        <div class="mod-item">IA fatos relevantes CVM em tempo real (V2)</div>
+        <div class="mod-item">Alerta WhatsApp/e-mail por evento</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="blk-lbl">Telas do Protótipo</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:7px;margin-bottom:24px">
+    <div style="background:var(--or-d);border:1px solid var(--or-b);border-radius:8px;padding:10px 12px"><div style="font-size:.72rem;font-weight:700;color:var(--or);margin-bottom:4px">🏠 Home</div><div style="font-size:.67rem;color:var(--t1)">Split-screen dual entry: busca CNPJ + upload/ticker</div></div>
+    <div style="background:var(--or-d);border:1px solid var(--or-b);border-radius:8px;padding:10px 12px"><div style="font-size:.72rem;font-weight:700;color:var(--or);margin-bottom:4px">🛡️ Verificações</div><div style="font-size:.67rem;color:var(--t1)">26+ verificações com expansão. Score + veredicto.</div></div>
+    <div style="background:var(--pu-d);border:1px solid var(--pu-b);border-radius:8px;padding:10px 12px"><div style="font-size:.72rem;font-weight:700;color:var(--pu);margin-bottom:4px">⚖️ Criminal</div><div style="font-size:.67rem;color:var(--t1)">Split empresa/sócios. BNMP, SINIC, SEEU, MPs.</div></div>
+    <div style="background:var(--bl-d);border:1px solid var(--bl-b);border-radius:8px;padding:10px 12px"><div style="font-size:.72rem;font-weight:700;color:var(--bl);margin-bottom:4px">👤 Sócios</div><div style="font-size:.67rem;color:var(--t1)">CPF por sócio. Phoenix, PGFN CPF.</div></div>
+    <div style="background:var(--yl-d);border:1px solid var(--yl-b);border-radius:8px;padding:10px 12px"><div style="font-size:.72rem;font-weight:700;color:var(--yl);margin-bottom:4px">🕸️ Grupo Econômico</div><div style="font-size:.67rem;color:var(--t1)">Cards por empresa vinculada com score.</div></div>
+    <div style="background:var(--rd-d);border:1px solid var(--rd-b);border-radius:8px;padding:10px 12px"><div style="font-size:.72rem;font-weight:700;color:var(--rd);margin-bottom:4px">🔄 Alertas Cruzados</div><div style="font-size:.67rem;color:var(--t1)">CNPJ × balanço do usuário. Ação em R$.</div></div>
+    <div style="background:var(--gn-d);border:1px solid var(--gn-b);border-radius:8px;padding:10px 12px"><div style="font-size:.72rem;font-weight:700;color:var(--gn);margin-bottom:4px">📊 Diagnóstico</div><div style="font-size:.67rem;color:var(--t1)">6 indicadores + régua + CEO table.</div></div>
+    <div style="background:var(--gn-d);border:1px solid var(--gn-b);border-radius:8px;padding:10px 12px"><div style="font-size:.72rem;font-weight:700;color:var(--gn);margin-bottom:4px">📋 DRE</div><div style="font-size:.67rem;color:var(--t1)">Tabela comparativa. Callout de impacto.</div></div>
+    <div style="background:var(--gn-d);border:1px solid var(--gn-b);border-radius:8px;padding:10px 12px"><div style="font-size:.72rem;font-weight:700;color:var(--gn);margin-bottom:4px">🔄 Ciclo de Caixa</div><div style="font-size:.67rem;color:var(--t1)">PMR/PMP/NCG com solução em R$/ano.</div></div>
+    <div style="background:var(--gn-d);border:1px solid var(--gn-b);border-radius:8px;padding:10px 12px"><div style="font-size:.72rem;font-weight:700;color:var(--gn);margin-bottom:4px">📑 Regime Tributário</div><div style="font-size:.67rem;color:var(--t1)">3 cards + LC 214/2025 impacto.</div></div>
+    <div style="background:var(--gn-d);border:1px solid var(--gn-b);border-radius:8px;padding:10px 12px"><div style="font-size:.72rem;font-weight:700;color:var(--gn);margin-bottom:4px">💰 Valuation</div><div style="font-size:.67rem;color:var(--t1)">5 métodos + piso/mediana/teto.</div></div>
+    <div style="background:var(--gn-d);border:1px solid var(--gn-b);border-radius:8px;padding:10px 12px"><div style="font-size:.72rem;font-weight:700;color:var(--gn);margin-bottom:4px">🌐 Ecossistema</div><div style="font-size:.67rem;color:var(--t1)">Barra segmentada + cards por unidade.</div></div>
+    <div style="background:var(--bl-d);border:1px solid var(--bl-b);border-radius:8px;padding:10px 12px"><div style="font-size:.72rem;font-weight:700;color:var(--bl);margin-bottom:4px">👥 Pessoas & M&A</div><div style="font-size:.67rem;color:var(--t1)">Glassdoor + executivos + timeline M&A.</div></div>
+    <div style="background:var(--bl-d);border:1px solid var(--bl-b);border-radius:8px;padding:10px 12px"><div style="font-size:.72rem;font-weight:700;color:var(--bl);margin-bottom:4px">🌍 Macro & Futuro</div><div style="font-size:.67rem;color:var(--t1)">Fatores quantificados + 3 cenários.</div></div>
+    <div style="background:var(--bl-d);border:1px solid var(--bl-b);border-radius:8px;padding:10px 12px"><div style="font-size:.72rem;font-weight:700;color:var(--bl);margin-bottom:4px">🏛️ Governança</div><div style="font-size:.67rem;color:var(--t1)">Score + risks sem eufemismo + peers.</div></div>
+    <div style="background:var(--pu-d);border:1px solid var(--pu-b);border-radius:8px;padding:10px 12px"><div style="font-size:.72rem;font-weight:700;color:var(--pu);margin-bottom:4px">💡 Sugestões</div><div style="font-size:.67rem;color:var(--t1)">10 módulos do roadmap com CTA.</div></div>
+  </div>
+</div>
+
+<!-- ═══ ARCHITECTURE ═══ -->
+<div id="v-arch" class="view">
+  <div class="sec-title">Arquitetura Técnica</div>
+  <div class="sec-sub">6 camadas desacopladas. Adapters plug-and-play. Cache Redis por fonte. Audit log LGPD com hash SHA-256.</div>
+
+  <div class="blk-lbl">Camadas do Sistema</div>
+  <div class="arch">
+    <div class="layer l1">
+      <div class="layer-hd"><div class="layer-num">1</div><div><div class="layer-nm">Clientes</div><div style="font-size:.67rem;color:var(--t1)">Consumidores da API</div></div><div class="layer-comp">Web/App · ERP · API parceiro · White-label</div></div>
+      <div class="layer-bd">Autenticam via <strong>JWT/OAuth2</strong>. Rate limiting por client_id. Payload: { cnpj, plano, campos_solicitados }.</div>
+    </div>
+    <div class="arrow">↓</div>
+    <div class="layer l2">
+      <div class="layer-hd"><div class="layer-num">2</div><div><div class="layer-nm">API Gateway</div><div style="font-size:.67rem;color:var(--t1)">Ponto de entrada único</div></div><div class="layer-comp">Auth · Rate limit · Auditoria LGPD · Versionamento</div></div>
+      <div class="layer-bd"><strong>Versionamento:</strong> /v1/ /v2/. Novos campos sempre em data.{categoria} — retrocompatibilidade garantida. <strong>Audit log:</strong> tenant_id, user_id, doc_hash (SHA-256), fontes_acessadas[], justificativa, ip_origem, timestamp. CPF/CNPJ nunca em texto puro.</div>
+    </div>
+    <div class="arrow">↓</div>
+    <div class="layer l3">
+      <div class="layer-hd"><div class="layer-num">3</div><div><div class="layer-nm">Core — Resolver + Orchestrator</div><div style="font-size:.67rem;color:var(--t1)">Decisão e coordenação</div></div><div class="layer-comp">Normalização · Orquestração · Fan-out</div></div>
+      <div class="layer-bd"><strong>Resolver:</strong> valida e normaliza CPF/CNPJ. Retorna 400 se inválido. <strong>Orchestrator:</strong> decide quais adapters acionar baseado no plano do usuário e tipo de documento. Executa adapters do Grupo A em paralelo (fan-out). Adapters do Grupo B acionados por plano.</div>
+    </div>
+    <div class="arrow">↓</div>
+    <div class="layer l3">
+      <div class="layer-hd"><div class="layer-num">3b</div><div><div class="layer-nm">Cache Redis</div><div style="font-size:.67rem;color:var(--t1)">TTL por fonte</div></div><div class="layer-comp">HIT → resposta imediata · MISS → aciona adapters</div></div>
+      <div class="layer-bd">Chave: <strong>{adapter_id}:{doc_hash}</strong>. TTL varia por fonte (12h a 89 dias). BNMP TTL 12h (mandado pode ser revogado). SINIC/PF TTL 89 dias (certidão válida 90 dias).</div>
+    </div>
+    <div class="arrow">↓</div>
+    <div class="layer l4">
+      <div class="layer-hd"><div class="layer-num">4</div><div><div class="layer-nm">Adapter Layer</div><div style="font-size:.67rem;color:var(--t1)">Contrato único para todas as fontes</div></div><div class="layer-comp">Plug-and-play · Cada fonte = 1 adapter</div></div>
+      <div class="layer-bd">Cada adapter implementa: <strong>query(doc, params) → AdapterResult</strong> e <strong>healthCheck() → boolean</strong>. Falha de um adapter não derruba o resultado — retorna status 'unavailable'. Novos adapters não exigem mudança no Orchestrator.</div>
+    </div>
+    <div class="arrow">↓</div>
+    <div class="layer l5">
+      <div class="layer-hd"><div class="layer-num">5</div><div><div class="layer-nm">Fontes Externas</div><div style="font-size:.67rem;color:var(--t1)">APIs, scrapers, RPAs</div></div><div class="layer-comp">17+ fontes V1 · Todas gratuitas ou mínimas</div></div>
+      <div class="layer-bd">Receita Federal · PGFN · CNJ DataJud · TST · BNMP · SINIC/PF · SEEU · MPs (~15 UFs) · DOU · CAGED · PNCP · CGU · CEMADEN · ANTT · CVM · Brapi · LLM (veredicto e operações)</div>
+    </div>
+    <div class="arrow">↓</div>
+    <div class="layer l6">
+      <div class="layer-hd"><div class="layer-num">6</div><div><div class="layer-nm">Cross-cutting</div><div style="font-size:.67rem;color:var(--t1)">Serviços transversais</div></div><div class="layer-comp">LGPD · Observabilidade · Quota · Schema registry</div></div>
+      <div class="layer-bd"><strong>Observabilidade:</strong> métricas por adapter (latência, disponibilidade, hit rate). <strong>Quota:</strong> controle de cota por plano. <strong>Schema registry:</strong> garante retrocompatibilidade do contrato. <strong>LGPD:</strong> direito de exclusão via hash — apaga dado sem precisar saber o CPF/CNPJ original.</div>
+    </div>
+  </div>
+
+  <div class="blk-lbl">Contrato do Adapter</div>
+  <div class="code-block"><span class="kw">interface</span> <span class="ty">Adapter</span> {
+  <span class="cm">// Identificação</span>
+  id: <span class="ty">string</span>;              <span class="cm">// ex: 'bnmp-cnj-mandados'</span>
+  version: <span class="ty">string</span>;         <span class="cm">// ex: '1.2.0'</span>
+
+  <span class="cm">// Consulta principal</span>
+  query(doc: <span class="ty">string</span>, params: <span class="ty">QueryParams</span>): <span class="ty">Promise</span>&lt;<span class="ty">AdapterResult</span>&gt;;
+
+  <span class="cm">// Health check para monitoramento</span>
+  healthCheck(): <span class="ty">Promise</span>&lt;<span class="ty">boolean</span>&gt;;
+}
+
+<span class="kw">interface</span> <span class="ty">AdapterResult</span> {
+  source: <span class="ty">string</span>;              <span class="cm">// id do adapter</span>
+  timestamp: <span class="ty">string</span>;           <span class="cm">// ISO 8601</span>
+  status: <span class="st">'ok'</span> | <span class="st">'error'</span> | <span class="st">'not_found'</span> | <span class="st">'unavailable'</span>;
+  data: <span class="ty">Record</span>&lt;<span class="ty">string</span>, <span class="ty">unknown</span>&gt;; <span class="cm">// dado retornado</span>
+  ttl_seconds: <span class="ty">number</span>;         <span class="cm">// para o Redis</span>
+}</div>
+
+  <div class="blk-lbl">TTL Redis por Fonte</div>
+  <div class="ttl-g">
+    <div class="ttl-c"><div class="ttl-v" style="color:var(--pu)">12h</div><div><div class="ttl-nm">Mandados de prisão (BNMP)</div><div class="ttl-src">Pode ser revogado a qualquer hora</div></div></div>
+    <div class="ttl-c"><div class="ttl-v" style="color:var(--rd)">24h</div><div><div class="ttl-nm">DataJud criminal + cível</div><div class="ttl-src">Fila assíncrona. Processos não mudam intraday.</div></div></div>
+    <div class="ttl-c"><div class="ttl-v" style="color:var(--rd)">24h</div><div><div class="ttl-nm">Inquéritos MPs + SEEU + PGFN</div><div class="ttl-src">Podem ser encerrados a qualquer hora</div></div></div>
+    <div class="ttl-c"><div class="ttl-v" style="color:var(--rd)">24h</div><div><div class="ttl-nm">TST/CSJT trabalhista</div><div class="ttl-src">Volume alto — fila assíncrona</div></div></div>
+    <div class="ttl-c"><div class="ttl-v" style="color:var(--or)">6h</div><div><div class="ttl-nm">Protestos CENPROT</div><div class="ttl-src">Novo protesto pode surgir a qualquer hora</div></div></div>
+    <div class="ttl-c"><div class="ttl-v" style="color:var(--or)">6h</div><div><div class="ttl-nm">Score Serasa PJ</div><div class="ttl-src">Custo por consulta — equilibrar custo vs frescor</div></div></div>
+    <div class="ttl-c"><div class="ttl-v" style="color:var(--or)">6h</div><div><div class="ttl-nm">Análise LLM (veredicto)</div><div class="ttl-src">Invalidar se novo fato ou inquérito chegar</div></div></div>
+    <div class="ttl-c"><div class="ttl-v" style="color:var(--yl)">48h</div><div><div class="ttl-nm">Receita Federal (cadastral)</div><div class="ttl-src">Dado cadastral — muda raramente</div></div></div>
+    <div class="ttl-c"><div class="ttl-v" style="color:var(--yl)">48h</div><div><div class="ttl-nm">ANTT / RNTRC</div><div class="ttl-src">Habilitação — muda raramente</div></div></div>
+    <div class="ttl-c"><div class="ttl-v" style="color:var(--gn)">7 dias</div><div><div class="ttl-nm">CAGED (admissões/demissões)</div><div class="ttl-src">Publicação mensal</div></div></div>
+    <div class="ttl-c"><div class="ttl-v" style="color:var(--gn)">7 dias</div><div><div class="ttl-nm">CEMADEN / INPE (climático)</div><div class="ttl-src">Dado por CEP — atualização semanal suficiente</div></div></div>
+    <div class="ttl-c"><div class="ttl-v" style="color:var(--tl)">89 dias</div><div><div class="ttl-nm">SINIC/PF (antecedentes)</div><div class="ttl-src">Certidão válida 90 dias — cache 89 por segurança</div></div></div>
+  </div>
+</div>
+
+<!-- ═══ FLOW ═══ -->
+<div id="v-flow" class="view">
+  <div class="sec-title">Fluxos de Usuário</div>
+  <div class="sec-sub">3 entradas distintas. Cada uma com seu caminho, decisões e saídas.</div>
+
+  <div class="blk-lbl">Fluxo 1 — Busca de CNPJ</div>
+  <div class="flow">
+    <div class="flow-step"><div class="fs-num">1</div><div><div class="fs-act">Usuário digita CNPJ ou razão social no Portal 01</div><div class="fs-out">Campo aceita texto livre. Formatação automática de CNPJ.</div></div><div class="fs-resp">Frontend</div></div>
+    <div class="flow-step"><div class="fs-num">2</div><div><div class="fs-act">Clica "Analisar →" — POST /v1/cnpj/{cnpj}</div><div class="fs-out">Gateway valida JWT e rate limit. Loga hash SHA-256 do CNPJ.</div></div><div class="fs-resp">API Gateway</div></div>
+    <div class="flow-step"><div class="fs-num">3</div><div><div class="fs-act">Resolver valida e normaliza o CNPJ</div><div class="fs-out">Se inválido → 400 "CNPJ inválido" inline no campo.</div></div><div class="fs-resp">Core / Resolver</div></div>
+    <div class="flow-step"><div class="fs-num">4</div><div><div class="fs-act">Orchestrator verifica cache Redis</div><div class="fs-out">HIT → resposta imediata (&lt;200ms). MISS → aciona adapters.</div></div><div class="fs-resp">Core / Cache</div></div>
+    <div class="flow-step"><div class="fs-num">5</div><div><div class="fs-act">Adapters Grupo A em paralelo (fan-out) — 17+ fontes</div><div class="fs-out">Receita, PGFN, DataJud, TST, BNMP, SINIC, SEEU, MPs, CAGED, CEMADEN, CGU...</div></div><div class="fs-resp">Adapter Layer</div></div>
+    <div class="flow-step"><div class="fs-num">6</div><div><div class="fs-act">Motor de Score calcula score 0–100</div><div class="fs-out">10 camadas ponderadas. 5 padrões de fraude. Score preditivo de RJ.</div></div><div class="fs-resp">Motor interno</div></div>
+    <div class="flow-step"><div class="fs-num">7</div><div><div class="fs-act">LLM gera veredicto em linguagem direta + ação</div><div class="fs-out">Texto do veredicto + CTA concreta. Cache 6h.</div></div><div class="fs-resp">Pipeline LLM</div></div>
+    <div class="flow-step"><div class="fs-num">8</div><div><div class="fs-act">Usuário lê veredicto e navega pelas 5 abas</div><div class="fs-out">Verde = prosseguir · Amarelo = condicional · Vermelho = recusar</div></div><div class="fs-resp">Frontend</div></div>
+  </div>
+
+  <div class="blk-lbl">Fluxo 2 — Upload de Balanço</div>
+  <div class="flow">
+    <div class="flow-step"><div class="fs-num">1</div><div><div class="fs-act">Portal 02 — toggle "Upload" ativo. Drag-and-drop.</div><div class="fs-out">Área dashed com formatos aceitos: .pdf, .xlsx, SPED</div></div><div class="fs-resp">Frontend</div></div>
+    <div class="flow-step"><div class="fs-num">2</div><div><div class="fs-act">Upload via POST /v1/balanco/upload</div><div class="fs-out">Se formato inválido → erro inline. Máx. 50MB.</div></div><div class="fs-resp">API Gateway</div></div>
+    <div class="flow-step"><div class="fs-num">3</div><div><div class="fs-act">Parser extrai linhas de DRE e balanço (OCR se PDF)</div><div class="fs-out">Se dados insuficientes → solicita campos manuais.</div></div><div class="fs-resp">Parser + LLM</div></div>
+    <div class="flow-step"><div class="fs-num">4</div><div><div class="fs-act">Motor financeiro calcula 6 indicadores + ciclo + regimes</div><div class="fs-out">P/L, EBITDA, dívida, liquidez, PMR, margem. Simples/LP/LR.</div></div><div class="fs-resp">Motor interno</div></div>
+    <div class="flow-step"><div class="fs-num">5</div><div><div class="fs-act">Valuation 5 métodos calculado</div><div class="fs-out">Múltiplos V1 fixos. Piso/mediana/teto.</div></div><div class="fs-resp">Motor interno</div></div>
+    <div class="flow-step"><div class="fs-num">6</div><div><div class="fs-act">Usuário navega pelas 5 abas (Diagnóstico, DRE, Ciclo, Fiscal, Valuation)</div><div class="fs-out">Callouts interativos mostram impacto de cada ação em R$.</div></div><div class="fs-resp">Frontend</div></div>
+  </div>
+
+  <div class="blk-lbl">Fluxo 3 — Ticker B3</div>
+  <div class="flow">
+    <div class="flow-step"><div class="fs-num">1</div><div><div class="fs-act">Portal 02 — toggle "Ticker B3". Campo com prefixo "B3:".</div><div class="fs-out">Tickers de exemplo clicáveis: JBSS3, PETR4, VALE3</div></div><div class="fs-resp">Frontend</div></div>
+    <div class="flow-step"><div class="fs-num">2</div><div><div class="fs-act">POST /v1/bolsa/{ticker}</div><div class="fs-out">Se ticker inválido → "Empresa não encontrada na B3".</div></div><div class="fs-resp">API Gateway</div></div>
+    <div class="flow-step"><div class="fs-num">3</div><div><div class="fs-act">Adapter CVM: DFP, ITR, FRE, IPE. Adapter Brapi: cotação + fundamentos.</div><div class="fs-out">Dados históricos CVM + cotação em tempo real.</div></div><div class="fs-resp">Adapters</div></div>
+    <div class="flow-step"><div class="fs-num">4</div><div><div class="fs-act">Motor calcula indicadores + régua + CEO table</div><div class="fs-out">P/L vs setor, crescimento, yield, EBITDA, dívida, ROE. Régua barato→caro.</div></div><div class="fs-resp">Motor interno + LLM</div></div>
+    <div class="flow-step"><div class="fs-num">5</div><div><div class="fs-act">Usuário navega pelas 10 abas do módulo bolsa</div><div class="fs-out">Abas V1 livres. Abas V2 (Pessoas, Macro, Gov) mostram lock para Free.</div></div><div class="fs-resp">Frontend</div></div>
+  </div>
+</div>
+
+<!-- ═══ VERSIONS ═══ -->
+<div id="v-versions" class="view">
+  <div class="sec-title">Mapa de Versões</div>
+  <div class="sec-sub">Cada funcionalidade classificada por fase de desenvolvimento.</div>
+
+  <div class="vm-legend">
+    <div class="vm-li"><div class="vm-dot" style="background:var(--gn)"></div>V1 — MVP: custo zero ou mínimo, esforço baixo</div>
+    <div class="vm-li"><div class="vm-dot" style="background:var(--bl)"></div>V2 — Parceiros pagos, scraping estadual ou custo/consulta</div>
+    <div class="vm-li"><div class="vm-dot" style="background:var(--pu)"></div>V3 — Dados próprios, contratos mínimos, infra avançada</div>
+  </div>
+
+  <div class="vm-grid">
+
+    <div class="vm-mod">
+      <div class="vm-mod-hd"><span class="vm-mod-ic">🛡️</span><div class="vm-mod-nm">Módulo CNPJ — Verificações</div></div>
+      <div class="vm-items">
+        <div class="vm-item"><span class="vm-badge v1b">V1</span><span class="vm-feat">Receita Federal — QSA, situação, CNAE</span><span class="vm-cost">R$0</span></div>
+        <div class="vm-item"><span class="vm-badge v1b">V1</span><span class="vm-feat">PGFN — dívida ativa federal</span><span class="vm-cost">R$0</span></div>
+        <div class="vm-item"><span class="vm-badge v1b">V1</span><span class="vm-feat">CGU — CEIS / CNEP / trabalho escravo</span><span class="vm-cost">R$0</span></div>
+        <div class="vm-item"><span class="vm-badge v1b">V1</span><span class="vm-feat">DataJud — processos (cível + criminal filtrado)</span><span class="vm-cost">R$0</span></div>
+        <div class="vm-item"><span class="vm-badge v1b">V1</span><span class="vm-feat">TST / CSJT — processos trabalhistas</span><span class="vm-cost">R$0</span></div>
+        <div class="vm-item"><span class="vm-badge v1b">V1</span><span class="vm-feat">CAGED — admissões e demissões (TTL 7d)</span><span class="vm-cost">R$0</span></div>
+        <div class="vm-item"><span class="vm-badge v1b">V1</span><span class="vm-feat">PNCP — contratos públicos federais</span><span class="vm-cost">R$0</span></div>
+        <div class="vm-item"><span class="vm-badge v1b">V1</span><span class="vm-feat">CEMADEN/INPE — risco climático por CEP</span><span class="vm-cost">R$0</span></div>
+        <div class="vm-item"><span class="vm-badge v1b">V1</span><span class="vm-feat">ANTT/RNTRC — habilitação transportadora</span><span class="vm-cost">R$0</span></div>
+        <div class="vm-item"><span class="vm-badge v1b">V1</span><span class="vm-feat">Motor score + grupo econômico + 5 padrões fraude</span><span class="vm-cost">R$0</span></div>
+        <div class="vm-item"><span class="vm-badge v2b">V2</span><span class="vm-feat">Serasa PJ — score de crédito</span><span class="vm-cost">R$5–18</span></div>
+        <div class="vm-item"><span class="vm-badge v2b">V2</span><span class="vm-feat">CENPROT — protestos nacionais</span><span class="vm-cost">R$1,50–3</span></div>
+        <div class="vm-item"><span class="vm-badge v2b">V2</span><span class="vm-feat">Benchmark setorial real CVM por CNAE</span><span class="vm-cost">Pipeline</span></div>
+        <div class="vm-item"><span class="vm-badge v3b">V3</span><span class="vm-feat">BigDataCorp grafo profundo</span><span class="vm-cost">R$5–12</span></div>
+        <div class="vm-item"><span class="vm-badge v3b">V3</span><span class="vm-feat">Open Finance / SCR Bacen</span><span class="vm-cost">TecnoSpeed</span></div>
+      </div>
+    </div>
+
+    <div class="vm-mod">
+      <div class="vm-mod-hd"><span class="vm-mod-ic">⚖️</span><div class="vm-mod-nm">Bloco Criminal</div></div>
+      <div class="vm-items">
+        <div class="vm-item"><span class="vm-badge v1b">V1</span><span class="vm-feat">BNMP — mandado prisão ativo (CPF sócio)</span><span class="vm-cost">R$0,50–2</span></div>
+        <div class="vm-item"><span class="vm-badge v1b">V1</span><span class="vm-feat">SINIC/PF — antecedentes criminais federais</span><span class="vm-cost">R$0 (RPA)</span></div>
+        <div class="vm-item"><span class="vm-badge v1b">V1</span><span class="vm-feat">SEEU/CNJ — execução penal (CNPJ direto)</span><span class="vm-cost">R$0</span></div>
+        <div class="vm-item"><span class="vm-badge v1b">V1</span><span class="vm-feat">MPs ~15 UFs — inquéritos ativos</span><span class="vm-cost">R$0</span></div>
+        <div class="vm-item"><span class="vm-badge v1b">V1</span><span class="vm-feat">DOU + LLM — operações policiais</span><span class="vm-cost">R$0</span></div>
+        <div class="vm-item"><span class="vm-badge v2b">V2</span><span class="vm-feat">PCs estaduais — certidão criminal sócio</span><span class="vm-cost">R$10–30</span></div>
+        <div class="vm-item"><span class="vm-badge v2b">V2</span><span class="vm-feat">TJs estaduais — condenações por UF</span><span class="vm-cost">Scraping</span></div>
+        <div class="vm-item"><span class="vm-badge v2b">V2</span><span class="vm-feat">Interpol red/yellow notice</span><span class="vm-cost">Parceiro</span></div>
+      </div>
+    </div>
+
+    <div class="vm-mod">
+      <div class="vm-mod-hd"><span class="vm-mod-ic">📊</span><div class="vm-mod-nm">Módulo Balanço / ESPELHO</div></div>
+      <div class="vm-items">
+        <div class="vm-item"><span class="vm-badge v1b">V1</span><span class="vm-feat">Upload PDF/Excel/SPED + parser LLM</span><span class="vm-cost">R$0</span></div>
+        <div class="vm-item"><span class="vm-badge v1b">V1</span><span class="vm-feat">6 indicadores com régua barato→caro</span><span class="vm-cost">R$0</span></div>
+        <div class="vm-item"><span class="vm-badge v1b">V1</span><span class="vm-feat">DRE com decomposição e callout impacto</span><span class="vm-cost">R$0</span></div>
+        <div class="vm-item"><span class="vm-badge v1b">V1</span><span class="vm-feat">Ciclo de caixa PMR/PMP/NCG</span><span class="vm-cost">R$0</span></div>
+        <div class="vm-item"><span class="vm-badge v1b">V1</span><span class="vm-feat">Comparativo regimes + LC 214/2025</span><span class="vm-cost">R$0</span></div>
+        <div class="vm-item"><span class="vm-badge v1b">V1</span><span class="vm-feat">Valuation 5 métodos (múltiplos fixos V1)</span><span class="vm-cost">R$0</span></div>
+        <div class="vm-item"><span class="vm-badge v2b">V2</span><span class="vm-feat">Benchmark setorial real (CVM DFP por CNAE)</span><span class="vm-cost">Pipeline</span></div>
+        <div class="vm-item"><span class="vm-badge v2b">V2</span><span class="vm-feat">Inconsistência fiscal NF-e × PGDAS</span><span class="vm-cost">Upload</span></div>
+        <div class="vm-item"><span class="vm-badge v3b">V3</span><span class="vm-feat">Open Finance extrato real</span><span class="vm-cost">TecnoSpeed</span></div>
+      </div>
+    </div>
+
+    <div class="vm-mod">
+      <div class="vm-mod-hd"><span class="vm-mod-ic">📈</span><div class="vm-mod-nm">Módulo Bolsa</div></div>
+      <div class="vm-items">
+        <div class="vm-item"><span class="vm-badge v1b">V1</span><span class="vm-feat">Ticker B3 → CVM DFP/ITR + Brapi</span><span class="vm-cost">R$0</span></div>
+        <div class="vm-item"><span class="vm-badge v1b">V1</span><span class="vm-feat">Régua posicionamento por indicador</span><span class="vm-cost">R$0</span></div>
+        <div class="vm-item"><span class="vm-badge v1b">V1</span><span class="vm-feat">CEO entregou o que prometeu (guidances CVM)</span><span class="vm-cost">R$0</span></div>
+        <div class="vm-item"><span class="vm-badge v1b">V1</span><span class="vm-feat">O que fazer / O que NÃO fazer (LLM)</span><span class="vm-cost">R$0</span></div>
+        <div class="vm-item"><span class="vm-badge v1b">V1</span><span class="vm-feat">Ecossistema — barra segmentada + cards unidades</span><span class="vm-cost">R$0</span></div>
+        <div class="vm-item"><span class="vm-badge v2b">V2</span><span class="vm-feat">Pessoas & M&A (Glassdoor + CVM FRE/IPE)</span><span class="vm-cost">Scraping</span></div>
+        <div class="vm-item"><span class="vm-badge v2b">V2</span><span class="vm-feat">Macro & Futuro (IBGE, Bacen + LLM)</span><span class="vm-cost">R$0</span></div>
+        <div class="vm-item"><span class="vm-badge v2b">V2</span><span class="vm-feat">Governança (score CVM + peers + alertas)</span><span class="vm-cost">R$0</span></div>
+        <div class="vm-item"><span class="vm-badge v2b">V2</span><span class="vm-feat">IA fatos relevantes CVM em tempo real</span><span class="vm-cost">LLM</span></div>
+        <div class="vm-item"><span class="vm-badge v2b">V2</span><span class="vm-feat">Análise de disrupção (6ª aba — demo existe)</span><span class="vm-cost">R$0</span></div>
+        <div class="vm-item"><span class="vm-badge v2b">V2</span><span class="vm-feat">Simulador DCF com sliders</span><span class="vm-cost">R$0</span></div>
+        <div class="vm-item"><span class="vm-badge v2b">V2</span><span class="vm-feat">Monitoramento carteira R$49–149/mês</span><span class="vm-cost">R$0</span></div>
+        <div class="vm-item"><span class="vm-badge v2b">V2</span><span class="vm-feat">Score ESG automático (IBAMA+CAGED+TST)</span><span class="vm-cost">R$0</span></div>
+        <div class="vm-item"><span class="vm-badge v3b">V3</span><span class="vm-feat">Timeline M&A interativa + ROI implícito</span><span class="vm-cost">Pipeline</span></div>
+        <div class="vm-item"><span class="vm-badge v3b">V3</span><span class="vm-feat">Mapa geográfico D3.js operações globais</span><span class="vm-cost">Pipeline</span></div>
+        <div class="vm-item"><span class="vm-badge v3b">V3</span><span class="vm-feat">Matriz bolha intragrupo</span><span class="vm-cost">Pipeline</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ ROADMAP ═══ -->
+<div id="v-roadmap" class="view">
+  <div class="sec-title">Roadmap Técnico</div>
+  <div class="sec-sub">O que construir em qual ordem. Cada fase tem critérios de passagem explícitos.</div>
+
+  <div class="blk-lbl">V1 — MVP (0–6 meses) · "Serasa que explica"</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;margin-bottom:20px">
+    <div style="background:var(--gn-d);border:1px solid var(--gn-b);border-radius:9px;padding:12px 14px">
+      <div style="font-size:.7rem;font-weight:700;color:var(--gn);margin-bottom:7px;letter-spacing:.3px">SPRINT 1 — Fundação (sem. 1–4)</div>
+      <div style="display:flex;flex-direction:column;gap:4px;font-size:.69rem;color:var(--t1)">
+        <span>→ Gateway JWT + Redis + adapters infra</span>
+        <span>→ Adapter Receita Federal</span>
+        <span>→ Adapter PGFN</span>
+        <span>→ Adapter CGU (CEIS/CNEP)</span>
+        <span>→ Motor de score básico (3 camadas)</span>
+        <span>→ Home page split-screen</span>
+      </div>
+    </div>
+    <div style="background:var(--gn-d);border:1px solid var(--gn-b);border-radius:9px;padding:12px 14px">
+      <div style="font-size:.7rem;font-weight:700;color:var(--gn);margin-bottom:7px;letter-spacing:.3px">SPRINT 2 — Criminal (sem. 5–8)</div>
+      <div style="display:flex;flex-direction:column;gap:4px;font-size:.69rem;color:var(--t1)">
+        <span>→ DataJud + filtro classes criminais</span>
+        <span>→ TST/CSJT trabalhista</span>
+        <span>→ BNMP/CNJ (mandados de prisão)</span>
+        <span>→ RPA SINIC/PF (antecedentes)</span>
+        <span>→ SEEU/CNJ (execução penal)</span>
+        <span>→ Scraping MPs (~15 UFs)</span>
+        <span>→ DOU + LLM operações policiais</span>
+      </div>
+    </div>
+    <div style="background:var(--gn-d);border:1px solid var(--gn-b);border-radius:9px;padding:12px 14px">
+      <div style="font-size:.7rem;font-weight:700;color:var(--gn);margin-bottom:7px;letter-spacing:.3px">SPRINT 3 — Motor (sem. 9–12)</div>
+      <div style="display:flex;flex-direction:column;gap:4px;font-size:.69rem;color:var(--t1)">
+        <span>→ Score 10 camadas completo</span>
+        <span>→ 5 padrões de fraude societária</span>
+        <span>→ Score preditivo de RJ</span>
+        <span>→ Motor de grupo econômico</span>
+        <span>→ CAGED + CEMADEN/INPE</span>
+        <span>→ LLM veredicto em linguagem direta</span>
+      </div>
+    </div>
+    <div style="background:var(--gn-d);border:1px solid var(--gn-b);border-radius:9px;padding:12px 14px">
+      <div style="font-size:.7rem;font-weight:700;color:var(--gn);margin-bottom:7px;letter-spacing:.3px">SPRINT 4 — Balanço V1 (sem. 13–20)</div>
+      <div style="display:flex;flex-direction:column;gap:4px;font-size:.69rem;color:var(--t1)">
+        <span>→ Parser upload PDF/Excel/SPED</span>
+        <span>→ CVM DFP/ITR/FRE/IPE + Brapi</span>
+        <span>→ 6 indicadores + régua</span>
+        <span>→ DRE + ciclo + regime + valuation</span>
+        <span>→ Ecossistema (barra + cards)</span>
+        <span>→ CEO table + O que fazer/NÃO fazer</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="blk-lbl">V2 — Produto Completo (6–18 meses) · "Inteligência de contraparte"</div>
+  <div style="background:var(--bl-d);border:1px solid var(--bl-b);border-radius:9px;padding:14px 16px;margin-bottom:16px;font-size:.73rem;color:var(--t1);line-height:1.8">
+    Serasa PJ + CENPROT · Benchmark setorial real CVM · PCs estaduais (Judit/Netrin) · Glassdoor scraping · Governança CVM FRE · Macro & Futuro LLM · IA fatos relevantes CVM em tempo real · Monitoramento de carteira R$49–149/mês · Simulador DCF · Análise de disrupção (integrar demo) · White-label escritórios · Score ESG automático · SPED ECD/ECF parser
+  </div>
+
+  <div class="blk-lbl">V3 — Infraestrutura de Dados (18–36 meses) · "Rede coletiva B2B"</div>
+  <div style="background:var(--pu-d);border:1px solid var(--pu-b);border-radius:9px;padding:14px 16px;margin-bottom:24px;font-size:.73rem;color:var(--t1);line-height:1.8">
+    Rede coletiva B2B anonimizada (k-anonimato k≥10) · Motor preditivo ML próprio (score 90 dias) · Open Finance via TecnoSpeed · BigDataCorp grafo profundo · Timeline M&A interativa · Mapa geográfico D3.js · Crédito estruturado B2B (bancos/FIDCs)
+  </div>
+
+  <div class="blk-lbl">Critérios de Passagem V1 → V2 → V3</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+    <div style="background:var(--s1);border:1px solid var(--gn-b);border-radius:9px;padding:13px">
+      <div style="font-size:.72rem;font-weight:700;color:var(--gn);margin-bottom:8px">Para lançar V2</div>
+      <div style="display:flex;flex-direction:column;gap:5px;font-size:.69rem;color:var(--t1)">
+        <span>✓ 100 clientes pagantes em 90 dias</span>
+        <span>✓ NPS &gt; 50</span>
+        <span>✓ Custo/consulta &lt; R$0,80</span>
+        <span>✓ 1 escritório usando white-label</span>
+        <span>✓ Uptime 99,5% últimos 30 dias</span>
+        <span>✓ Dev sênior ou co-fundador técnico</span>
+      </div>
+    </div>
+    <div style="background:var(--s1);border:1px solid var(--bl-b);border-radius:9px;padding:13px">
+      <div style="font-size:.72rem;font-weight:700;color:var(--bl);margin-bottom:8px">Para lançar V3</div>
+      <div style="display:flex;flex-direction:column;gap:5px;font-size:.69rem;color:var(--t1)">
+        <span>✓ 1.000 clientes ativos</span>
+        <span>✓ Retenção mensal &gt; 60%</span>
+        <span>✓ 10+ escritórios white-label</span>
+        <span>✓ MRR &gt; R$100k</span>
+        <span>✓ Uptime 99,9%</span>
+        <span>✓ Time de 3+ devs + data engineer</span>
+      </div>
+    </div>
+    <div style="background:var(--s1);border:1px solid var(--pu-b);border-radius:9px;padding:13px">
+      <div style="font-size:.72rem;font-weight:700;color:var(--pu);margin-bottom:8px">KPIs V3</div>
+      <div style="display:flex;flex-direction:column;gap:5px;font-size:.69rem;color:var(--t1)">
+        <span>→ 5.000+ clientes ativos</span>
+        <span>→ MRR &gt; R$500k</span>
+        <span>→ 100+ escritórios white-label</span>
+        <span>→ Custo/consulta &lt; R$0,20</span>
+        <span>→ Rede coletiva &gt; 1.000 empresas</span>
+        <span>→ Churn &lt; 5%</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+function setView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('act'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('act'));
+  document.getElementById(id).classList.add('act');
+  var idx={'v-overview':0,'v-arch':1,'v-flow':2,'v-versions':3,'v-roadmap':4}[id];
+  document.querySelectorAll('.tab')[idx].classList.add('act');
+}
+</script>
+</body>
+</html>

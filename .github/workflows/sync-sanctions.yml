@@ -1,0 +1,28 @@
+name: Sincronizar sanções (CEIS/CNEP)
+
+on:
+  schedule:
+    - cron: "0 6 * * 0"   # Todo domingo às 03h de Brasília (06h UTC)
+  workflow_dispatch:        # Permite rodar manualmente pelo GitHub
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Instalar dependências
+        run: npm install
+
+      - name: Rodar sincronização
+        env:
+          POSTGRES_URL: ${{ secrets.POSTGRES_URL }}
+        run: node scripts/sync-sanctions.js

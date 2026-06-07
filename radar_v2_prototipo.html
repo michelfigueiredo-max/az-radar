@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>RADAR — Inteligência Empresarial</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS ── */
+:root {
+  --bg:#07090D; --s1:#0D1117; --s2:#131920; --s3:#1A2230;
+  --b1:#1E2A3A; --b2:#243446; --b3:#2E4058;
+  --orange:#F97316; --ora-d:rgba(249,115,22,.1); --ora-b:rgba(249,115,22,.22);
+  --green:#22C55E; --grn-d:rgba(34,197,94,.09); --grn-b:rgba(34,197,94,.2);
+  --blue:#3B82F6; --blu-d:rgba(59,130,246,.1); --blu-b:rgba(59,130,246,.22);
+  --red:#EF4444; --red-d:rgba(239,68,68,.08); --red-b:rgba(239,68,68,.2);
+  --yel:#EAB308; --yel-d:rgba(234,179,8,.08); --yel-b:rgba(234,179,8,.2);
+  --purple:#A855F7; --purp-d:rgba(168,85,247,.08); --purp-b:rgba(168,85,247,.2);
+  --teal:#14B8A6; --teal-d:rgba(20,184,166,.08);
+  --w:#F1F5F9; --t1:#94A3B8; --t2:#475569; --t3:#1E293B;
+  --ds:'Syne',sans-serif; --bd:'DM Sans',sans-serif; --mo:'JetBrains Mono',monospace;
+  --r:10px; --r2:14px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{font-size:14px;scroll-behavior:smooth;}
+body{background:var(--bg);font-family:var(--bd);color:var(--w);line-height:1.55;overflow-x:hidden;}
+.page{display:none;}.page.active{display:block;}
+.tab-p{display:none;}.tab-p.active{display:block;}
+.an-mod{display:none;}.an-mod.active{display:block;}
+
+/* ── BTN ── */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:11px 22px;border-radius:8px;font-family:var(--ds);font-size:.75rem;font-weight:700;cursor:pointer;border:none;transition:all .15s;text-decoration:none;letter-spacing:.3px;}
+.btn-orange{background:var(--orange);color:#fff;}.btn-orange:hover{background:#ea6b0e;transform:translateY(-1px);}
+.btn-green{background:var(--green);color:#052e16;}.btn-green:hover{background:#16a34a;}
+.btn-blue{background:var(--blue);color:#fff;}.btn-blue:hover{background:#2563eb;}
+.btn-outline{background:transparent;color:var(--w);border:1px solid var(--b2);}.btn-outline:hover{border-color:var(--b3);background:var(--s2);}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:.63rem;font-weight:600;letter-spacing:.3px;}
+.chip-o{background:var(--ora-d);color:var(--orange);border:1px solid var(--ora-b);}
+.chip-g{background:var(--grn-d);color:var(--green);border:1px solid var(--grn-b);}
+.chip-b{background:var(--blu-d);color:var(--blue);border:1px solid var(--blu-b);}
+.chip-r{background:var(--red-d);color:var(--red);border:1px solid var(--red-b);}
+.chip-y{background:var(--yel-d);color:var(--yel);border:1px solid var(--yel-b);}
+.chip-p{background:var(--purp-d);color:var(--purple);border:1px solid var(--purp-b);}
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);}
+
+/* ── HOME ── */
+.home-nav{background:rgba(7,9,13,.96);backdrop-filter:blur(20px);border-bottom:1px solid var(--b1);height:56px;display:flex;align-items:center;padding:0 28px;position:sticky;top:0;z-index:600;}
+.hn-logo{font-family:var(--ds);font-size:1rem;font-weight:800;letter-spacing:2.5px;color:var(--w);cursor:pointer;}
+.hn-logo span{color:var(--orange);}
+.hn-links{display:flex;gap:22px;margin-left:36px;}
+.hnl{font-size:.76rem;color:var(--t1);cursor:pointer;background:none;border:none;font-family:var(--bd);transition:color .12s;}
+.hnl:hover{color:var(--w);}
+.hn-right{margin-left:auto;display:flex;gap:10px;align-items:center;}
+
+/* ── HERO ── */
+.hero{padding:80px 28px 64px;max-width:1100px;margin:0 auto;text-align:center;}
+.hero-tag{font-size:.63rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--orange);margin-bottom:16px;display:flex;align-items:center;justify-content:center;gap:8px;}
+.hero-tag::before,.hero-tag::after{content:'';display:block;width:28px;height:1.5px;background:var(--orange);}
+.hero-h1{font-family:var(--ds);font-size:clamp(2.2rem,4.5vw,3.6rem);font-weight:800;color:var(--w);line-height:1.05;margin-bottom:20px;}
+.hero-h1 em{color:var(--orange);font-style:normal;}
+.hero-h1 strong{color:var(--green);font-style:normal;}
+.hero-p{font-size:.92rem;color:var(--t1);line-height:1.78;max-width:560px;margin:0 auto 36px;}
+
+/* ── PORTAIS DE ENTRADA ── */
+.entrada-section{padding:0 28px 72px;max-width:1100px;margin:0 auto;}
+.entrada-title{font-family:var(--ds);font-size:1.1rem;font-weight:700;color:var(--w);text-align:center;margin-bottom:6px;}
+.entrada-sub{font-size:.8rem;color:var(--t1);text-align:center;margin-bottom:32px;}
+.entrada-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+@media(max-width:720px){.entrada-grid{grid-template-columns:1fr;}}
+
+.portal{background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:28px;position:relative;overflow:hidden;transition:all .2s;cursor:pointer;}
+.portal-o:hover{border-color:rgba(249,115,22,.4);box-shadow:0 12px 40px rgba(249,115,22,.08);}
+.portal-g:hover{border-color:rgba(34,197,94,.4);box-shadow:0 12px 40px rgba(34,197,94,.08);}
+.portal-accent{position:absolute;top:0;left:0;right:0;height:3px;border-radius:16px 16px 0 0;}
+.portal-accent-o{background:linear-gradient(90deg,var(--orange),#fb923c);}
+.portal-accent-g{background:linear-gradient(90deg,var(--green),#4ade80);}
+.portal-icon{font-size:2rem;margin-bottom:14px;display:block;}
+.portal-badge{font-size:.6rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;}
+.portal-badge-o{color:var(--orange);}
+.portal-badge-g{color:var(--green);}
+.portal-title{font-family:var(--ds);font-size:1.15rem;font-weight:700;color:var(--w);margin-bottom:8px;}
+.portal-desc{font-size:.78rem;color:var(--t1);line-height:1.65;margin-bottom:20px;}
+
+/* Portal CNPJ — campo de busca */
+.portal-search{display:flex;background:var(--s2);border:1px solid var(--b2);border-radius:9px;overflow:hidden;margin-bottom:10px;transition:border-color .15s;}
+.portal-search:focus-within{border-color:var(--orange);}
+.portal-search input{flex:1;background:transparent;border:none;outline:none;padding:11px 14px;font-family:var(--mo);font-size:.82rem;color:var(--w);}
+.portal-search input::placeholder{color:var(--t2);font-family:var(--bd);}
+.portal-search button{padding:10px 18px;background:var(--orange);color:#fff;border:none;font-family:var(--ds);font-size:.72rem;font-weight:700;cursor:pointer;letter-spacing:.3px;transition:background .12s;}
+.portal-search button:hover{background:#ea6b0e;}
+
+/* Portal Balanço — entrada dual */
+.entrada-dual{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.entrada-btn{background:var(--s2);border:1px solid var(--b2);border-radius:8px;padding:12px;cursor:pointer;transition:all .15s;text-align:center;}
+.entrada-btn:hover{border-color:var(--green);background:rgba(34,197,94,.05);}
+.eb-icon{font-size:1.2rem;margin-bottom:5px;display:block;}
+.eb-label{font-size:.7rem;font-weight:600;color:var(--w);display:block;margin-bottom:2px;}
+.eb-sub{font-size:.63rem;color:var(--t2);}
+.entrada-btn.active-g{border-color:var(--green);background:var(--grn-d);}
+.ticker-input{display:flex;background:var(--s2);border:1px solid var(--b2);border-radius:8px;overflow:hidden;transition:border-color .15s;}
+.ticker-input:focus-within{border-color:var(--green);}
+.ticker-prefix{padding:10px 12px;background:var(--s3);font-family:var(--mo);font-size:.72rem;color:var(--t2);border-right:1px solid var(--b1);display:flex;align-items:center;}
+.ticker-input input{flex:1;background:transparent;border:none;outline:none;padding:10px 12px;font-family:var(--mo);font-size:.82rem;color:var(--w);text-transform:uppercase;}
+.ticker-input button{padding:9px 16px;background:var(--green);color:#052e16;border:none;font-family:var(--ds);font-size:.7rem;font-weight:700;cursor:pointer;letter-spacing:.3px;}
+
+/* ── TOPNAV ANALYSIS ── */
+.topnav{background:rgba(7,9,13,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--b1);height:54px;display:flex;align-items:center;padding:0 20px;position:sticky;top:0;z-index:600;}
+.tn-logo{font-family:var(--ds);font-size:.92rem;font-weight:800;letter-spacing:2px;color:var(--w);padding-right:18px;border-right:1px solid var(--b1);margin-right:4px;cursor:pointer;}
+.tn-logo span{color:var(--orange);}
+.tn-nav{display:flex;height:54px;overflow-x:auto;scrollbar-width:none;}
+.tn-nav::-webkit-scrollbar{display:none;}
+.tn-tab{padding:0 16px;height:100%;display:flex;align-items:center;font-size:.71rem;font-weight:600;color:var(--t1);border:none;background:transparent;cursor:pointer;font-family:var(--bd);white-space:nowrap;border-bottom:2px solid transparent;transition:all .15s;letter-spacing:.2px;}
+.tn-tab:hover{color:var(--w);}
+.tn-tab.act-o{color:var(--orange);border-bottom-color:var(--orange);background:rgba(249,115,22,.04);}
+.tn-tab.act-g{color:var(--green);border-bottom-color:var(--green);}
+.tn-right{margin-left:auto;display:flex;align-items:center;gap:10px;padding-left:14px;border-left:1px solid var(--b1);}
+.tn-plan{font-size:.62rem;font-weight:700;padding:4px 9px;border-radius:5px;background:var(--s2);color:var(--t1);border:1px solid var(--b1);}
+
+/* ── SUBNAV ── */
+.subnav{background:rgba(13,17,23,.97);border-bottom:1px solid var(--b1);height:38px;display:flex;align-items:center;padding:0 8px;overflow-x:auto;scrollbar-width:none;position:sticky;top:54px;z-index:500;}
+.subnav::-webkit-scrollbar{display:none;}
+.stab{padding:5px 12px;border-radius:6px;font-size:.69rem;font-weight:500;color:var(--t1);border:none;background:transparent;cursor:pointer;font-family:var(--bd);white-space:nowrap;transition:all .12s;}
+.stab:hover{color:var(--w);}
+.stab.so{background:var(--ora-d);color:var(--orange);}
+.stab.sg{background:var(--grn-d);color:var(--green);}
+
+/* ── WRAP ── */
+.an-wrap{max-width:1100px;margin:0 auto;padding:18px 14px 80px;}
+
+/* ── CO HEADER ── */
+.co-hdr{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r2);padding:16px 18px;margin-bottom:12px;display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;}
+.co-av{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--ds);font-size:.74rem;font-weight:800;flex-shrink:0;}
+.co-av-o{background:rgba(249,115,22,.14);color:var(--orange);border:1px solid rgba(249,115,22,.28);}
+.co-av-g{background:rgba(34,197,94,.11);color:var(--green);border:1px solid rgba(34,197,94,.24);}
+.co-name{font-family:var(--ds);font-size:.97rem;font-weight:700;color:var(--w);margin-bottom:3px;}
+.co-sub{font-size:.7rem;color:var(--t1);margin-bottom:7px;}
+.co-tags{display:flex;flex-wrap:wrap;gap:5px;}
+.score-big{font-family:var(--mo);font-size:2rem;font-weight:700;line-height:1;}
+.score-lbl{font-size:.62rem;color:var(--t2);margin-top:2px;text-align:right;}
+
+/* ── VEREDICTO ── */
+.verd{border-radius:var(--r2);padding:14px 16px;margin-bottom:12px;border:1px solid;}
+.vg{background:var(--grn-d);border-color:rgba(34,197,94,.22);}
+.vy{background:var(--yel-d);border-color:rgba(234,179,8,.22);}
+.vr{background:var(--red-d);border-color:rgba(239,68,68,.2);}
+.vb{background:var(--blu-d);border-color:rgba(59,130,246,.22);}
+.vp{background:var(--purp-d);border-color:rgba(168,85,247,.22);}
+.v-em{font-size:1.1rem;flex-shrink:0;margin-top:1px;}
+.v-row{display:flex;align-items:flex-start;gap:10px;}
+.v-title{font-family:var(--ds);font-size:.87rem;font-weight:700;margin-bottom:3px;}
+.vg .v-title{color:var(--green);}
+.vy .v-title{color:var(--yel);}
+.vr .v-title{color:var(--red);}
+.vb .v-title{color:var(--blue);}
+.vp .v-title{color:var(--purple);}
+.v-text{font-size:.77rem;color:var(--t1);line-height:1.7;}
+.v-text strong{color:var(--w);}
+.v-action{margin-top:8px;font-size:.73rem;font-weight:600;padding:5px 12px;border-radius:5px;display:inline-block;}
+.va-o{background:var(--ora-d);color:var(--orange);border:1px solid var(--ora-b);}
+.va-g{background:var(--grn-d);color:var(--green);border:1px solid var(--grn-b);}
+.va-b{background:var(--blu-d);color:var(--blue);border:1px solid var(--blu-b);}
+
+/* ── BLOCO TÍTULO ── */
+.block-title{font-size:.6rem;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--t2);margin:20px 0 9px;display:flex;align-items:center;gap:9px;}
+.block-title::after{content:'';flex:1;height:.5px;background:var(--b1);}
+
+/* ── CHECK BLOCK ── */
+.check-block{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);margin-bottom:7px;overflow:hidden;}
+.cb-head{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;transition:background .12s;}
+.cb-head:hover{background:var(--s2);}
+.cb-icon{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.64rem;font-weight:700;flex-shrink:0;}
+.cb-ok{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.25);}
+.cb-alert{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.25);}
+.cb-warn{background:rgba(234,179,8,.12);color:var(--yel);border:1px solid rgba(234,179,8,.25);}
+.cb-info{background:rgba(59,130,246,.12);color:var(--blue);border:1px solid rgba(59,130,246,.25);}
+.cb-crim{background:rgba(168,85,247,.12);color:var(--purple);border:1px solid rgba(168,85,247,.25);}
+.cb-title{font-size:.78rem;font-weight:500;color:var(--w);flex:1;}
+.cb-source{font-size:.61rem;color:var(--t2);margin-left:auto;white-space:nowrap;}
+.cb-date{font-size:.6rem;color:var(--t2);}
+.cb-body{display:none;padding:10px 14px 12px;border-top:1px solid var(--b1);background:var(--s2);font-size:.76rem;color:var(--t1);line-height:1.68;}
+.cb-body.open{display:block;}
+.cb-body strong{color:var(--w);}
+.cb-action{margin-top:8px;font-size:.72rem;font-weight:600;padding:5px 11px;border-radius:5px;display:inline-block;background:var(--ora-d);color:var(--orange);border:1px solid var(--ora-b);}
+
+/* ── STATS ── */
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:5px;margin-bottom:12px;}
+.stat{background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:8px;text-align:center;}
+.sv{font-family:var(--mo);font-size:.82rem;font-weight:700;display:block;margin-bottom:1px;}
+.sv-o{color:var(--orange);}.sv-g{color:var(--green);}.sv-b{color:var(--blue);}
+.sv-y{color:var(--yel);}.sv-r{color:var(--red);}.sv-t{color:var(--teal);}.sv-p{color:var(--purple);}
+.sl{font-size:.58rem;color:var(--t2);}
+
+/* ── CRIMINAL BLOCK ── */
+.crim-section{background:var(--s1);border:1px solid rgba(168,85,247,.25);border-radius:var(--r2);overflow:hidden;margin-bottom:12px;}
+.crim-header{background:rgba(168,85,247,.08);padding:12px 16px;border-bottom:1px solid rgba(168,85,247,.2);display:flex;align-items:center;gap:10px;}
+.crim-icon{font-size:1rem;}
+.crim-title{font-family:var(--ds);font-size:.85rem;font-weight:700;color:var(--purple);}
+.crim-sub{font-size:.68rem;color:var(--t1);margin-top:2px;}
+.crim-body{padding:12px 16px;}
+.crim-split{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+@media(max-width:640px){.crim-split{grid-template-columns:1fr;}}
+.crim-col-title{font-size:.6rem;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--t2);margin-bottom:8px;display:flex;align-items:center;gap:7px;}
+.crim-col-title::after{content:'';flex:1;height:.5px;background:var(--b1);}
+.crim-item{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--s2);border-radius:7px;margin-bottom:5px;font-size:.75rem;}
+.crim-item:last-child{margin-bottom:0;}
+.ci-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.ci-ok{background:var(--green);}
+.ci-warn{background:var(--yel);}
+.ci-alert{background:var(--red);}
+.ci-info{background:var(--blue);}
+.ci-label{flex:1;color:var(--t1);}
+.ci-label strong{color:var(--w);display:block;margin-bottom:1px;}
+.ci-src{font-size:.6rem;color:var(--t2);white-space:nowrap;}
+.crim-frontier{background:rgba(168,85,247,.06);border:1px solid rgba(168,85,247,.15);border-radius:7px;padding:9px 12px;font-size:.72rem;color:var(--t1);line-height:1.65;}
+.crim-frontier strong{color:var(--purple);}
+
+/* ── GRUPO ECONÔMICO ── */
+.grupo-banner{background:rgba(249,115,22,.06);border:1px solid rgba(249,115,22,.22);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.gb-text{flex:1;font-size:.78rem;color:var(--t1);line-height:1.55;}
+.gb-text strong{color:var(--orange);}
+.grupo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;margin-bottom:10px;}
+.gc{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:12px 14px;}
+.gc.crit{border-color:rgba(239,68,68,.3);}
+.gc-hdr{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.gc-av{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--ds);font-size:.58rem;font-weight:800;flex-shrink:0;}
+.gc-name{font-size:.76rem;font-weight:600;color:var(--w);}
+.gc-score{font-family:var(--mo);font-size:.86rem;font-weight:700;margin-left:auto;}
+.gc-items{font-size:.7rem;color:var(--t1);line-height:1.7;}
+.gc-items span{display:block;}
+.gc-ok::before{content:'✓ ';color:var(--green);}
+.gc-warn::before{content:'⚠ ';color:var(--yel);}
+.gc-crit::before{content:'✕ ';color:var(--red);}
+
+/* ── INDICADORES BALANÇO ── */
+.ind-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+@media(max-width:640px){.ind-grid{grid-template-columns:1fr 1fr;}}
+.ind{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;}
+.ind-top{padding:12px 12px 9px;}
+.ind-lbl{font-size:.66rem;color:var(--t1);margin-bottom:1px;}
+.ind-tc{font-family:var(--mo);font-size:.58rem;color:var(--t2);margin-bottom:6px;}
+.ind-val{font-family:var(--mo);font-size:1.3rem;font-weight:700;color:var(--w);line-height:1;margin-bottom:5px;}
+.hbar{height:4px;background:var(--b1);border-radius:2px;overflow:hidden;margin-bottom:3px;}
+.hf{height:100%;border-radius:2px;}
+.hf-g{background:var(--green);}.hf-y{background:var(--yel);}.hf-r{background:var(--red);}
+.ind-bot{padding:7px 12px;background:var(--s2);border-top:1px solid var(--b1);font-size:.7rem;color:var(--t1);line-height:1.55;}
+.ind-bot strong{color:var(--w);}
+
+/* ── DRE ── */
+.dre{width:100%;border-collapse:collapse;font-size:.76rem;}
+.dre th{padding:7px 11px;background:var(--s2);font-size:.61rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--t2);text-align:left;border-bottom:1px solid var(--b1);}
+.dre th:not(:first-child){text-align:right;}
+.dre td{padding:7px 11px;border-bottom:.5px solid var(--b1);color:var(--t1);}
+.dre td:not(:first-child){font-family:var(--mo);text-align:right;}
+.dre-pos{color:var(--green)!important;}.dre-neg{color:var(--red)!important;}
+.dre tr.dre-tot td{font-weight:600;color:var(--w);background:var(--s2);}
+.dre tr.dre-ebt td{color:var(--blue);font-weight:600;}
+.dre tr.dre-sub td:first-child{padding-left:20px;color:var(--t2);}
+.dre tr.dre-result td{color:var(--green);font-weight:700;background:rgba(34,197,94,.04);}
+
+/* ── CICLO ── */
+.ciclo-row{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:.5px solid var(--b1);}
+.ciclo-row:last-child{border-bottom:none;}
+.ciclo-lbl{font-size:.7rem;color:var(--t1);width:150px;flex-shrink:0;}
+.ciclo-track{flex:1;height:18px;background:var(--s2);border-radius:4px;overflow:hidden;}
+.ciclo-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:7px;}
+.ciclo-fill span{font-family:var(--mo);font-size:.64rem;font-weight:700;color:#fff;}
+.ciclo-val{font-family:var(--mo);font-size:.7rem;font-weight:600;min-width:52px;text-align:right;}
+
+/* ── CALLOUT ── */
+.callout{border-radius:var(--r);padding:11px 14px;font-size:.77rem;color:var(--t1);line-height:1.7;margin-bottom:10px;border:1px solid;}
+.ca-y{background:var(--yel-d);border-color:rgba(234,179,8,.18);}
+.ca-g{background:var(--grn-d);border-color:rgba(34,197,94,.18);}
+.ca-b{background:var(--blu-d);border-color:rgba(59,130,246,.18);}
+.ca-r{background:var(--red-d);border-color:rgba(239,68,68,.18);}
+.callout strong{color:var(--w);}
+
+/* ── REGIME ── */
+.reg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.reg{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:13px;}
+.reg.best{border-color:rgba(34,197,94,.32);background:rgba(34,197,94,.04);}
+.reg-badge{font-size:.58rem;font-weight:700;padding:2px 7px;border-radius:4px;background:var(--green);color:#052e16;display:inline-block;margin-bottom:5px;}
+.reg-name{font-size:.76rem;font-weight:600;color:var(--w);margin-bottom:2px;}
+.reg-val{font-family:var(--mo);font-size:1.25rem;font-weight:700;color:var(--w);margin:4px 0 2px;}
+.reg-desc{font-size:.68rem;color:var(--t1);}
+.reg-save{font-size:.7rem;color:var(--green);margin-top:4px;font-weight:600;}
+
+/* ── VALUATION ── */
+.val-methods{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:12px;}
+@media(max-width:700px){.val-methods{grid-template-columns:1fr 1fr;}}
+.vm{background:var(--s1);border:1px solid var(--b1);border-radius:8px;padding:10px 11px;}
+.vm-name{font-size:.67rem;color:var(--t1);margin-bottom:2px;}
+.vm-val{font-family:var(--mo);font-size:.9rem;font-weight:700;color:var(--w);margin-bottom:2px;}
+.vm-pct{font-size:.62rem;color:var(--t2);}
+.vm-bar{height:3px;background:var(--b1);border-radius:2px;overflow:hidden;margin-top:5px;}
+.vm-bf{height:100%;border-radius:2px;background:var(--blue);}
+.val-result{background:rgba(34,197,94,.05);border:1px solid rgba(34,197,94,.28);border-radius:var(--r);padding:14px 16px;margin-bottom:12px;}
+.vr-range{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.vr-label{font-size:.63rem;color:var(--t2);}
+.vr-val{font-family:var(--mo);font-size:1.6rem;font-weight:700;color:var(--w);}
+.vr-med{font-family:var(--mo);font-size:1.15rem;font-weight:700;color:var(--green);}
+
+/* ── CRUZAMENTO ── */
+.cruz-alert{border-radius:var(--r2);padding:13px 16px;margin-bottom:10px;border:1px solid;display:flex;align-items:flex-start;gap:10px;}
+.cruz-alert-r{background:rgba(239,68,68,.07);border-color:rgba(239,68,68,.2);}
+.cruz-alert-y{background:var(--yel-d);border-color:rgba(234,179,8,.2);}
+.ca-icon{font-size:1rem;flex-shrink:0;margin-top:1px;}
+.ca-body{flex:1;}
+.ca-title{font-family:var(--ds);font-size:.83rem;font-weight:700;margin-bottom:4px;}
+.cruz-alert-r .ca-title{color:var(--red);}
+.cruz-alert-y .ca-title{color:var(--yel);}
+.ca-text{font-size:.76rem;color:var(--t1);line-height:1.68;}
+.ca-text strong{color:var(--w);}
+.ca-action{margin-top:7px;font-size:.72rem;font-weight:600;padding:5px 11px;border-radius:5px;display:inline-block;background:var(--ora-d);color:var(--orange);border:1px solid var(--ora-b);}
+
+/* ── LOCK ── */
+.lock-box{border:1px solid var(--b1);border-radius:var(--r);padding:24px;text-align:center;background:var(--s1);margin-bottom:10px;}
+.lock-icon{font-size:1.3rem;margin-bottom:6px;}
+.lock-txt{font-size:.78rem;color:var(--t1);margin-bottom:10px;}
+
+/* ── SEC LBL ── */
+.sec-lbl{font-size:.6rem;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--t2);margin:16px 0 8px;display:flex;align-items:center;gap:8px;}
+.sec-lbl::after{content:'';flex:1;height:.5px;background:var(--b1);}
+</style>
+
+<script>
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function showMod(mod){
+  showPage('pg-analysis');
+  document.querySelectorAll('.an-mod').forEach(m=>m.classList.remove('active'));
+  document.querySelectorAll('[id^="sub-"]').forEach(s=>s.style.display='none');
+  document.querySelectorAll('.tn-tab').forEach(t=>t.className='tn-tab');
+  document.getElementById('mod-'+mod).classList.add('active');
+  var sub = document.getElementById('sub-'+mod);
+  if(sub) sub.style.display='flex';
+  if(mod==='cnpj'){
+    document.getElementById('tab-cnpj').className='tn-tab act-o';
+    switchTab('cnpj','checklist');
+  } else {
+    document.getElementById('tab-balanco').className='tn-tab act-g';
+    switchTab('balanco','indicadores');
+  }
+}
+function switchTab(mod, tab){
+  var modEl=document.getElementById('mod-'+mod);
+  modEl.querySelectorAll('.tab-p').forEach(p=>p.classList.remove('active'));
+  var el=document.getElementById(mod+'-'+tab);
+  if(el) el.classList.add('active');
+  var sn=document.getElementById('sub-'+mod);
+  if(!sn) return;
+  sn.querySelectorAll('.stab').forEach(s=>s.className='stab');
+  var map={checklist:0,criminal:1,socios:2,grupo:3,cruzamentos:4,
+           indicadores:0,dre:1,ciclo:2,fiscal:3,valuation:4};
+  var idx=map[tab];
+  var tabs=sn.querySelectorAll('.stab');
+  if(tabs[idx]){
+    var cls=mod==='cnpj'?'so':'sg';
+    tabs[idx].className='stab '+cls;
+  }
+}
+function toggleCheck(el){
+  var body=el.nextElementSibling;
+  if(body&&body.classList.contains('cb-body')) body.classList.toggle('open');
+}
+function setEntrada(type){
+  document.getElementById('ent-upload').style.display = type==='upload'?'block':'none';
+  document.getElementById('ent-ticker').style.display = type==='ticker'?'flex':'none';
+  document.querySelectorAll('.entrada-btn').forEach(b=>b.classList.remove('active-g'));
+  document.getElementById('btn-'+type).classList.add('active-g');
+}
+</script>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════
+     HOME PAGE
+═══════════════════════════════════ -->
+<div id="pg-home" class="page active">
+
+<!-- NAV -->
+<nav class="home-nav">
+  <div class="hn-logo" onclick="showPage('pg-home')"><span>R</span>ADAR</div>
+  <div class="hn-links">
+    <button class="hnl" onclick="showPage('pg-home')">Produto</button>
+    <button class="hnl">Preços</button>
+    <button class="hnl">Para contadores</button>
+  </div>
+  <div class="hn-right">
+    <button class="btn btn-outline" style="padding:8px 16px;font-size:.72rem">Entrar</button>
+    <button class="btn btn-orange" style="padding:8px 16px;font-size:.72rem">Começar grátis</button>
+  </div>
+</nav>
+
+<!-- TAGLINE CENTRAL -->
+<div style="text-align:center;padding:52px 24px 40px;max-width:680px;margin:0 auto">
+  <div style="font-size:.62rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--orange);margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:8px">
+    <span style="display:block;width:24px;height:1.5px;background:var(--orange)"></span>
+    Inteligência empresarial brasileira
+    <span style="display:block;width:24px;height:1.5px;background:var(--orange)"></span>
+  </div>
+  <h1 style="font-family:var(--ds);font-size:clamp(1.9rem,4vw,3.1rem);font-weight:800;color:var(--w);line-height:1.07;margin-bottom:14px">
+    Duas perguntas.<br>Uma plataforma.
+  </h1>
+  <p style="font-size:.88rem;color:var(--t1);line-height:1.75">Escolha o que você precisa saber agora.</p>
+</div>
+
+<!-- SPLIT PORTALS -->
+<div style="display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 220px);border-top:1px solid var(--b1)" id="home-split">
+
+  <!-- ══ PORTAL ESQUERDO — CNPJ ══ -->
+  <div style="padding:40px 36px 52px;border-right:1px solid var(--b1);display:flex;flex-direction:column;position:relative;overflow:hidden;background:linear-gradient(160deg,rgba(249,115,22,.03) 0%,transparent 60%)">
+
+    <!-- número decorativo -->
+    <div style="font-family:var(--ds);font-size:6rem;font-weight:800;color:rgba(249,115,22,.06);position:absolute;top:16px;right:24px;line-height:1;pointer-events:none;user-select:none">01</div>
+
+    <div style="margin-bottom:20px">
+      <div style="display:inline-flex;align-items:center;gap:7px;background:var(--ora-d);border:1px solid var(--ora-b);border-radius:6px;padding:5px 11px;margin-bottom:16px">
+        <span style="font-size:.82rem">🛡️</span>
+        <span style="font-size:.63rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--orange)">Para quem vende, compra ou contrata</span>
+      </div>
+      <h2 style="font-family:var(--ds);font-size:1.55rem;font-weight:800;color:var(--w);line-height:1.15;margin-bottom:12px">
+        Posso <span style="color:var(--orange)">vender tranquilo</span><br>para este CNPJ?
+      </h2>
+      <p style="font-size:.82rem;color:var(--t1);line-height:1.75;max-width:380px">
+        Antes de dar prazo, fechar contrato ou assinar parceria — consulte todos os canais que importam em 60 segundos. Fiscal, judicial, societário, trabalhista, criminal e reputacional.
+      </p>
+    </div>
+
+    <!-- o que você descobre -->
+    <div style="margin-bottom:28px">
+      <div style="font-size:.6rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t2);margin-bottom:10px">O que você descobre</div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div style="display:flex;align-items:center;gap:9px;font-size:.78rem;color:var(--t1)"><span style="color:var(--orange);font-size:.7rem;font-weight:700;width:16px">✓</span>Dívida ativa federal, estadual e protestos</div>
+        <div style="display:flex;align-items:center;gap:9px;font-size:.78rem;color:var(--t1)"><span style="color:var(--orange);font-size:.7rem;font-weight:700;width:16px">✓</span>Processos judiciais, trabalhistas e criminais</div>
+        <div style="display:flex;align-items:center;gap:9px;font-size:.78rem;color:var(--t1)"><span style="color:var(--orange);font-size:.7rem;font-weight:700;width:16px">✓</span>Mandados de prisão e antecedentes dos sócios</div>
+        <div style="display:flex;align-items:center;gap:9px;font-size:.78rem;color:var(--t1)"><span style="color:var(--orange);font-size:.7rem;font-weight:700;width:16px">✓</span>Sanções CEIS/CNEP, PEP, OFAC</div>
+        <div style="display:flex;align-items:center;gap:9px;font-size:.78rem;color:var(--t1)"><span style="color:var(--orange);font-size:.7rem;font-weight:700;width:16px">✓</span>Grupo econômico e empresas dos sócios</div>
+        <div style="display:flex;align-items:center;gap:9px;font-size:.78rem;color:var(--t1)"><span style="color:var(--orange);font-size:.7rem;font-weight:700;width:16px">✓</span>Score com raciocínio visível — não caixa-preta</div>
+      </div>
+    </div>
+
+    <!-- CAMPO DE BUSCA — destaque máximo -->
+    <div style="margin-top:auto">
+      <div style="font-size:.68rem;font-weight:600;color:var(--t1);margin-bottom:8px">Digite o CNPJ, razão social ou nome fantasia:</div>
+      <div style="display:flex;background:var(--s2);border:1.5px solid var(--b2);border-radius:10px;overflow:hidden;transition:border-color .15s;box-shadow:0 4px 24px rgba(249,115,22,.06)" onfocusin="this.style.borderColor='var(--orange)'" onfocusout="this.style.borderColor='var(--b2)'">
+        <div style="padding:14px 14px;display:flex;align-items:center;color:var(--t2);font-size:1rem">🔍</div>
+        <input type="text" placeholder="Ex: 17.057.060/0001-50 ou Transportadora..." style="flex:1;background:transparent;border:none;outline:none;padding:14px 4px;font-family:var(--bd);font-size:.86rem;color:var(--w)" id="cnpj-input">
+        <button onclick="showMod('cnpj')" style="padding:12px 22px;background:var(--orange);color:#fff;border:none;font-family:var(--ds);font-size:.75rem;font-weight:700;cursor:pointer;letter-spacing:.3px;transition:background .12s;white-space:nowrap" onmouseover="this.style.background='#ea6b0e'" onmouseout="this.style.background='var(--orange)'">
+          Analisar agora →
+        </button>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <span style="font-size:.62rem;color:var(--t2)">Exemplos rápidos:</span>
+        <span style="font-size:.68rem;color:var(--orange);cursor:pointer;padding:3px 8px;border-radius:4px;background:var(--ora-d);border:1px solid var(--ora-b)" onclick="document.getElementById('cnpj-input').value='17.057.060/0001-50';showMod('cnpj')">Transportadora MG</span>
+        <span style="font-size:.68rem;color:var(--orange);cursor:pointer;padding:3px 8px;border-radius:4px;background:var(--ora-d);border:1px solid var(--ora-b)" onclick="showMod('cnpj')">Fornecedor SP</span>
+        <span style="font-size:.68rem;color:var(--orange);cursor:pointer;padding:3px 8px;border-radius:4px;background:var(--ora-d);border:1px solid var(--ora-b)" onclick="showMod('cnpj')">Cliente RJ</span>
+      </div>
+      <div style="margin-top:12px;font-size:.65rem;color:var(--t2);display:flex;align-items:center;gap:5px">
+        <span style="color:var(--green)">●</span> Gratuito para as primeiras 3 consultas · Resultado em 60 segundos
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PORTAL DIREITO — BALANÇO ══ -->
+  <div style="padding:40px 36px 52px;display:flex;flex-direction:column;position:relative;overflow:hidden;background:linear-gradient(160deg,rgba(34,197,94,.025) 0%,transparent 60%)">
+
+    <!-- número decorativo -->
+    <div style="font-family:var(--ds);font-size:6rem;font-weight:800;color:rgba(34,197,94,.06);position:absolute;top:16px;right:24px;line-height:1;pointer-events:none;user-select:none">02</div>
+
+    <div style="margin-bottom:20px">
+      <div style="display:inline-flex;align-items:center;gap:7px;background:var(--grn-d);border:1px solid var(--grn-b);border-radius:6px;padding:5px 11px;margin-bottom:16px">
+        <span style="font-size:.82rem">📊</span>
+        <span style="font-size:.63rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--green)">Para o dono, contador e investidor</span>
+      </div>
+      <h2 style="font-family:var(--ds);font-size:1.55rem;font-weight:800;color:var(--w);line-height:1.15;margin-bottom:12px">
+        O que o <span style="color:var(--green)">balanço está</span><br>tentando me dizer?
+      </h2>
+      <p style="font-size:.82rem;color:var(--t1);line-height:1.75;max-width:380px">
+        Análise financeira em linguagem direta — sem termos técnicos, sem dado solto. Descubra por que o lucro está sumindo, o que melhorar, quanto vale o negócio e como chegar ao crédito que você precisa.
+      </p>
+    </div>
+
+    <!-- o que você descobre -->
+    <div style="margin-bottom:28px">
+      <div style="font-size:.6rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t2);margin-bottom:10px">O que você descobre</div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div style="display:flex;align-items:center;gap:9px;font-size:.78rem;color:var(--t1)"><span style="color:var(--green);font-size:.7rem;font-weight:700;width:16px">✓</span>Por que o lucro cai mesmo com receita crescendo</div>
+        <div style="display:flex;align-items:center;gap:9px;font-size:.78rem;color:var(--t1)"><span style="color:var(--green);font-size:.7rem;font-weight:700;width:16px">✓</span>Qual regime tributário vai economizar mais imposto</div>
+        <div style="display:flex;align-items:center;gap:9px;font-size:.78rem;color:var(--t1)"><span style="color:var(--green);font-size:.7rem;font-weight:700;width:16px">✓</span>Quanto vale a empresa (5 métodos + piso e teto)</div>
+        <div style="display:flex;align-items:center;gap:9px;font-size:.78rem;color:var(--t1)"><span style="color:var(--green);font-size:.7rem;font-weight:700;width:16px">✓</span>Como o banco vai ver o balanço para crédito</div>
+        <div style="display:flex;align-items:center;gap:9px;font-size:.78rem;color:var(--t1)"><span style="color:var(--green);font-size:.7rem;font-weight:700;width:16px">✓</span>Ciclo de caixa e onde o dinheiro está preso</div>
+        <div style="display:flex;align-items:center;gap:9px;font-size:.78rem;color:var(--t1)"><span style="color:var(--green);font-size:.7rem;font-weight:700;width:16px">✓</span>Para empresa listada: insiders, fatos relevantes, valuation</div>
+      </div>
+    </div>
+
+    <!-- DUAL ENTRY -->
+    <div style="margin-top:auto">
+      <div style="font-size:.68rem;font-weight:600;color:var(--t1);margin-bottom:10px">Como você quer entrar?</div>
+
+      <!-- TOGGLE SELETOR -->
+      <div style="display:flex;background:var(--s2);border:1px solid var(--b1);border-radius:9px;padding:4px;gap:4px;margin-bottom:14px">
+        <button id="tog-upload" onclick="setEntrada('upload')"
+          style="flex:1;padding:9px 12px;border-radius:6px;border:none;cursor:pointer;font-family:var(--bd);font-size:.74rem;font-weight:600;background:var(--green);color:#052e16;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px">
+          <span>📄</span> Upload balanço / DRE
+        </button>
+        <button id="tog-ticker" onclick="setEntrada('ticker')"
+          style="flex:1;padding:9px 12px;border-radius:6px;border:none;cursor:pointer;font-family:var(--bd);font-size:.74rem;font-weight:600;background:transparent;color:var(--t1);transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px">
+          <span>📈</span> Ticker B3
+        </button>
+      </div>
+
+      <!-- UPLOAD AREA -->
+      <div id="ent-upload">
+        <div onclick="showMod('balanco')"
+          style="border:2px dashed var(--b2);border-radius:10px;padding:22px;text-align:center;cursor:pointer;transition:all .15s;background:var(--s2)"
+          onmouseover="this.style.borderColor='#22C55E';this.style.background='rgba(34,197,94,.04)'"
+          onmouseout="this.style.borderColor='var(--b2)';this.style.background='var(--s2)'">
+          <div style="font-size:1.6rem;margin-bottom:8px">📂</div>
+          <div style="font-size:.78rem;font-weight:600;color:var(--w);margin-bottom:4px">Arraste o arquivo aqui ou clique para selecionar</div>
+          <div style="font-size:.67rem;color:var(--t2);margin-bottom:12px">Balanço, DRE, SPED ECD/ECF — PDF ou Excel aceitos</div>
+          <div style="display:inline-flex;gap:6px;flex-wrap:wrap;justify-content:center">
+            <span style="padding:3px 8px;background:var(--s3);border:1px solid var(--b1);border-radius:4px;font-size:.62rem;color:var(--t2)">.pdf</span>
+            <span style="padding:3px 8px;background:var(--s3);border:1px solid var(--b1);border-radius:4px;font-size:.62rem;color:var(--t2)">.xlsx</span>
+            <span style="padding:3px 8px;background:var(--s3);border:1px solid var(--b1);border-radius:4px;font-size:.62rem;color:var(--t2)">.xls</span>
+            <span style="padding:3px 8px;background:var(--s3);border:1px solid var(--b1);border-radius:4px;font-size:.62rem;color:var(--t2)">SPED</span>
+          </div>
+        </div>
+        <div style="margin-top:10px;text-align:center;font-size:.65rem;color:var(--t2)">
+          Sem arquivo agora? <span style="color:var(--green);cursor:pointer;font-weight:600" onclick="showMod('balanco')">Ver demo — Transportadora Rotas do Sul →</span>
+        </div>
+      </div>
+
+      <!-- TICKER AREA -->
+      <div id="ent-ticker" style="display:none">
+        <div style="font-size:.74rem;color:var(--t1);margin-bottom:8px;line-height:1.6">
+          Insira o código da empresa na B3 para análise completa: indicadores, insiders, valuation e fatos relevantes — em linguagem simples.
+        </div>
+        <div style="display:flex;background:var(--s2);border:1.5px solid var(--b2);border-radius:10px;overflow:hidden;transition:border-color .15s;box-shadow:0 4px 24px rgba(34,197,94,.06)" onfocusin="this.style.borderColor='var(--green)'" onfocusout="this.style.borderColor='var(--b2)'">
+          <div style="padding:14px 14px;background:var(--s3);border-right:1px solid var(--b1);font-family:var(--mo);font-size:.72rem;color:var(--t2);display:flex;align-items:center;white-space:nowrap">B3:</div>
+          <input type="text" placeholder="JBSS3, PETR4, VALE3, WEGE3..." maxlength="6"
+            style="flex:1;background:transparent;border:none;outline:none;padding:14px 12px;font-family:var(--mo);font-size:.9rem;color:var(--w);text-transform:uppercase;letter-spacing:1px" id="ticker-input">
+          <button onclick="showMod('balanco')" style="padding:12px 20px;background:var(--green);color:#052e16;border:none;font-family:var(--ds);font-size:.75rem;font-weight:700;cursor:pointer;letter-spacing:.3px;transition:background .12s;white-space:nowrap" onmouseover="this.style.background='#16a34a'" onmouseout="this.style.background='var(--green)'">
+            Analisar →
+          </button>
+        </div>
+        <div style="margin-top:9px;display:flex;gap:7px;flex-wrap:wrap;align-items:center">
+          <span style="font-size:.62rem;color:var(--t2)">Tickers populares:</span>
+          <span style="font-size:.68rem;color:var(--green);cursor:pointer;padding:3px 8px;border-radius:4px;background:var(--grn-d);border:1px solid var(--grn-b)" onclick="document.getElementById('ticker-input').value='JBSS3';showMod('balanco')">JBSS3</span>
+          <span style="font-size:.68rem;color:var(--green);cursor:pointer;padding:3px 8px;border-radius:4px;background:var(--grn-d);border:1px solid var(--grn-b)" onclick="document.getElementById('ticker-input').value='PETR4';showMod('balanco')">PETR4</span>
+          <span style="font-size:.68rem;color:var(--green);cursor:pointer;padding:3px 8px;border-radius:4px;background:var(--grn-d);border:1px solid var(--grn-b)" onclick="document.getElementById('ticker-input').value='VALE3';showMod('balanco')">VALE3</span>
+          <span style="font-size:.68rem;color:var(--green);cursor:pointer;padding:3px 8px;border-radius:4px;background:var(--grn-d);border:1px solid var(--grn-b)" onclick="document.getElementById('ticker-input').value='WEGE3';showMod('balanco')">WEGE3</span>
+        </div>
+        <div style="margin-top:12px;font-size:.65rem;color:var(--t2);display:flex;align-items:center;gap:5px">
+          <span style="color:var(--green)">●</span> Dados CVM atualizados · Inclui DFP/ITR + movimentação de insiders
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /home-split -->
+
+<script>
+// Override setEntrada to also update the toggle buttons
+function setEntrada(type){
+  document.getElementById('ent-upload').style.display = type==='upload'?'block':'none';
+  document.getElementById('ent-ticker').style.display = type==='ticker'?'block':'none';
+  var togU = document.getElementById('tog-upload');
+  var togT = document.getElementById('tog-ticker');
+  if(type==='upload'){
+    togU.style.background='var(--green)'; togU.style.color='#052e16';
+    togT.style.background='transparent'; togT.style.color='var(--t1)';
+  } else {
+    togT.style.background='var(--green)'; togT.style.color='#052e16';
+    togU.style.background='transparent'; togU.style.color='var(--t1)';
+  }
+}
+// Mobile: stack portals
+function checkMobile(){
+  var s=document.getElementById('home-split');
+  if(s) s.style.gridTemplateColumns=window.innerWidth<700?'1fr':'1fr 1fr';
+}
+window.addEventListener('resize',checkMobile);
+checkMobile();
+</script>
+
+</div><!-- /pg-home -->
+
+
+<!-- ═══════════════════════════════════
+     ANALYSIS PAGE
+═══════════════════════════════════ -->
+<div id="pg-analysis" class="page">
+<nav class="topnav">
+  <div class="tn-logo" onclick="showPage('pg-home')"><span>R</span>ADAR</div>
+  <div class="tn-nav">
+    <button class="tn-tab act-o" id="tab-cnpj" onclick="showMod('cnpj')">🛡️ Análise de CNPJ</button>
+    <button class="tn-tab" id="tab-balanco" onclick="showMod('balanco')">📊 Balanço / Ação</button>
+  </div>
+  <div class="tn-right">
+    <span class="tn-plan">Free</span>
+    <button class="btn btn-orange" style="padding:6px 14px;font-size:.69rem">Ver Planos</button>
+  </div>
+</nav>
+
+<!-- SUBNAV CNPJ -->
+<div class="subnav" id="sub-cnpj">
+  <button class="stab so" onclick="switchTab('cnpj','checklist')">Verificações</button>
+  <button class="stab" onclick="switchTab('cnpj','criminal')">Criminal</button>
+  <button class="stab" onclick="switchTab('cnpj','socios')">Sócios & CPF</button>
+  <button class="stab" onclick="switchTab('cnpj','grupo')">Grupo Econômico</button>
+  <button class="stab" onclick="switchTab('cnpj','cruzamentos')">Alertas cruzados</button>
+</div>
+<!-- SUBNAV BALANÇO -->
+<div class="subnav" id="sub-balanco" style="display:none">
+  <button class="stab sg" onclick="switchTab('balanco','indicadores')">Diagnóstico</button>
+  <button class="stab" onclick="switchTab('balanco','dre')">DRE</button>
+  <button class="stab" onclick="switchTab('balanco','ciclo')">Ciclo de caixa</button>
+  <button class="stab" onclick="switchTab('balanco','fiscal')">Regime tributário</button>
+  <button class="stab" onclick="switchTab('balanco','valuation')">Quanto vale</button>
+</div>
+
+<!-- ═══ MÓDULO CNPJ ═══ -->
+<div class="an-mod active" id="mod-cnpj">
+<div class="an-wrap">
+
+  <div class="co-hdr">
+    <div style="display:flex;align-items:flex-start;gap:12px">
+      <div class="co-av co-av-o">TRS</div>
+      <div>
+        <div class="co-name">Transportadora Rotas do Sul Ltda.</div>
+        <div class="co-sub">CNPJ 17.057.060/0001-50 · Simples Nacional · Belo Horizonte/MG · 14 anos · CNAE 4930-2/02</div>
+        <div class="co-tags">
+          <span class="chip chip-g">Ativa</span>
+          <span class="chip chip-y">Protesto ativo</span>
+          <span class="chip chip-o">Score moderado</span>
+          <span class="chip chip-r">Grupo c/ alerta</span>
+          <span class="chip chip-p">Inquérito MP</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="score-big" style="color:var(--yel)">64</div>
+      <div class="score-lbl">Score / 100</div>
+    </div>
+  </div>
+
+  <!-- TAB: VERIFICAÇÕES -->
+  <div class="tab-p active" id="cnpj-checklist">
+    <div class="verd vy">
+      <div class="v-row"><span class="v-em">⚠️</span>
+        <div>
+          <div class="v-title">Risco moderado — 3 alertas em 26 verificações</div>
+          <div class="v-text">Empresa sólida, 14 anos de operação. <strong>1 protesto de R$23.400 ativo</strong> e <strong>inquérito policial ativo no MPRJ</strong> derrubam o score. Sócio minoritário tem empresa irmã com <strong>R$340k de dívida ativa</strong>. O CNPJ consultado está limpo fiscalmente, mas o grupo e o histórico judicial merecem atenção.</div>
+          <span class="v-action va-o">Limite R$15.000 · 30 dias · Análise de grupo recomendada →</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span class="sv sv-g">14 anos</span><span class="sl">Fundação</span></div>
+      <div class="stat"><span class="sv sv-g">Ativa</span><span class="sl">Situação RF</span></div>
+      <div class="stat"><span class="sv sv-g">R$0</span><span class="sl">Dívida federal</span></div>
+      <div class="stat"><span class="sv sv-r">1</span><span class="sl">Protesto ativo</span></div>
+      <div class="stat"><span class="sv sv-p">1</span><span class="sl">Inquérito MP</span></div>
+      <div class="stat"><span class="sv sv-g">0</span><span class="sl">Proc. criminais</span></div>
+      <div class="stat"><span class="sv sv-g">Limpo</span><span class="sl">CEIS/CNEP</span></div>
+      <div class="stat"><span class="sv sv-y">-3</span><span class="sl">CAGED 90d</span></div>
+    </div>
+
+    <div class="block-title">Bloco 1 — Dados cadastrais · Receita Federal</div>
+    <div class="check-block"><div class="cb-head" onclick="toggleCheck(this)"><div class="cb-icon cb-ok">✓</div><div class="cb-title">Situação cadastral — Ativa</div><div class="cb-source">Receita Federal</div></div><div class="cb-body">Ativa desde 04/2011. Sem processo de baixa em curso.</div></div>
+    <div class="check-block"><div class="cb-head" onclick="toggleCheck(this)"><div class="cb-icon cb-ok">✓</div><div class="cb-title">CNAE — Transporte rodoviário de carga fracionada (4930-2/02)</div><div class="cb-source">Receita Federal</div></div><div class="cb-body">CNAE consistente com a operação declarada. CNAEs secundários: 5229-0/02.</div></div>
+    <div class="check-block"><div class="cb-head" onclick="toggleCheck(this)"><div class="cb-icon cb-warn">⚠</div><div class="cb-title">Capital social — R$50.000 (abaixo do esperado para o porte)</div><div class="cb-source">Receita Federal</div></div><div class="cb-body"><strong>Capital de R$50.000 com frota declarada e 25 funcionários.</strong> Para operação de transporte nesse porte, o capital está subintegralizado. Verificar se reflete a realidade da empresa.</div></div>
+
+    <div class="block-title">Bloco 2 — Dívida federal · PGFN</div>
+    <div class="check-block"><div class="cb-head" onclick="toggleCheck(this)"><div class="cb-icon cb-ok">✓</div><div class="cb-title">Certidão PGFN — Negativa</div><div class="cb-source">PGFN</div></div><div class="cb-body">Sem dívida ativa federal inscrita. CNPJ em dia com a União.</div></div>
+
+    <div class="block-title">Bloco 3 — Sanções governamentais · CGU / Transparência</div>
+    <div class="check-block"><div class="cb-head" onclick="toggleCheck(this)"><div class="cb-icon cb-ok">✓</div><div class="cb-title">CEIS / CNEP — Não consta</div><div class="cb-source">CGU</div></div><div class="cb-body">Não inscrita no CEIS nem no CNEP. Habilitada para contratar com o governo federal.</div></div>
+    <div class="check-block"><div class="cb-head" onclick="toggleCheck(this)"><div class="cb-icon cb-ok">✓</div><div class="cb-title">Lista trabalho escravo — Não consta</div><div class="cb-source">MTE / Transparência</div></div><div class="cb-body">Não consta na lista de empregadores com condições análogas ao trabalho escravo.</div></div>
+
+    <div class="block-title">Bloco 4 — CAGED / Emprego formal · MTE</div>
+    <div class="check-block"><div class="cb-head" onclick="toggleCheck(this)"><div class="cb-icon cb-warn">⚠</div><div class="cb-title">CAGED — Contração de -3 funcionários em 90 dias</div><div class="cb-source">CAGED / MTE · jun/2025</div></div><div class="cb-body"><strong>Saldo negativo por 3 meses consecutivos:</strong> mar (-1), abr (-1), mai (-1). Quadro atual: 25 (era 28 em jan/2025). Coincide com o registro do protesto em fevereiro. Setor de transporte MG reduziu média de 1,2% no período — esta empresa reduziu mais.</div></div>
+
+    <div class="block-title">Bloco 5 — Processos judiciais · DataJud / CNJ</div>
+    <div class="check-block"><div class="cb-head" onclick="toggleCheck(this)"><div class="cb-icon cb-ok">✓</div><div class="cb-title">Processos criminais — Nenhum ativo</div><div class="cb-source">DataJud Criminal · CNJ</div></div><div class="cb-body">DataJud filtrado para classes criminais (Ação Penal, IPL, Execução Criminal): <strong>zero processos criminais ativos.</strong> 2 processos cíveis encerrados em 2021–2022.</div></div>
+
+    <div class="block-title">Bloco 6 — Protestos · PGFN / CENPROT</div>
+    <div class="check-block"><div class="cb-head" onclick="toggleCheck(this)"><div class="cb-icon cb-alert">✕</div><div class="cb-title">Protesto ativo — R$23.400 · Cartório BH · fev/2025</div><div class="cb-source">Web search / CENPROT V2</div></div><div class="cb-body"><strong>1 protesto ativo:</strong> R$23.400, Cartório de Protesto BH, 14/02/2025. Credor: Posto Combustíveis Central Ltda. Situação: ativo. -22 pontos no score. Proteção nacional completa (CENPROT) disponível no plano Plus.<div class="cb-action">Solicitar comprovante de baixa antes de ampliar crédito</div></div></div>
+
+    <div class="block-title">Bloco 7 — Contratos governamentais · PNCP / SIAFI</div>
+    <div class="check-block"><div class="cb-head" onclick="toggleCheck(this)"><div class="cb-icon cb-info">ℹ</div><div class="cb-title">Contratos públicos ativos — 2 contratos · R$1,2M</div><div class="cb-source">PNCP / Transparência</div></div><div class="cb-body"><strong>Ativo positivo:</strong> 2 contratos ativos com órgãos federais totalizando R$1,2M. Vigência até dez/2025. Pagamentos em dia pelo SIAFI. Receita futura garantida que o balanço não captura integralmente.</div></div>
+
+    <div class="block-title">Bloco 8 — RNTRC / ANTT · Habilitação transportadora (CNAE 4930)</div>
+    <div class="check-block"><div class="cb-head" onclick="toggleCheck(this)"><div class="cb-icon cb-ok">✓</div><div class="cb-title">RNTRC — Regular, frota registrada</div><div class="cb-source">ANTT</div></div><div class="cb-body">Registro Nacional de Transportadores Rodoviários de Cargas ativo. Modalidade: Carga Geral. Frota declarada: 8 veículos registrados no RNTRC. Sem autuações de infração de peso da PRF no último ano.</div></div>
+  </div>
+
+  <!-- TAB: CRIMINAL -->
+  <div class="tab-p" id="cnpj-criminal">
+    <div class="verd vp">
+      <div class="v-row"><span class="v-em">🔍</span>
+        <div>
+          <div class="v-title">Risco criminal MODERADO — empresa limpa, inquérito ativo no MP</div>
+          <div class="v-text">A empresa não tem condenação penal corporativa nem ação penal ativa. <strong>Porém figura como parte em 1 inquérito policial no MPRJ</strong> — tipo: estelionato, em andamento desde fev/2025. Os sócios têm ficha limpa federal (SINIC/PF) e sem mandados ativos (BNMP).</div>
+          <span class="v-action va-b">Acompanhar desfecho do inquérito antes de ampliar exposição acima de R$30k →</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOCO CRIMINAL ESTRUTURADO -->
+    <div class="crim-section">
+      <div class="crim-header">
+        <span class="crim-icon">⚖️</span>
+        <div>
+          <div class="crim-title">Situação Criminal — CNPJ e Sócios</div>
+          <div class="crim-sub">Premissa: empresa não tem antecedentes próprios — verificação feita por CNPJ + CPFs dos sócios extraídos do QSA</div>
+        </div>
+      </div>
+      <div class="crim-body">
+        <div class="crim-split">
+          <!-- Empresa -->
+          <div>
+            <div class="crim-col-title">Empresa — por CNPJ</div>
+            <div class="crim-item">
+              <div class="ci-dot ci-ok"></div>
+              <div class="ci-label"><strong>Condenação penal corporativa</strong>Nenhuma com trânsito em julgado</div>
+              <div class="ci-src">SEEU / CNJ</div>
+            </div>
+            <div class="crim-item">
+              <div class="ci-dot ci-ok"></div>
+              <div class="ci-label"><strong>Ação penal ativa</strong>Nenhuma nas classes criminais</div>
+              <div class="ci-src">DataJud criminal</div>
+            </div>
+            <div class="crim-item">
+              <div class="ci-dot ci-warn"></div>
+              <div class="ci-label"><strong>Inquérito policial ativo</strong>1 inquérito no MPRJ · tipo: estelionato · fev/2025</div>
+              <div class="ci-src">MPRJ / MP</div>
+            </div>
+            <div class="crim-item">
+              <div class="ci-dot ci-ok"></div>
+              <div class="ci-label"><strong>Operações policiais</strong>Nenhuma nos últimos 24 meses</div>
+              <div class="ci-src">DOU + LLM</div>
+            </div>
+          </div>
+          <!-- Sócios -->
+          <div>
+            <div class="crim-col-title">Sócios — por CPF</div>
+            <div class="crim-item">
+              <div class="ci-dot ci-ok"></div>
+              <div class="ci-label"><strong>Roberto Alves (60%)</strong>Sem mandado ativo · ficha federal limpa</div>
+              <div class="ci-src">BNMP · SINIC/PF</div>
+            </div>
+            <div class="crim-item">
+              <div class="ci-dot ci-ok"></div>
+              <div class="ci-label"><strong>Marcos Oliveira (40%)</strong>Sem mandado ativo · ficha federal limpa</div>
+              <div class="ci-src">BNMP · SINIC/PF</div>
+            </div>
+            <div class="crim-item">
+              <div class="ci-dot ci-info"></div>
+              <div class="ci-label"><strong>Execução penal (SEEU)</strong>Nenhum sócio com pena em execução</div>
+              <div class="ci-src">SEEU / CNJ</div>
+            </div>
+            <div class="crim-item">
+              <div class="ci-dot ci-ok"></div>
+              <div class="ci-label"><strong>Interpol / Difusões</strong>Não consta em nenhuma lista</div>
+              <div class="ci-src">Interpol · COMPLIANCE</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fronteiras -->
+        <div class="crim-frontier">
+          <strong>O que o RADAR não consulta (sigiloso por lei):</strong> BO onde o CNPJ figura como suspeito (Lei 12.037/2009) · Inquéritos com sigilo judicial decretado · SINESP/sistemas internos das polícias · RIF do COAF (Lei 9.613/1998) · Processos em segredo de justiça
+        </div>
+
+        <div class="lock-box" style="margin-top:12px">
+          <div class="lock-icon">🔒</div>
+          <div class="lock-txt">Certidão criminal estadual (PC-MG) · Condenações TJMG · Interpol completo</div>
+          <button class="btn btn-orange" style="font-size:.72rem;padding:8px 16px">Disponível no Plano COMPLIANCE →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: SÓCIOS -->
+  <div class="tab-p" id="cnpj-socios">
+    <div class="verd vb">
+      <div class="v-row"><span class="v-em">ℹ️</span>
+        <div>
+          <div class="v-title">2 sócios verificados — CPFs cruzados em todas as fontes</div>
+          <div class="v-text">Roberto Alves (60%) sem ocorrências em nenhuma base. <strong>Marcos Oliveira (40%) encerrou empresa em 2019</strong> — baixa regular, sem dívida. Nenhum CPF consta com mandado de prisão, pena em execução ou antecedentes federais.</div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="padding:14px 16px;margin-bottom:10px">
+      <div class="sec-lbl">Verificações por CPF — fontes criminais e civis</div>
+      <div class="check-block"><div class="cb-head" onclick="toggleCheck(this)"><div class="cb-icon cb-ok">✓</div><div class="cb-title">Roberto Alves — BNMP · Sem mandado de prisão ativo</div><div class="cb-source">BNMP / CNJ</div></div><div class="cb-body">Consultado no Banco Nacional de Monitoramento de Prisões. <strong>Nenhum mandado ativo.</strong> Tipo verificado: definitivo, preventivo e temporário.</div></div>
+      <div class="check-block"><div class="cb-head" onclick="toggleCheck(this)"><div class="cb-icon cb-ok">✓</div><div class="cb-title">Roberto Alves — SINIC/PF · Ficha federal limpa</div><div class="cb-source">Polícia Federal</div></div><div class="cb-body">Certidão de Antecedentes Criminais emitida via SINIC. <strong>Resultado: negativa.</strong> Cobre Justiça Federal + estados com acordo de cooperação com a PF.</div></div>
+      <div class="check-block"><div class="cb-head" onclick="toggleCheck(this)"><div class="cb-icon cb-ok">✓</div><div class="cb-title">Roberto Alves — SEEU · Sem pena em execução</div><div class="cb-source">SEEU / CNJ</div></div><div class="cb-body">Nenhuma condenação criminal com pena em execução. Sem regime semiaberto, tornozeleira ou livramento condicional.</div></div>
+      <div class="check-block"><div class="cb-head" onclick="toggleCheck(this)"><div class="cb-icon cb-ok">✓</div><div class="cb-title">Marcos Oliveira — BNMP · Sem mandado ativo</div><div class="cb-source">BNMP / CNJ</div></div><div class="cb-body">Nenhum mandado de prisão ativo no BNMP.</div></div>
+      <div class="check-block"><div class="cb-head" onclick="toggleCheck(this)"><div class="cb-icon cb-ok">✓</div><div class="cb-title">Marcos Oliveira — Empresa encerrada em 2019 (baixa regular)</div><div class="cb-source">Receita Federal</div></div><div class="cb-body">Empresa encerrada voluntariamente em 2019. Baixa limpa, sem dívida ativa. Sem padrão phoenix detectado.</div></div>
+      <div class="check-block"><div class="cb-head" onclick="toggleCheck(this)"><div class="cb-icon cb-ok">✓</div><div class="cb-title">Marcos Oliveira — PGFN (dívida ativa do CPF)</div><div class="cb-source">PGFN</div></div><div class="cb-body">CPF sem inscrição em dívida ativa federal.</div></div>
+    </div>
+    <div class="lock-box">
+      <div class="lock-icon">🔒</div>
+      <div class="lock-txt">Certidão PC-MG dos sócios · Condenações TJMG · Vínculos por endereço · Score Serasa PF</div>
+      <button class="btn btn-orange" style="font-size:.72rem;padding:8px 16px">Plano Pro / COMPLIANCE →</button>
+    </div>
+  </div>
+
+  <!-- TAB: GRUPO ECONÔMICO -->
+  <div class="tab-p" id="cnpj-grupo">
+    <div class="grupo-banner">
+      <div>⚠️</div>
+      <div class="gb-text"><strong>Grupo econômico detectado:</strong> sócio majoritário Roberto Alves tem 2 outras empresas vinculadas ao CPF. A empresa consultada está limpa — mas <strong>uma empresa irmã tem R$340k de dívida ativa inscrita.</strong> Análise de grupo recomendada antes de liberar crédito.</div>
+      <button class="btn btn-orange" style="font-size:.72rem;padding:8px 16px">Análise de grupo R$49 →</button>
+    </div>
+    <div class="grupo-grid">
+      <div class="gc">
+        <div class="gc-hdr">
+          <div class="gc-av" style="background:rgba(34,197,94,.14);color:var(--green);border:1px solid rgba(34,197,94,.28)">TRS</div>
+          <div><div class="gc-name">Transportadora Rotas do Sul</div><div style="font-size:.63rem;color:var(--t1)">Consultada · BH/MG · 14 anos</div></div>
+          <div class="gc-score" style="color:var(--yel)">64</div>
+        </div>
+        <div class="gc-items">
+          <span class="gc-ok">Situação: Ativa</span>
+          <span class="gc-ok">PGFN: Negativa</span>
+          <span class="gc-warn">Protesto: R$23,4k ativo</span>
+          <span class="gc-warn">Inquérito MP: 1 ativo (MPRJ)</span>
+        </div>
+      </div>
+      <div class="gc crit">
+        <div class="gc-hdr">
+          <div class="gc-av" style="background:rgba(239,68,68,.14);color:var(--red);border:1px solid rgba(239,68,68,.28)">LRC</div>
+          <div><div class="gc-name">Logística Rotas Centro Ltda.</div><div style="font-size:.63rem;color:var(--t1)">SP · 8 anos</div></div>
+          <div class="gc-score" style="color:var(--red)">28</div>
+        </div>
+        <div class="gc-items">
+          <span class="gc-ok">Situação: Ativa</span>
+          <span class="gc-crit">PGFN: R$340k inscrito</span>
+          <span class="gc-crit">Execução fiscal: andamento (TJ-SP)</span>
+          <span class="gc-warn">CAGED: -8 funcionários 12m</span>
+        </div>
+      </div>
+    </div>
+    <div class="callout ca-r"><strong>Por que isso importa:</strong> a empresa que você analisa está limpa. Mas o sócio majoritário controla uma empresa irmã com R$340k de dívida ativa e execução fiscal em SP. Em PME, pessoa física e jurídica se misturam — desconsideração da personalidade jurídica é possível. Risco real, não teórico.</div>
+  </div>
+
+  <!-- TAB: CRUZAMENTOS -->
+  <div class="tab-p" id="cnpj-cruzamentos">
+    <div class="verd vy">
+      <div class="v-row"><span class="v-em">🔄</span>
+        <div>
+          <div class="v-title">3 alertas cruzados detectados — CNPJ × seu balanço</div>
+          <div class="v-text">O RADAR cruzou os dados deste CNPJ com o seu balanço carregado anteriormente. <strong>Dois caixas pressionados na mesma relação comercial.</strong></div>
+        </div>
+      </div>
+    </div>
+    <div class="cruz-alert cruz-alert-r">
+      <span class="ca-icon">🔴</span>
+      <div class="ca-body">
+        <div class="ca-title">Dois caixas pressionados — risco de inadimplência em cascata</div>
+        <div class="ca-text">Seu cliente tem <strong>score 64 com caixa pressionado</strong> — e seu próprio caixa tem <strong>cobertura de juros de 2,8x</strong>. Se ele atrasar 60 dias, você entra no cheque especial. O inquérito policial ativo no MP aumenta o risco de instabilidade operacional.</div>
+        <span class="ca-action">Reduza prazo de 45 para 30 dias → libera +R$72k de liquidez</span>
+      </div>
+    </div>
+    <div class="cruz-alert cruz-alert-y">
+      <span class="ca-icon">🟡</span>
+      <div class="ca-body">
+        <div class="ca-title">Empresa irmã com dívida ativa grave</div>
+        <div class="ca-text">Logística Rotas Centro (empresa irmã, mesmo sócio) tem <strong>R$340k de dívida ativa e execução fiscal ativa</strong>. Desconsideração da personalidade jurídica pode atingir Roberto Alves como sócio da empresa que você está contratando.</div>
+        <span class="ca-action">Exigir garantia real ou fiança bancária →</span>
+      </div>
+    </div>
+    <div class="callout ca-g"><strong>Fontes cruzadas:</strong> Score CNPJ + CAGED (módulo RADAR) × NCG + cobertura de juros (seu balanço carregado). Zero fontes pagas para esses alertas.</div>
+  </div>
+
+</div><!-- /an-wrap cnpj -->
+</div><!-- /mod-cnpj -->
+
+<!-- ═══ MÓDULO BALANÇO ═══ -->
+<div class="an-mod" id="mod-balanco">
+<div class="an-wrap">
+
+  <div class="co-hdr">
+    <div style="display:flex;align-items:flex-start;gap:12px">
+      <div class="co-av co-av-g">TRS</div>
+      <div>
+        <div class="co-name">Transportadora Rotas do Sul — Balanço 2024</div>
+        <div class="co-sub">Exercício jan–dez 2024 · Simples Nacional · Upload realizado</div>
+        <div class="co-tags">
+          <span class="chip chip-y">Margem abaixo do setor</span>
+          <span class="chip chip-r">Juros excessivos</span>
+          <span class="chip chip-g">Receita crescendo</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="score-big" style="color:var(--yel)">C+</div>
+      <div class="score-lbl">Saúde financeira</div>
+    </div>
+  </div>
+
+  <!-- TAB: DIAGNÓSTICO -->
+  <div class="tab-p active" id="balanco-indicadores">
+    <div class="verd vy">
+      <div class="v-row"><span class="v-em">⚠️</span>
+        <div>
+          <div class="v-title">Empresa boa com uma dívida cara — você está trabalhando para pagar o banco</div>
+          <div class="v-text">Faturamento cresceu 14% em 2024, mas o lucro <em>caiu</em> 3,5%. <strong>Os juros consomem R$214k/ano — mais que o dobro do lucro líquido.</strong> O negócio é saudável. O custo da dívida é o problema.</div>
+          <span class="v-action va-g">Renegociar dívida de 2,1% para 1,3%a.m. libera R$80k/ano →</span>
+        </div>
+      </div>
+    </div>
+    <div class="ind-grid">
+      <div class="ind"><div class="ind-top"><div class="ind-lbl">Margem EBITDA</div><div class="ind-tc">Setor transporte MG: 24–32%</div><div class="ind-val" style="color:var(--yel)">19,0%</div><div class="hbar"><div class="hf hf-y" style="width:44%"></div></div></div><div class="ind-bot"><strong>Abaixo do setor.</strong> R$19 de EBITDA a cada R$100. Setor médio: R$28. Juros altos puxam isso para baixo.</div></div>
+      <div class="ind"><div class="ind-top"><div class="ind-lbl">Cobertura de juros</div><div class="ind-tc">Banco exige mínimo 3,0x</div><div class="ind-val" style="color:var(--red)">2,8x</div><div class="hbar"><div class="hf hf-r" style="width:52%"></div></div></div><div class="ind-bot"><strong>Abaixo do mínimo bancário.</strong> Por isso o crédito foi negado. Precisa chegar a 3x.</div></div>
+      <div class="ind"><div class="ind-top"><div class="ind-lbl">Endividamento</div><div class="ind-tc">Saudável: abaixo de 40%</div><div class="ind-val" style="color:var(--yel)">48%</div><div class="hbar"><div class="hf hf-y" style="width:68%"></div></div></div><div class="ind-bot"><strong>Elevado e subindo.</strong> Era 41% em 2023. Cada R$1 de ativo, R$0,48 é dívida.</div></div>
+      <div class="ind"><div class="ind-top"><div class="ind-lbl">Prazo de recebimento</div><div class="ind-tc">Setor: 28–35 dias</div><div class="ind-val" style="color:var(--red)">45 dias</div><div class="hbar"><div class="hf hf-r" style="width:75%"></div></div></div><div class="ind-bot"><strong>Você financia o cliente.</strong> Recebe em 45 dias, paga em 28. Descasamento custa R$36k/ano.</div></div>
+      <div class="ind"><div class="ind-top"><div class="ind-lbl">Liquidez corrente</div><div class="ind-tc">Saudável: acima de 1,5x</div><div class="ind-val" style="color:var(--yel)">1,42x</div><div class="hbar"><div class="hf hf-y" style="width:55%"></div></div></div><div class="ind-bot"><strong>Atenção.</strong> Para cada R$1 de dívida curto prazo, R$1,42 em caixa. Apertado mas controlado.</div></div>
+      <div class="ind"><div class="ind-top"><div class="ind-lbl">Margem líquida</div><div class="ind-tc">Setor: 4–8%</div><div class="ind-val" style="color:var(--red)">4,2%</div><div class="hbar"><div class="hf hf-r" style="width:32%"></div></div></div><div class="ind-bot"><strong>No piso do setor.</strong> Em 2023 eram 5,8% — regrediu. Juros são o culpado.</div></div>
+    </div>
+    <div class="callout ca-b"><strong>Em linguagem direta:</strong> a empresa cresce, tem clientes e opera bem. O problema é que 2,4x o lucro líquido vai para o banco em forma de juros. Renegociar a dívida é a ação de maior impacto — não precisa crescer, não precisa cortar nada.</div>
+  </div>
+
+  <!-- TAB: DRE -->
+  <div class="tab-p" id="balanco-dre">
+    <div class="verd vg"><div class="v-row"><span class="v-em">📋</span><div><div class="v-title">A receita cresceu 14% — mas os juros cresceram 38%</div><div class="v-text">Todo o crescimento de 2024 foi consumido pelo aumento do custo financeiro. <strong>O negócio cresceu, o dono ficou mais pobre.</strong></div></div></div></div>
+    <div class="card" style="overflow:hidden;margin-bottom:12px">
+      <table class="dre">
+        <thead><tr><th>Item</th><th>2024</th><th>2023</th><th>Variação</th></tr></thead>
+        <tbody>
+          <tr class="dre-tot"><td>Receita Bruta</td><td class="dre-pos">R$2.394k</td><td>R$2.100k</td><td class="dre-pos">+14,0%</td></tr>
+          <tr class="dre-sub"><td>(-) Impostos</td><td class="dre-neg">(R$287k)</td><td>(R$252k)</td><td></td></tr>
+          <tr class="dre-tot"><td>Receita Líquida</td><td>R$2.107k</td><td>R$1.848k</td><td class="dre-pos">+14,0%</td></tr>
+          <tr class="dre-sub"><td>(-) Custo diesel</td><td class="dre-neg">(R$743k)</td><td>(R$630k)</td><td></td></tr>
+          <tr class="dre-sub"><td>(-) Manutenção frota</td><td class="dre-neg">(R$189k)</td><td>(R$162k)</td><td></td></tr>
+          <tr class="dre-sub"><td>(-) Pessoal operacional</td><td class="dre-neg">(R$425k)</td><td>(R$380k)</td><td></td></tr>
+          <tr class="dre-ebt"><td>EBITDA</td><td class="dre-pos">R$398k</td><td>R$380k</td><td class="dre-pos">+4,7%</td></tr>
+          <tr class="dre-sub"><td>(-) Depreciação</td><td class="dre-neg">(R$98k)</td><td>(R$90k)</td><td></td></tr>
+          <tr class="dre-sub"><td>(-) Despesas administrativas</td><td class="dre-neg">(R$142k)</td><td>(R$128k)</td><td></td></tr>
+          <tr class="dre-sub"><td style="color:var(--red);font-weight:600">(-) Juros e encargos</td><td class="dre-neg" style="font-weight:600">(R$214k)</td><td>(R$155k)</td><td class="dre-neg">+38%</td></tr>
+          <tr class="dre-result"><td>Lucro Líquido</td><td>R$89k</td><td>R$109k</td><td class="dre-neg">-18,3%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout ca-y"><strong>Se os juros caírem de 2,1% para 1,3%a.m.:</strong> juros anuais caem de R$214k para ~R$134k → lucro sobe de R$89k para R$169k (+90%) sem vender um frete a mais.</div>
+  </div>
+
+  <!-- TAB: CICLO DE CAIXA -->
+  <div class="tab-p" id="balanco-ciclo">
+    <div class="verd vy"><div class="v-row"><span class="v-em">🔄</span><div><div class="v-title">Você financia o cliente — 17 dias de descasamento custam R$36k/ano</div><div class="v-text">Recebe em <strong>45 dias</strong>, paga fornecedores em <strong>28 dias</strong>. O descasamento prende <strong>R$145k no capital de giro</strong>, financiado pelo banco a 2,1%a.m.</div></div></div></div>
+    <div class="card" style="padding:14px 16px;margin-bottom:12px">
+      <div class="sec-lbl">Ciclo financeiro</div>
+      <div class="ciclo-row"><div class="ciclo-lbl">Receber dos clientes</div><div class="ciclo-track"><div class="ciclo-fill" style="width:82%;background:var(--red)"><span>45 dias</span></div></div><div class="ciclo-val" style="color:var(--red)">45d</div></div>
+      <div class="ciclo-row"><div class="ciclo-lbl">Pagar fornecedores</div><div class="ciclo-track"><div class="ciclo-fill" style="width:51%;background:var(--green)"><span>28 dias</span></div></div><div class="ciclo-val" style="color:var(--green)">28d</div></div>
+      <div class="ciclo-row"><div class="ciclo-lbl">Dinheiro preso</div><div class="ciclo-track"><div class="ciclo-fill" style="width:68%;background:var(--yel)"><span>R$145k</span></div></div><div class="ciclo-val" style="color:var(--yel)">R$145k</div></div>
+      <div class="ciclo-row"><div class="ciclo-lbl">Custo do descasamento</div><div class="ciclo-track"><div class="ciclo-fill" style="width:45%;background:var(--orange)"><span>R$36k/ano</span></div></div><div class="ciclo-val" style="color:var(--orange)">R$36k/a</div></div>
+    </div>
+    <div class="callout ca-g"><strong>Solução:</strong> oferecer 1,5% de desconto para quem pagar em 15 dias. Custa R$15k/ano mas elimina R$36k de juros. Resultado: <strong>+R$21k no caixa sem mudar nada.</strong></div>
+  </div>
+
+  <!-- TAB: REGIME TRIBUTÁRIO -->
+  <div class="tab-p" id="balanco-fiscal">
+    <div class="verd vy"><div class="v-row"><span class="v-em">📑</span><div><div class="v-title">Você paga R$47k a mais de imposto por ano do que deveria</div><div class="v-text">No Simples Nacional: <strong>R$113k/ano.</strong> No Lucro Presumido: <strong>R$66k/ano.</strong> A diferença é mais da metade do lucro líquido atual.</div><span class="v-action va-o">Trocar em janeiro — decisão irretratável. Agendar com contador até outubro →</span></div></div></div>
+    <div class="reg-grid">
+      <div class="reg"><div class="reg-name">Simples Nacional</div><div style="font-size:.68rem;color:var(--t1);margin-bottom:4px">Regime atual</div><div class="reg-val" style="color:var(--red)">R$113k/ano</div><div class="reg-desc">Alíquota efetiva 5,3%</div></div>
+      <div class="reg best"><div class="reg-badge">Recomendado</div><div class="reg-name">Lucro Presumido</div><div style="font-size:.68rem;color:var(--t1);margin-bottom:4px">Melhor opção</div><div class="reg-val" style="color:var(--green)">R$66k/ano</div><div class="reg-desc">Alíquota efetiva 3,1%</div><div class="reg-save">↓ Economia: R$47k/ano (+53% no lucro)</div></div>
+      <div class="reg"><div class="reg-name">Lucro Real</div><div style="font-size:.68rem;color:var(--t1);margin-bottom:4px">Opção avançada</div><div class="reg-val">R$74k/ano</div><div class="reg-desc">Alta complexidade · só vale com prejuízo</div></div>
+    </div>
+    <div class="callout ca-b"><strong>Atenção LC 214/2025 (IBS/CBS):</strong> transição começa em 2026. Para transporte intermunicipal (ICMS), impacto estimado de +0,8 a +1,4pp na carga efetiva até 2033. Simule o impacto por tipo de operação no módulo completo.</div>
+  </div>
+
+  <!-- TAB: VALUATION -->
+  <div class="tab-p" id="balanco-valuation">
+    <div class="verd vg"><div class="v-row"><span class="v-em">💰</span><div><div class="v-title">Sua empresa vale entre R$1,1M e R$2,3M</div><div class="v-text">Valor médio ponderado RADAR: <strong>R$1,63M.</strong> 5 métodos calibrados para PME de transporte. Oferta abaixo de R$1,1M = abaixo do piso de mercado.</div></div></div></div>
+    <div class="val-methods">
+      <div class="vm"><div class="vm-name">Múltiplo EBITDA</div><div class="vm-val">R$1,79M</div><div class="vm-pct">Peso 40% · EBITDA × 4,5x</div><div class="vm-bar"><div class="vm-bf" style="width:80%"></div></div></div>
+      <div class="vm"><div class="vm-name">Transações reais</div><div class="vm-val">R$1,55M</div><div class="vm-pct">Peso 25% · M&A do setor</div><div class="vm-bar"><div class="vm-bf" style="width:50%"></div></div></div>
+      <div class="vm"><div class="vm-name">PL Ajustado</div><div class="vm-val">R$1,10M</div><div class="vm-pct">Peso 20% · normas CFC</div><div class="vm-bar"><div class="vm-bf" style="width:40%"></div></div></div>
+      <div class="vm"><div class="vm-name">DCF Simplificado</div><div class="vm-val">R$1,94M</div><div class="vm-pct">Peso 10% · referência teto</div><div class="vm-bar"><div class="vm-bf" style="width:20%"></div></div></div>
+      <div class="vm"><div class="vm-name">Múltiplo Receita</div><div class="vm-val">R$1,26M</div><div class="vm-pct">Peso 5% · piso negociação</div><div class="vm-bar"><div class="vm-bf" style="width:10%"></div></div></div>
+    </div>
+    <div class="val-result">
+      <div class="vr-range">
+        <div><div class="vr-label">Piso</div><div class="vr-val">R$1,1M</div></div>
+        <div style="color:var(--t2);font-size:1.2rem">—</div>
+        <div style="flex:1"><div class="vr-label" style="margin-bottom:4px">Valor médio ponderado RADAR</div><div class="vr-med">R$1,63M</div></div>
+        <div><div class="vr-label">Teto</div><div class="vr-val">R$2,3M</div></div>
+      </div>
+      <div style="font-size:.74rem;color:var(--t1);margin-top:10px;line-height:1.65">
+        <strong style="color:var(--w)">O que valoriza:</strong> 14 anos, frota própria, contratos públicos ativos (+R$280k vs empresa nova).<br>
+        <strong style="color:var(--w)">O que desvaloriza:</strong> margem abaixo da média (4,2% vs 7%) e dívida elevada (-R$310k).<br>
+        <strong style="color:var(--green)">Se resolver os juros:</strong> margem sobe +3pp → valuation sobe para ~R$2,1M (+R$470k sem crescer nada).
+      </div>
+    </div>
+  </div>
+
+</div><!-- /an-wrap balanco -->
+</div><!-- /mod-balanco -->
+
+</div><!-- /pg-analysis -->
+
+</body>
+</html>

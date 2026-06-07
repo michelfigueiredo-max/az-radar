@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>RADAR — Universo Criminal e Policial</title>
+<style>
+:root{
+  --bg:#07090D;--s1:#0D1117;--s2:#131920;--s3:#1A2230;
+  --b1:#1E2A3A;--b2:#243446;
+  --green:#22C55E;--grn-d:rgba(34,197,94,.09);--grn-b:rgba(34,197,94,.2);
+  --orange:#F97316;--ora-d:rgba(249,115,22,.1);--ora-b:rgba(249,115,22,.22);
+  --red:#EF4444;--red-d:rgba(239,68,68,.09);--red-b:rgba(239,68,68,.2);
+  --gray:#6B7280;--gray-d:rgba(107,114,128,.09);--gray-b:rgba(107,114,128,.2);
+  --blue:#3B82F6;--blu-d:rgba(59,130,246,.09);--blu-b:rgba(59,130,246,.22);
+  --purple:#A855F7;--purp-d:rgba(168,85,247,.09);--purp-b:rgba(168,85,247,.22);
+  --yel:#EAB308;
+  --w:#F1F5F9;--t1:#94A3B8;--t2:#475569;
+  --sans:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono','Fira Mono',monospace;
+  --r:10px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:var(--sans);color:var(--w);font-size:13px;line-height:1.55;padding:20px 16px 60px;}
+.header{max-width:1100px;margin:0 auto 24px;}
+.title{font-size:1.5rem;font-weight:700;color:var(--w);margin-bottom:4px;}
+.title span{color:var(--orange);}
+.subtitle{font-size:.8rem;color:var(--t1);}
+
+.legend{display:flex;gap:16px;flex-wrap:wrap;padding:10px 14px;background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);margin-bottom:20px;max-width:1100px;margin-left:auto;margin-right:auto;}
+.li{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t1);}
+.dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+
+.summary{display:flex;gap:10px;flex-wrap:wrap;max-width:1100px;margin:0 auto 24px;}
+.sc{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:12px 16px;flex:1;min-width:120px;text-align:center;}
+.sv{font-size:22px;font-weight:700;font-family:var(--mono);display:block;margin-bottom:2px;}
+.sl{font-size:10px;color:var(--t2);}
+
+.alert-box{max-width:1100px;margin:0 auto 24px;padding:12px 16px;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);border-radius:var(--r);font-size:12px;color:var(--t1);line-height:1.7;}
+.alert-box strong{color:var(--w);}
+
+.sec{max-width:1100px;margin:0 auto 24px;}
+.sec-ttl{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--t2);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.sec-ttl::after{content:'';flex:1;height:.5px;background:var(--b1);}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:9px;}
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);padding:12px 14px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;}
+.card.f1::before{background:var(--green);}
+.card.f2::before{background:var(--orange);}
+.card.f3::before{background:var(--red);}
+.card.fx::before{background:var(--gray);}
+
+.cn{font-size:12px;font-weight:600;margin-bottom:5px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;line-height:1.4;}
+.cd{font-size:11px;color:var(--t1);margin-bottom:7px;line-height:1.55;}
+.cw{font-size:11px;background:var(--s2);border-radius:6px;padding:6px 9px;margin-bottom:7px;line-height:1.6;}
+.cw strong{color:var(--w);}
+.tags{display:flex;gap:4px;flex-wrap:wrap;}
+.tag{padding:2px 7px;border-radius:8px;font-size:10px;font-weight:600;}
+.tg{background:var(--grn-d);color:var(--green);border:1px solid var(--grn-b);}
+.to{background:var(--ora-d);color:var(--orange);border:1px solid var(--ora-b);}
+.tr{background:var(--red-d);color:var(--red);border:1px solid var(--red-b);}
+.tgr{background:var(--gray-d);color:var(--gray);border:1px solid var(--gray-b);}
+.tb{background:var(--blu-d);color:var(--blue);border:1px solid var(--blu-b);}
+.tp{background:var(--purp-d);color:var(--purple);border:1px solid var(--purp-b);}
+
+.badge{padding:2px 8px;border-radius:8px;font-size:10px;font-weight:600;}
+.bf{background:var(--grn-d);color:var(--green);border:1px solid var(--grn-b);}
+.bm{background:var(--ora-d);color:var(--orange);border:1px solid var(--ora-b);}
+.bd{background:var(--red-d);color:var(--red);border:1px solid var(--red-b);}
+.bx{background:var(--gray-d);color:var(--gray);border:1px solid var(--gray-b);}
+
+.divider{height:.5px;background:var(--b1);max-width:1100px;margin:0 auto 24px;}
+
+em{color:var(--w);font-style:normal;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="title"><span>RADAR</span> — Universo Criminal e Policial por CNPJ</div>
+  <div class="subtitle">Todas as polícias · antecedentes · BOs · mandados · inquéritos · operações · o que é possível e o que é vedado</div>
+</div>
+
+<div class="legend" style="margin-bottom:16px;">
+  <div class="li"><div class="dot" style="background:#22C55E"></div>Fácil — API ou dado público direto</div>
+  <div class="li"><div class="dot" style="background:#F97316"></div>Médio — parceiro ou scraping estruturado</div>
+  <div class="li"><div class="dot" style="background:#EF4444"></div>Difícil — exige autoridade ou consentimento</div>
+  <div class="li"><div class="dot" style="background:#6B7280"></div>Impossível — sigiloso por lei</div>
+</div>
+
+<div class="summary">
+  <div class="sc"><span class="sv" style="color:#22C55E">9</span><span class="sl">Fácil / direto</span></div>
+  <div class="sc"><span class="sv" style="color:#F97316">8</span><span class="sl">Médio / parceiro</span></div>
+  <div class="sc"><span class="sv" style="color:#EF4444">6</span><span class="sl">Difícil / restrito</span></div>
+  <div class="sc"><span class="sv" style="color:#6B7280">5</span><span class="sl">Sigiloso por lei</span></div>
+</div>
+
+<div class="alert-box">
+  <strong>Premissa fundamental:</strong> empresa (CNPJ) não tem antecedentes criminais próprios. O sistema penal brasileiro processa <em>pessoas físicas</em>. O caminho sempre é: <strong>CNPJ → CPF do sócio/representante legal → verificação criminal do CPF</strong>. O CNPJ aparece diretamente em processos judiciais (DataJud), inquéritos (MP) e operações policiais (DOU), mas a certidão de antecedentes e mandado de prisão são sempre do CPF. Qualquer empresa que prometa "antecedentes criminais do CNPJ" está aggregando dados do sócio — não do CNPJ em si.
+</div>
+
+<!-- SEÇÃO 1: FÁCIL -->
+<div class="sec">
+<div class="sec-ttl">Fácil — API pública, custo zero ou baixo, implementar direto</div>
+<div class="grid">
+
+<div class="card f1">
+  <div class="cn"><span>BNMP — Mandados de prisão ativos (CPF do sócio)</span><span class="badge bf">V1 · Fácil</span></div>
+  <div class="cd">Banco Nacional de Monitoramento de Prisões do CNJ. Consulta via CPF retorna: flag possui mandado (true/false), tipo (definitivo / preventivo / temporário), tipificação penal, tribunal emissor, se houve recaptura antes.</div>
+  <div class="cw"><strong>Implementação:</strong> API via Direct Data, Netrin ou Judit — R$0,50–2/consulta. CNJ tem endpoint direto com rate limit. Retorna PDF comprovante. <strong>Aplicação no RADAR:</strong> verificar CPFs de todos os sócios automaticamente. Sócio com mandado ativo = alerta crítico no score.</div>
+  <div class="tags"><span class="tag tg">CNJ / BNMP</span><span class="tag tb">CPF do sócio</span><span class="tag tg">R$0,50–2</span></div>
+</div>
+
+<div class="card f1">
+  <div class="cn"><span>CAC / SINIC — Certidão de Antecedentes PF (federal)</span><span class="badge bf">V1 · Fácil</span></div>
+  <div class="cd">Certidão do SINIC da Polícia Federal — indiciamentos, denúncias, condenações e absolvições na Justiça Federal + estados com acordo de cooperação. Validade 90 dias. Gratuita e online em servicos.pf.gov.br.</div>
+  <div class="cw"><strong>Limitação crítica:</strong> cobertura parcial — estados sem acordo com a PF ficam de fora. Resultado "negativa" não garante ficha limpa absoluta. Para due diligence completo, combinar com PC estadual. <strong>RPA disponível:</strong> Infosimples, Netrin, Judit automatizam a emissão.</div>
+  <div class="tags"><span class="tag tg">Polícia Federal</span><span class="tag tg">SINIC</span><span class="tag tb">Via RPA</span><span class="tag tg">Gratuito</span></div>
+</div>
+
+<div class="card f1">
+  <div class="cn"><span>DataJud / CNJ — Processos criminais por CNPJ e CPF</span><span class="badge bf">V1 · Já mapeado</span></div>
+  <div class="cd">API pública CNJ com metadados de todos os processos judiciais. Inclui processos penais por CNPJ E por CPF. Classes criminais: Ação Penal Pública, Inquérito Policial, Execução Criminal, Habeas Corpus.</div>
+  <div class="cw"><strong>O que retorna por CNPJ:</strong> número do processo, tribunal, classe processual, polo (réu/vítima/terceiro), data, última movimentação. <strong>Expansão necessária no RADAR:</strong> filtrar especificamente classes criminais — atualmente mistura cível, trabalhista e criminal no mesmo bloco.</div>
+  <div class="tags"><span class="tag tg">CNJ DataJud</span><span class="tag tg">CNPJ + CPF</span><span class="tag tg">API pública · gratuito</span></div>
+</div>
+
+<div class="card f1">
+  <div class="cn"><span>SEEU / CNJ — Execução penal (aceita CNPJ diretamente)</span><span class="badge bf">V1 · Diferencial</span></div>
+  <div class="cd">Sistema Eletrônico de Execução Unificado do CNJ. Certidão de antecedentes para fins civis — condenações com trânsito em julgado + status de execução da pena. <em>Aceita CNPJ</em> como parâmetro de busca diretamente.</div>
+  <div class="cw"><strong>Por que único:</strong> é o único sistema criminal que aceita CNPJ além de CPF. Para o RADAR, verificar se o próprio CNPJ consultado tem condenação criminal com execução ativa. Usado em compliance para habilitação em licitações e contratos públicos.</div>
+  <div class="tags"><span class="tag tg">CNJ / SEEU</span><span class="tag tg">Aceita CNPJ direto</span><span class="tag tg">Gratuito</span></div>
+</div>
+
+<div class="card f1">
+  <div class="cn"><span>Inquéritos policiais — portais de transparência dos MPs</span><span class="badge bf">V1 · Cobertura parcial</span></div>
+  <div class="cd">Vários MPs estaduais publicam inquéritos em andamento com busca por CNPJ: MPF, MPRJ, MPBA, MPPE, MPPI e outros. Dado: número, tipo, envolvidos, promotor, situação. Empresa figurando como parte = sinal antecedente.</div>
+  <div class="cw"><strong>Valor estratégico:</strong> inquérito no MP aparece antes de virar processo no DataJud — lag de meses. Empresa no polo de investigação de inquérito já é sinal de risco antes de qualquer condenação. <strong>Cobertura:</strong> ~15 estados com consulta por CNPJ via web scraping estruturado.</div>
+  <div class="tags"><span class="tag tg">MP estaduais + MPF</span><span class="tag to">Cobertura parcial</span><span class="tag tb">Scraping</span></div>
+</div>
+
+<div class="card f1">
+  <div class="cn"><span>Interpol — Red/Yellow notices (CPF + nome do sócio)</span><span class="badge bf">COMPLIANCE · Fácil</span></div>
+  <div class="cd">Difusões da Interpol vinculadas ao CPF/nome. Red notice = procurado internacionalmente por crime grave. Yellow notice = desaparecimento. API disponível via CPF.CNPJ e parceiros.</div>
+  <div class="cw"><strong>O que retorna:</strong> tipo de difusão, país solicitante, crime imputado, data de emissão. <strong>Aplicação:</strong> módulo COMPLIANCE para empresas com operações internacionais, parceiros em dólar ou exportadores. Exigido por bancos correspondentes.</div>
+  <div class="tags"><span class="tag tg">Interpol</span><span class="tag tp">COMPLIANCE</span><span class="tag tb">Via parceiro</span></div>
+</div>
+
+<div class="card f1">
+  <div class="cn"><span>DOU + web search + LLM — operações policiais por CNPJ</span><span class="badge bf">V1 · Já parcial</span></div>
+  <div class="cd">Operações da PF, MP e CGU são nomeadas e divulgadas. Mandados de busca no DOU identificam CNPJs. Queries específicas: "[razão social]" + "operação" + "busca e apreensão" + "sede invadida" + "PF" + "MP".</div>
+  <div class="cw"><strong>Já no RADAR como reputação</strong> — expandir com queries criminais. LLM extrai: nome da operação, data, órgão investigador (PF/PC/MP), crime imputado, status atual (em curso/encerrada). Lag de 24–72h após a operação.</div>
+  <div class="tags"><span class="tag tg">DOU + imprensa</span><span class="tag tg">LLM</span><span class="tag tg">Gratuito</span></div>
+</div>
+
+<div class="card f1">
+  <div class="cn"><span>PRF — Infrações e autos por CNPJ (frota da empresa)</span><span class="badge bf">Condicional CNAE 4930</span></div>
+  <div class="cd">Polícia Rodoviária Federal registra autuações por RENAVAM. Para frota de empresa (transportadoras): histórico de infrações vinculado ao CNPJ. Dados via DENATRAN/SENATRAN — gratuito e público.</div>
+  <div class="cw"><strong>Aplicação condicional:</strong> transportadora com alto índice de infrações PRF (excesso de peso, documentação irregular, velocidade) indica risco operacional e compliance fraco. Cruzar com RNTRC e ANTT. Útil para gestores de crédito de transportadoras.</div>
+  <div class="tags"><span class="tag tg">PRF · DENATRAN</span><span class="tag to">CNAE 4930</span><span class="tag tg">Gratuito</span></div>
+</div>
+
+<div class="card f1">
+  <div class="cn"><span>CEIS / CNEP / Lista MTE — sanções com origem criminal</span><span class="badge bf">V1 · Já mapeado</span></div>
+  <div class="cd">CEIS e CNEP incluem empresas sancionadas por atos criminosos contra a administração pública (Lei Anticorrupção 12.846/2013). Lista MTE inclui empresas com situação análoga à escravidão. Origem muitas vezes é inquérito ou ação penal.</div>
+  <div class="cw"><strong>Diferencial criminal:</strong> empresa no CEIS ou CNEP frequentemente tem processo criminal paralelo (DataJud). Cruzar as duas fontes para entender se a sanção veio de processo penal transitado ou apenas administrativo.</div>
+  <div class="tags"><span class="tag tg">CGU · Transparência</span><span class="tag tg">Já mapeado</span></div>
+</div>
+
+</div>
+</div>
+
+<!-- SEÇÃO 2: MÉDIO -->
+<div class="sec">
+<div class="sec-ttl">Médio — via parceiro, scraping ou cobertura parcial por estado</div>
+<div class="grid">
+
+<div class="card f2">
+  <div class="cn"><span>Polícias Civis estaduais — certidões criminais por UF</span><span class="badge bm">Médio · Por UF</span></div>
+  <div class="cd">Cada PC tem seu sistema: SP (IIRGD/IISP), MG (PC-MG), RJ, RS, BA e outras têm portais com certidão por CPF. Resultado: positiva (tem antecedente estadual) ou negativa. Complementa o SINIC federal.</div>
+  <div class="cw"><strong>Por que necessário:</strong> condenação criminal estadual pode não estar no SINIC da PF. Sócio condenado por estelionato em SP pode ter registro só no TJSP. Para cobertura completa: PF + PC do estado de domicílio do sócio + PC do estado de operação da empresa. Via Judit ou Netrin: ~R$10–30/sócio/UF.</div>
+  <div class="tags"><span class="tag to">Por UF</span><span class="tag tb">Via Judit/Netrin</span><span class="tag to">R$10–30/sócio</span></div>
+</div>
+
+<div class="card f2">
+  <div class="cn"><span>BOs de ocorrência — empresa como vítima ou declarante</span><span class="badge bm">Médio · Parcial</span></div>
+  <div class="cd">BO onde o CNPJ é <em>vítima</em> (furto na sede, estelionato, invasão) é consultável pelo titular nos portais das PCs estaduais. Alguns estados permitem busca por CPF/CNPJ do declarante.</div>
+  <div class="cw"><strong>Limitação crítica:</strong> BO onde o CNPJ figura como <em>suspeito/investigado</em> é sigiloso por lei — não acessível para terceiros. A consulta pública só retorna BOs onde o CNPJ é o declarante. Empresa com muitos BOs como vítima de furto pode indicar controle interno fraco.</div>
+  <div class="tags"><span class="tag to">Apenas como vítima</span><span class="tag tr">Suspeito = sigiloso</span><span class="tag to">Por UF</span></div>
+</div>
+
+<div class="card f2">
+  <div class="cn"><span>TJs estaduais — condenações criminais por CPF do sócio</span><span class="badge bm">Médio · 27 TJs</span></div>
+  <div class="cd">Cada TJ tem jurisprudência criminal consultável por CPF ou nome. TJMG, TJSP, TJRJ, TJRS com APIs ou portais. Retorna: tipo de crime, data da condenação, status (cumprida, recurso, em aberto).</div>
+  <div class="cw"><strong>Por que importante além do SINIC:</strong> condenação no TJ estadual que ainda não chegou ao SINIC federal por falta de acordo. Fraude contratual, estelionato, receptação, crimes societários — maioria é estadual. Cobertura completa requer scraping dos 27 TJs.</div>
+  <div class="tags"><span class="tag to">27 TJs</span><span class="tag tb">CPF do sócio</span><span class="tag to">Scraping por UF</span></div>
+</div>
+
+<div class="card f2">
+  <div class="cn"><span>Operações da PF — mandados e buscas no DOU</span><span class="badge bm">Médio · Inferível</span></div>
+  <div class="cd">Operações da PF são publicadas no DOU com CNPJs e nomes de empresas. Mandado de busca e apreensão publicado identifica o endereço (≈ o CNPJ). Notícias citam razão social das empresas investigadas.</div>
+  <div class="cw"><strong>Pipeline estruturado:</strong> DOU + agências (Agência Brasil, G1, Valor, InfoMoney). LLM classifica: nome da operação, crime, órgão, situação. Lag de 24–72h. Complementa o DataJud — operação pode aparecer antes do processo ser distribuído.</div>
+  <div class="tags"><span class="tag to">DOU + imprensa</span><span class="tag tb">LLM</span><span class="tag to">Lag 24–72h</span></div>
+</div>
+
+<div class="card f2">
+  <div class="cn"><span>Receita Federal — crimes fiscais e apreensões</span><span class="badge bm">Médio · Indireto</span></div>
+  <div class="cd">Auto de apreensão da RF por contrabando, descaminho ou crime fiscal vira processo no TRF (DataJud). Infração administrativa vai para dívida ativa (PGFN). Representação fiscal para fins penais dispara inquérito federal.</div>
+  <div class="cw"><strong>Caminho:</strong> PGFN com valor alto + DataJud com classe "Ação Penal Federal" = indício de crime fiscal. A Receita não publica apreensões por CNPJ diretamente — mas o processo judicial que resulta é público.</div>
+  <div class="tags"><span class="tag to">Via PGFN + DataJud</span><span class="tag to">Crime fiscal</span><span class="tag to">Indireto</span></div>
+</div>
+
+<div class="card f2">
+  <div class="cn"><span>Polícia Militar — autuações de estabelecimentos</span><span class="badge bm">Médio · Condicional</span></div>
+  <div class="cd">PM fiscaliza estabelecimentos comerciais (bares, baladas, postos, comércio noturno). Autuações por perturbação do sossego, funcionamento irregular ou flagrante viram processo administrativo na prefeitura + SSP.</div>
+  <div class="cw"><strong>O que a PM NÃO faz:</strong> não registra antecedentes criminais — isso é da PC. Autuação da PM vira BO na PC do estado. <strong>O que está disponível:</strong> processo administrativo da prefeitura (alvará cassado, auto de infração) é público e consultável por CNPJ.</div>
+  <div class="tags"><span class="tag to">SP / MG</span><span class="tag to">Processo adm. público</span><span class="tag tgr">Sem API direta</span></div>
+</div>
+
+<div class="card f2">
+  <div class="cn"><span>COAF — sinal indireto via DataJud e imprensa</span><span class="badge bm">Médio · Inferível</span></div>
+  <div class="cd">COAF gera RIFs que disparam inquéritos. O RIF em si é sigiloso, mas processos oriundos de denúncia do COAF aparecem no DataJud com menção ao COAF como origem. Notícias de lavagem de dinheiro citam CNPJs.</div>
+  <div class="cw"><strong>Estratégia indireta:</strong> buscar no DataJud processos com classe "Lavagem de Dinheiro" ou "Lei 9.613" + CNPJ ou sócio. Monitoramento de imprensa: "[CNPJ ou razão social]" + "COAF" + "lavagem" + "inteligência financeira".</div>
+  <div class="tags"><span class="tag to">Via DataJud</span><span class="tag to">Web search</span><span class="tag tr">RIF sigiloso</span></div>
+</div>
+
+<div class="card f2">
+  <div class="cn"><span>Polícia Penal — regime de cumprimento de pena (sócio)</span><span class="badge bm">Médio · Via SEEU</span></div>
+  <div class="cd">Polícia Penal administra presídios. Status de cumprimento de pena (regime aberto, semiaberto, fechado, livramento condicional) de sócio condenado está no SEEU/CNJ — consultável por CPF.</div>
+  <div class="cw"><strong>Aplicação no RADAR:</strong> sócio em regime semiaberto ou com tornozeleira eletrônica ainda pode figurar no QSA da empresa. Cruzar BNMP + SEEU + DataJud para identificar sócios com condenação ativa e regime de cumprimento de pena.</div>
+  <div class="tags"><span class="tag to">CNJ / SEEU</span><span class="tag to">CPF do sócio</span></div>
+</div>
+
+</div>
+</div>
+
+<!-- SEÇÃO 3: DIFÍCIL -->
+<div class="sec">
+<div class="sec-ttl">Difícil — exige autoridade, processo judicial ou consentimento expresso</div>
+<div class="grid">
+
+<div class="card f3">
+  <div class="cn"><span>Certidão criminal completa — todas as UFs + federal</span><span class="badge bd">Difícil · Alto custo</span></div>
+  <div class="cd">Cobertura total: PF (SINIC) + 27 polícias civis estaduais + 27 TJs. Exige solicitação individual em cada órgão ou consentimento assinado pelo próprio sócio consultado.</div>
+  <div class="cw"><strong>Caminho viável:</strong> cobrir PF + PC do estado de domicílio + TJ do estado de operação via Judit ou Netrin. Custo ~R$30–80/sócio para cobertura razoável. Produto premium para módulo COMPLIANCE ou due diligence M&A. Não viável em V1 como verificação automática.</div>
+  <div class="tags"><span class="tag tr">Custo R$30–80/sócio</span><span class="tag tb">Via Judit/Netrin</span><span class="tag tp">Produto COMPLIANCE</span></div>
+</div>
+
+<div class="card f3">
+  <div class="cn"><span>BO de terceiro onde figura como suspeito/investigado</span><span class="badge bd">Juridicamente vedado</span></div>
+  <div class="cd">BO onde o CNPJ ou sócio figura como suspeito é sigiloso. Lei 12.037/2009 veda mencionar identificação criminal do indiciado. Só a parte envolvida, advogado habilitado com procuração ou autoridade com ordem judicial pode acessar.</div>
+  <div class="cw"><strong>O que dá para inferir:</strong> se o BO virou IPL (inquérito policial), aparece no DataJud. Se virou processo, aparece no TJ. O BO em si fica inacessível. <strong>Atenção:</strong> qualquer serviço que promete "consultar BOs de terceiros como suspeitos" está usando dados obtidos ilegalmente.</div>
+  <div class="tags"><span class="tag tr">Lei 12.037/2009</span><span class="tag tr">Sigiloso</span></div>
+</div>
+
+<div class="card f3">
+  <div class="cn"><span>Sistemas internos das polícias (SINESP, antigo INFOSEG)</span><span class="badge bd">Acesso policial exclusivo</span></div>
+  <div class="cd">SINESP integra bases da PC, PM e PF. Veículos furtados, mandados em aberto, ocorrências, histórico de abordagens. Acesso restrito a policiais credenciados com login institucional gov.br.</div>
+  <div class="cw"><strong>Risco grave:</strong> existe mercado de "consultas via despachante policial" usando acesso indevido — prática investigada na Operação Nexus Fractus (PCDF, março/2026). Policial preso por vender dados do SINESP. Entrar nesse caminho implica risco penal para o RADAR e para o cliente.</div>
+  <div class="tags"><span class="tag tr">Acesso policial exclusivo</span><span class="tag tr">Crime acessar ilegalmente</span></div>
+</div>
+
+<div class="card f3">
+  <div class="cn"><span>Inquéritos policiais com sigilo decretado pelo juiz</span><span class="badge bd">Impossível</span></div>
+  <div class="cd">Art. 20 do CPP: autoridade policial pode decretar sigilo. Juiz pode manter sigilo indefinidamente. Não aparece no DataJud. Não é acessível via LAI (Lei de Acesso à Informação).</div>
+  <div class="cw"><strong>Sinal indireto único:</strong> se a empresa sofreu busca e apreensão, a notícia costuma aparecer na imprensa antes do inquérito virar processo. Monitoramento de mídia com LLM é o único caminho legal quando o inquérito está sob sigilo judicial.</div>
+  <div class="tags"><span class="tag tr">CPP art. 20</span><span class="tag tr">LAI não alcança</span></div>
+</div>
+
+<div class="card f3">
+  <div class="cn"><span>Consulta Nacional de Pessoas (CNJ) — magistrados</span><span class="badge bd">Exclusivo magistrado</span></div>
+  <div class="cd">Ferramenta CNJ que centraliza: todos os sistemas PJe + RF + PF + SEEU. Inclui FAC (Folha de Antecedentes Criminais) completa, vínculos e endereços. Acesso exclusivo para juízes e promotores. Sem API pública.</div>
+  <div class="cw"><strong>Como o RADAR se aproxima disso:</strong> agregar DataJud + SINIC (via RPA PF) + BNMP + SEEU + TJs estaduais via parceiros. Não é o mesmo, mas cobre 80% do que um juiz veria — sem ter acesso ao sistema em si.</div>
+  <div class="tags"><span class="tag tr">Só magistrado</span><span class="tag to">Agregar equivalente</span></div>
+</div>
+
+<div class="card f3">
+  <div class="cn"><span>Prontuários internos da Polícia Militar</span><span class="badge bd">Uso interno</span></div>
+  <div class="cd">Seção de P2 (inteligência da PM) mantém dossiês internos. Autuações da PM viram ocorrência na PC. Prontuário operacional da PM é restrito a uso interno da instituição.</div>
+  <div class="cw"><strong>Exceção acessível:</strong> autuações administrativas de estabelecimento (alvará, vigilância sanitária, bombeiros) ficam nos processos da prefeitura — públicos e consultáveis por CNPJ. Esse dado sim está disponível.</div>
+  <div class="tags"><span class="tag tr">Interno PM</span><span class="tag to">Processo adm. é público</span></div>
+</div>
+
+</div>
+</div>
+
+<!-- SEÇÃO 4: SIGILOSO -->
+<div class="sec">
+<div class="sec-ttl">Sigiloso por lei — impossível por qualquer meio legal</div>
+<div class="grid">
+
+<div class="card fx">
+  <div class="cn"><span>Inquérito policial sob sigilo decretado</span><span class="badge bx">Vedado — CPP art. 20</span></div>
+  <div class="cd">Autoridade policial pode decretar sigilo. Juiz pode manter indefinidamente. Não aparece em portal algum. Nem via LAI (Lei 12.527/2011) é acessível enquanto em curso.</div>
+  <div class="tags"><span class="tag tgr">CPP art. 20</span><span class="tag tgr">LAI não alcança</span></div>
+</div>
+
+<div class="card fx">
+  <div class="cn"><span>BO de terceiro como suspeito/investigado</span><span class="badge bx">Vedado — Lei 12.037/2009</span></div>
+  <div class="cd">Lei 12.037/2009 proíbe mencionar identificação criminal do indiciado fora do processo judicial. BO de suspeito de terceiro = dado de persecução penal — estritamente não público.</div>
+  <div class="tags"><span class="tag tgr">Lei 12.037/2009</span><span class="tag tgr">Persecução penal</span></div>
+</div>
+
+<div class="card fx">
+  <div class="cn"><span>RIF do COAF</span><span class="badge bx">Vedado — Lei 9.613/1998</span></div>
+  <div class="cd">Relatório de Inteligência Financeira é sigiloso por lei. Compartilhado só com MP ou PF mediante solicitação judicial. O CNPJ que é objeto de RIF não tem como saber que está sendo analisado.</div>
+  <div class="tags"><span class="tag tgr">Lei 9.613/1998</span><span class="tag tgr">Lavagem de dinheiro</span></div>
+</div>
+
+<div class="card fx">
+  <div class="cn"><span>Operações de inteligência policial (P2, ABIN)</span><span class="badge bx">Vedado — Lei 9.883/1999</span></div>
+  <div class="cd">Atividade de inteligência das polícias e da ABIN é protegida por lei de segurança nacional. Relatórios, monitoramentos e dossiês de inteligência são classificados por definição.</div>
+  <div class="tags"><span class="tag tgr">Lei 9.883/1999</span><span class="tag tgr">Segurança nacional</span></div>
+</div>
+
+<div class="card fx">
+  <div class="cn"><span>Processos criminais em segredo de justiça</span><span class="badge bx">Vedado — CPP art. 792</span></div>
+  <div class="cd">Processos com menores, vítimas de crimes sexuais ou decretados em segredo pelo juiz não aparecem no DataJud e não são acessíveis por meio algum — nem o réu sabe o número do processo de outro em segredo.</div>
+  <div class="tags"><span class="tag tgr">CPP art. 792</span><span class="tag tgr">DataJud exclui</span></div>
+</div>
+
+</div>
+</div>
+
+<!-- RESUMO APLICAÇÃO PARA O RADAR -->
+<div class="sec">
+<div class="sec-ttl">Aplicação prática para o RADAR — o que implementar e quando</div>
+<div style="background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;">
+  <table style="width:100%;border-collapse:collapse;font-size:11px;">
+    <thead>
+      <tr style="background:var(--s2);">
+        <th style="padding:8px 12px;text-align:left;color:var(--t2);font-size:9px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--b1);">Dado</th>
+        <th style="padding:8px 12px;text-align:left;color:var(--t2);font-size:9px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--b1);">Fase</th>
+        <th style="padding:8px 12px;text-align:left;color:var(--t2);font-size:9px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--b1);">Custo</th>
+        <th style="padding:8px 12px;text-align:left;color:var(--t2);font-size:9px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--b1);">Módulo</th>
+        <th style="padding:8px 12px;text-align:left;color:var(--t2);font-size:9px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--b1);">Nota</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom:.5px solid var(--b1);"><td style="padding:7px 12px;color:var(--green);">BNMP — mandado prisão (CPF sócio)</td><td style="padding:7px 12px;color:var(--t1);">V1</td><td style="padding:7px 12px;color:var(--t1);">R$0,50–2/consulta</td><td style="padding:7px 12px;color:var(--t1);">RADAR + COMPLIANCE</td><td style="padding:7px 12px;color:var(--t1);">Maior sinal de risco individual</td></tr>
+      <tr style="border-bottom:.5px solid var(--b1);background:rgba(255,255,255,.02);"><td style="padding:7px 12px;color:var(--green);">SINIC/PF — CAC federal (CPF sócio)</td><td style="padding:7px 12px;color:var(--t1);">V1</td><td style="padding:7px 12px;color:var(--t1);">Gratuito (RPA)</td><td style="padding:7px 12px;color:var(--t1);">RADAR + COMPLIANCE</td><td style="padding:7px 12px;color:var(--t1);">Cobertura federal + acordos</td></tr>
+      <tr style="border-bottom:.5px solid var(--b1);"><td style="padding:7px 12px;color:var(--green);">DataJud criminal (CNPJ + CPF sócio)</td><td style="padding:7px 12px;color:var(--t1);">V1</td><td style="padding:7px 12px;color:var(--t1);">Gratuito</td><td style="padding:7px 12px;color:var(--t1);">RADAR</td><td style="padding:7px 12px;color:var(--t1);">Já mapeado — expandir filtro classes</td></tr>
+      <tr style="border-bottom:.5px solid var(--b1);background:rgba(255,255,255,.02);"><td style="padding:7px 12px;color:var(--green);">SEEU/CNJ (aceita CNPJ direto)</td><td style="padding:7px 12px;color:var(--t1);">V1</td><td style="padding:7px 12px;color:var(--t1);">Gratuito</td><td style="padding:7px 12px;color:var(--t1);">COMPLIANCE</td><td style="padding:7px 12px;color:var(--t1);">Único sistema que aceita CNPJ</td></tr>
+      <tr style="border-bottom:.5px solid var(--b1);"><td style="padding:7px 12px;color:var(--green);">Inquéritos MP estaduais (CNPJ)</td><td style="padding:7px 12px;color:var(--t1);">V1</td><td style="padding:7px 12px;color:var(--t1);">Gratuito (scraping)</td><td style="padding:7px 12px;color:var(--t1);">RADAR</td><td style="padding:7px 12px;color:var(--t1);">Sinal antecedente ao processo</td></tr>
+      <tr style="border-bottom:.5px solid var(--b1);background:rgba(255,255,255,.02);"><td style="padding:7px 12px;color:var(--green);">DOU + LLM — operações policiais</td><td style="padding:7px 12px;color:var(--t1);">V1</td><td style="padding:7px 12px;color:var(--t1);">Gratuito</td><td style="padding:7px 12px;color:var(--t1);">RADAR</td><td style="padding:7px 12px;color:var(--t1);">Expandir queries criminais</td></tr>
+      <tr style="border-bottom:.5px solid var(--b1);"><td style="padding:7px 12px;color:var(--green);">Interpol (CPF/nome sócio)</td><td style="padding:7px 12px;color:var(--t1);">V1</td><td style="padding:7px 12px;color:var(--t1);">Via parceiro</td><td style="padding:7px 12px;color:var(--t1);">COMPLIANCE</td><td style="padding:7px 12px;color:var(--t1);">Empresas com operações internacionais</td></tr>
+      <tr style="border-bottom:.5px solid var(--b1);background:rgba(255,255,255,.02);"><td style="padding:7px 12px;color:var(--orange);">PC estaduais — certidão criminal por UF</td><td style="padding:7px 12px;color:var(--t1);">V2</td><td style="padding:7px 12px;color:var(--t1);">R$10–30/sócio/UF</td><td style="padding:7px 12px;color:var(--t1);">COMPLIANCE</td><td style="padding:7px 12px;color:var(--t1);">Via Judit ou Netrin</td></tr>
+      <tr style="border-bottom:.5px solid var(--b1);"><td style="padding:7px 12px;color:var(--orange);">TJs estaduais — condenações criminais</td><td style="padding:7px 12px;color:var(--t1);">V2</td><td style="padding:7px 12px;color:var(--t1);">Scraping por UF</td><td style="padding:7px 12px;color:var(--t1);">COMPLIANCE</td><td style="padding:7px 12px;color:var(--t1);">27 TJs a cobrir</td></tr>
+      <tr style="background:rgba(255,255,255,.02);"><td style="padding:7px 12px;color:var(--orange);">BOs como vítima (declarante)</td><td style="padding:7px 12px;color:var(--t1);">V2</td><td style="padding:7px 12px;color:var(--t1);">Por UF</td><td style="padding:7px 12px;color:var(--t1);">RADAR</td><td style="padding:7px 12px;color:var(--t1);">Apenas vítima/declarante — suspeito é sigiloso</td></tr>
+    </tbody>
+  </table>
+</div>
+</div>
+
+</body>
+</html>
