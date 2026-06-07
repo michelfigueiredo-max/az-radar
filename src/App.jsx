@@ -1104,17 +1104,42 @@ function HistoricoView({ mobile, isMaster }) {
   const [busca, setBusca] = useState("");
   const [filtroTipo, setFiltroTipo] = useState("todos");
   const [filtroStatus, setFiltroStatus] = useState("todos");
-  const filtered = useMemo(() => HISTORICO.filter(h => {
-    const b = !busca || h.doc.includes(busca) || h.nome.toLowerCase().includes(busca.toLowerCase()) || h.cliente.toLowerCase().includes(busca.toLowerCase());
+  const [consultas, setConsultas] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/consultas")
+      .then(r => r.json())
+      .then(d => setConsultas(d.consultas || []))
+      .catch(() => {})
+      .finally(() => setCarregando(false));
+  }, []);
+
+  // Normaliza para o formato esperado pelo template
+  const HISTORICO_REAL = consultas.map(c => ({
+    id:       String(c.id).padStart(3, "0"),
+    data:     new Date(c.criado_em).toLocaleDateString("pt-BR"),
+    cliente:  "Uso Próprio",
+    doc:      c.cpf_cnpj,
+    tipo:     c.perfil_id || "admin",
+    itens:    0,
+    cobrado:  0,
+    custo_api:0,
+    status:   c.status_geral || "ok",
+    nome:     c.nome_consultado || (c.cpf_cnpj.length === 14 ? "Análise CPF" : "Empresa"),
+  }));
+
+  const filtered = useMemo(() => HISTORICO_REAL.filter(h => {
+    const b = !busca || h.doc.includes(busca) || h.nome.toLowerCase().includes(busca.toLowerCase());
     const t = filtroTipo === "todos" || h.tipo === filtroTipo;
     const s = filtroStatus === "todos" || h.status === filtroStatus;
     return b && t && s;
-  }), [busca, filtroTipo, filtroStatus]);
+  }), [busca, filtroTipo, filtroStatus, HISTORICO_REAL]);
 
   return (
     <div style={{ padding: mobile ? "14px 12px" : "22px 24px", maxWidth: 1000, margin: "0 auto" }}>
       <h2 style={{ fontSize: 15, fontWeight: 800, color: C.text, margin: "0 0 4px" }}>Histórico de Consultas</h2>
-      <p style={{ fontSize: 12, color: C.textMuted, margin: "0 0 16px" }}>Filtro por CPF/CNPJ, cliente, tipo e status</p>
+      <p style={{ fontSize: 12, color: C.textMuted, margin: "0 0 16px" }}>{carregando ? "Carregando…" : `${HISTORICO_REAL.length} consulta(s) registrada(s)`}</p>
       {/* KPIs */}
       <div style={{ display: "grid", gridTemplateColumns: mobile ? "1fr 1fr" : `repeat(${isMaster ? 4 : 3}, 1fr)`, gap: 8, marginBottom: 14 }}>
         {[

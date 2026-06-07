@@ -263,11 +263,15 @@ export default function ConsultaView({ mobile }) {
     checks.forEach(c => { prog[c] = "pendente"; });
     setProgresso({ ...prog });
 
+    let mapFinal = null;
+    let cnpjDataFinal = null;
+
     try {
       if (tipoReal === "cnpj") {
         // CNPJ RF primeiro
         setProgresso(p => ({ ...p, "CNPJ — Receita Federal": "loading", "Simples Nacional": "loading" }));
         const cnpj = await consultarCNPJ(docLimpo).catch(e => { throw e; });
+        cnpjDataFinal = cnpj;
         setCnpjData(cnpj);
         setProgresso(p => ({ ...p, "CNPJ — Receita Federal": "ok", "Simples Nacional": "ok" }));
 
@@ -291,6 +295,7 @@ export default function ConsultaView({ mobile }) {
           "MTE — Trabalho Escravo":       res.mte,
         };
         keys.forEach(k => setProgresso(p => ({ ...p, [k]: map[k]?.erro ? "erro" : "ok" })));
+        mapFinal = map;
         setResultados(map);
       } else {
         const keys = CHECKS_CPF;
@@ -312,9 +317,29 @@ export default function ConsultaView({ mobile }) {
           "Benefícios Sociais — CGU":          res.beneficios,
         };
         keys.forEach(k => setProgresso(p => ({ ...p, [k]: map[k]?.erro ? "erro" : "ok" })));
+        mapFinal = map;
         setResultados(map);
       }
       setFase("resultado");
+
+      // Salva no histórico (fire-and-forget)
+      if (mapFinal) {
+        const vals = Object.values(mapFinal);
+        const statusSave = vals.some(r => r?.status === "recusa") ? "recusa"
+          : vals.every(r => r?.status === "ok") ? "ok" : "alerta";
+        fetch("/api/consultas", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            cpf_cnpj:        docLimpo,
+            perfil_id:       perfilId,
+            perfil_nome:     perfil?.nome || "",
+            resultado:       mapFinal,
+            status_geral:    statusSave,
+            nome_consultado: cnpjDataFinal?.razaoSocial || "",
+          }),
+        }).catch(() => {});
+      }
     } catch (e) {
       setErro(e.message || "Erro na consulta");
       setFase("form");
