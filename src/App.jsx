@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback, Component } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef, Component } from "react";
 import {
   consultarCNPJ, runHealthCheck, getLastHealthCheck,
   getApiLog, clearApiLog, API_REGISTRY,
@@ -1100,7 +1100,7 @@ function DossieView({ mobile, perfilId }) {
   );
 }
 
-function HistoricoView({ mobile, isMaster }) {
+function HistoricoView({ mobile, isMaster, onReabrirConsulta }) {
   const [busca, setBusca] = useState("");
   const [filtroTipo, setFiltroTipo] = useState("todos");
   const [filtroStatus, setFiltroStatus] = useState("todos");
@@ -1180,7 +1180,7 @@ function HistoricoView({ mobile, isMaster }) {
             const S = STATUS_CFG[h.status];
             const P = PERFIL_META[h.tipo];
             return (
-              <div key={h.id} style={{ background: C.surface, border: `1px solid ${C.border}`, borderLeft: `3px solid ${P.cor}`, borderRadius: 10, padding: "13px 14px" }}>
+              <div key={h.id} onClick={() => onReabrirConsulta?.(h.doc, h.tipo)} style={{ background: C.surface, border: `1px solid ${C.border}`, borderLeft: `3px solid ${P.cor}`, borderRadius: 10, padding: "13px 14px", cursor: onReabrirConsulta ? "pointer" : "default" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 8, marginBottom: 8 }}>
                   <div>
                     <div style={{ fontSize: 12, fontWeight: 700, color: C.text }}>{h.nome}</div>
@@ -1214,7 +1214,10 @@ function HistoricoView({ mobile, isMaster }) {
             const margem = h.cobrado - h.custo_api;
             const pct = h.cobrado > 0 ? Math.round(margem / h.cobrado * 100) : 0;
             return (
-              <div key={h.id} style={{ display: "grid", gridTemplateColumns: `55px 90px 1fr 130px 100px 60px 90px${isMaster ? " 80px 75px" : ""}`, padding: "11px 16px", borderBottom: i < filtered.length - 1 ? `1px solid ${C.border}` : "none", background: i % 2 === 0 ? C.surface : "#F8FAFC", gap: 8, alignItems: "center" }}>
+              <div key={h.id} onClick={() => onReabrirConsulta?.(h.doc, h.tipo)} style={{ display: "grid", gridTemplateColumns: `55px 90px 1fr 130px 100px 60px 90px${isMaster ? " 80px 75px" : ""}`, padding: "11px 16px", borderBottom: i < filtered.length - 1 ? `1px solid ${C.border}` : "none", background: i % 2 === 0 ? C.surface : "#F8FAFC", gap: 8, alignItems: "center", cursor: onReabrirConsulta ? "pointer" : "default" }}
+                onMouseEnter={e => { if (onReabrirConsulta) e.currentTarget.style.background = C.accentBg; }}
+                onMouseLeave={e => { e.currentTarget.style.background = i % 2 === 0 ? C.surface : "#F8FAFC"; }}
+              >
                 <span style={{ fontSize: 10, color: C.textMuted, fontFamily: "monospace" }}>#{h.id}</span>
                 <span style={{ fontSize: 11, color: C.textSub }}>{h.data}</span>
                 <div>
@@ -1509,6 +1512,146 @@ function ApiHealthPanel({ mobile }) {
   );
 }
 
+// ─── HISTORICO SIDEBAR ───────────────────────────────────────────────────────
+function HistoricoSidebar({ onReabrir, refreshKey }) {
+  const [consultas, setConsultas] = useState([]);
+
+  useEffect(() => {
+    fetch("/api/consultas?limit=30")
+      .then(r => r.json())
+      .then(d => setConsultas(d.consultas || []))
+      .catch(() => {});
+  }, [refreshKey]);
+
+  const S = { ok: { cor: C.green, icon: "✓" }, alerta: { cor: C.yellow, icon: "!" }, recusa: { cor: C.red, icon: "✕" } };
+
+  return (
+    <div style={{ width: 240, flexShrink: 0, background: C.surface, borderRight: `1px solid ${C.border}`, display: "flex", flexDirection: "column", height: "calc(100vh - 52px)", position: "sticky", top: 52, overflowY: "auto" }}>
+      <div style={{ padding: "12px 14px 8px", borderBottom: `1px solid ${C.border}`, fontSize: 10, fontWeight: 700, color: C.textMuted, textTransform: "uppercase", letterSpacing: 1 }}>
+        Histórico
+      </div>
+      {consultas.length === 0 && (
+        <div style={{ padding: "16px 14px", fontSize: 11, color: C.textMuted }}>Nenhuma consulta registrada.</div>
+      )}
+      {consultas.map((c, i) => {
+        const tipo = c.cpf_cnpj?.length === 14 ? "PF" : "PJ";
+        const doc = c.cpf_cnpj?.length === 14
+          ? c.cpf_cnpj.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, "$1.***.$2-**")
+          : c.cpf_cnpj?.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.***.***/$4-$5");
+        const nome = c.nome_consultado || (tipo === "PJ" ? "Empresa" : "Pessoa Física");
+        const st = S[c.status_geral] || { cor: C.textMuted, icon: "?" };
+        const P = PERFIL_META[c.perfil_id] || PERFIL_META["motorista"];
+        return (
+          <button key={i} onClick={() => onReabrir(c.cpf_cnpj, c.perfil_id)}
+            style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "9px 14px", borderBottom: `1px solid ${C.border}`, background: "none", border: "none", cursor: "pointer", textAlign: "left", transition: "background 0.1s", width: "100%" }}
+            onMouseEnter={e => { e.currentTarget.style.background = C.accentBg; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "none"; }}
+          >
+            <span style={{ fontSize: 14, flexShrink: 0, marginTop: 1 }}>{P.emoji}</span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{nome}</div>
+              <div style={{ fontSize: 9, fontFamily: "monospace", color: C.textMuted, marginTop: 1 }}>{doc}</div>
+              <div style={{ fontSize: 9, color: C.textMuted, marginTop: 1 }}>{new Date(c.criado_em).toLocaleDateString("pt-BR")}</div>
+            </div>
+            <span style={{ fontSize: 11, fontWeight: 700, color: st.cor, flexShrink: 0 }}>{st.icon}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── BREADCRUMB ──────────────────────────────────────────────────────────────
+function Breadcrumb({ segmentos }) {
+  if (!segmentos?.length) return null;
+  return (
+    <div style={{ background: C.surface, borderBottom: `1px solid ${C.border}`, padding: "6px 20px", display: "flex", alignItems: "center", gap: 4, fontSize: 11, flexWrap: "wrap" }}>
+      {segmentos.map((seg, i) => (
+        <span key={i} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          {i > 0 && <span style={{ color: C.textMuted }}>›</span>}
+          {seg.onClick ? (
+            <button onClick={seg.onClick} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", color: C.accent, fontWeight: 600, fontSize: 11 }}>{seg.label}</button>
+          ) : (
+            <span style={{ color: C.textSub, fontWeight: i === segmentos.length - 1 ? 700 : 400 }}>{seg.label}</span>
+          )}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+// ─── RECENTES BAR ─────────────────────────────────────────────────────────────
+function RecentesBar({ mobile, onReabrir }) {
+  const [recentes, setRecentes] = useState([]);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/consultas?limit=6")
+      .then(r => r.json())
+      .then(d => setRecentes(d.consultas || []))
+      .catch(() => {});
+  }, []);
+
+  if (!recentes.length) return null;
+
+  const STATUS_ICON = { ok: "✓", alerta: "!", recusa: "✕" };
+  const STATUS_COLOR = { ok: C.green, alerta: C.yellow, recusa: C.red };
+
+  const items = recentes.slice(0, 6);
+
+  if (mobile) {
+    return (
+      <div style={{ background: C.surface, borderBottom: `1px solid ${C.border}`, padding: "0 12px" }}>
+        <button onClick={() => setOpen(v => !v)} style={{ background: "none", border: "none", cursor: "pointer", padding: "8px 0", width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: C.textSub }}>🕐 Recentes</span>
+          <span style={{ fontSize: 10, color: C.accent }}>{open ? "▲" : "▼"}</span>
+        </button>
+        {open && (
+          <div style={{ paddingBottom: 8, display: "flex", flexDirection: "column", gap: 4 }}>
+            {items.map((c, i) => {
+              const tipo = c.cpf_cnpj?.length === 14 ? "PF" : "PJ";
+              const doc = c.cpf_cnpj?.length === 14
+                ? c.cpf_cnpj.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, "$1.***.$2-**")
+                : c.cpf_cnpj?.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.***.***/$4-$5");
+              return (
+                <button key={i} onClick={() => { onReabrir(c.cpf_cnpj, c.perfil_id); setOpen(false); }}
+                  style={{ background: C.grayBg, border: `1px solid ${C.border}`, borderRadius: 6, padding: "6px 10px", cursor: "pointer", textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}>
+                    <span style={{ fontSize: 9, fontWeight: 700, color: C.textMuted }}>{tipo}</span>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: C.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.nome_consultado || doc}</span>
+                  </div>
+                  <span style={{ fontSize: 10, color: STATUS_COLOR[c.status_geral] || C.textMuted }}>{STATUS_ICON[c.status_geral] || "?"}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ background: C.surface, borderBottom: `1px solid ${C.border}`, padding: "6px 20px", display: "flex", alignItems: "center", gap: 6, overflowX: "auto" }}>
+      <span style={{ fontSize: 10, fontWeight: 700, color: C.textMuted, letterSpacing: 1, textTransform: "uppercase", flexShrink: 0, marginRight: 4 }}>Recentes</span>
+      {items.map((c, i) => {
+        const tipo = c.cpf_cnpj?.length === 14 ? "PF" : "PJ";
+        const doc = c.cpf_cnpj?.length === 14
+          ? c.cpf_cnpj.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, "$1.***.$2-**")
+          : c.cpf_cnpj?.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, "$1.***.***/$4-$5");
+        const label = c.nome_consultado ? c.nome_consultado.split(" ").slice(0, 2).join(" ") : doc;
+        return (
+          <button key={i} onClick={() => onReabrir(c.cpf_cnpj, c.perfil_id)}
+            style={{ display: "flex", alignItems: "center", gap: 5, padding: "4px 10px", borderRadius: 20, border: `1px solid ${C.border}`, background: C.grayBg, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0 }}>
+            <span style={{ fontSize: 9, fontWeight: 700, color: C.textMuted }}>{tipo}</span>
+            <span style={{ fontSize: 11, color: C.text, fontWeight: 500 }}>{label}</span>
+            <span style={{ fontSize: 10, color: STATUS_COLOR[c.status_geral] || C.textMuted, fontWeight: 700 }}>{STATUS_ICON[c.status_geral] || ""}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 // ─── APP ──────────────────────────────────────────────────────────────────────
 const PERFIL_IDS = ["motorista", "admin", "confianca", "autonomo", "empresa1", "empresa2"];
 const VIEW_TABS = ["consulta", "dossie", "historico", "master"];
@@ -1518,6 +1661,9 @@ export default function App() {
   const [isMaster, setIsMaster] = useState(false);
   const [view, setView] = useState("consulta");
   const [perfilAtivo, setPerfilAtivo] = useState("motorista");
+  const [breadcrumb, setBreadcrumb] = useState(null);
+  const [sidebarKey, setSidebarKey] = useState(0);
+  const consultaRef = useRef(null);
 
   // Auto health check: roda se nunca foi executado ou se passaram mais de 24h
   useEffect(() => {
@@ -1576,11 +1722,31 @@ export default function App() {
         </div>
       )}
 
+      {/* BREADCRUMB */}
+      {breadcrumb && <Breadcrumb segmentos={breadcrumb.segmentos} />}
+
       {/* CONTENT */}
       <div style={{ minHeight: "calc(100vh - 52px)", overflowX: "hidden" }}>
-        {view === "consulta"  && <ErrorBoundary><ConsultaView mobile={mobile} /></ErrorBoundary>}
+        {view === "consulta" && (
+          <div style={{ display: "flex", alignItems: "flex-start" }}>
+            {!mobile && (
+              <HistoricoSidebar key={sidebarKey} onReabrir={(doc, perfil) => {
+                consultaRef.current?.iniciarConsulta(doc, perfil);
+              }} />
+            )}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <ErrorBoundary>
+                <ConsultaView ref={consultaRef} mobile={mobile} onBreadcrumb={setBreadcrumb} onConsultaSalva={() => setSidebarKey(k => k + 1)} />
+              </ErrorBoundary>
+            </div>
+          </div>
+        )}
         {view === "dossie"    && <DossieView key={perfilAtivo} mobile={mobile} perfilId={perfilAtivo} />}
-        {view === "historico" && <HistoricoView mobile={mobile} isMaster={isMaster} />}
+        {view === "historico" && <HistoricoView mobile={mobile} isMaster={isMaster} onReabrirConsulta={(doc, perfil) => {
+          setView("consulta");
+          setBreadcrumb(null);
+          setTimeout(() => consultaRef.current?.iniciarConsulta(doc, perfil), 80);
+        }} />}
         {view === "master"    && isMaster  && <MasterView mobile={mobile} />}
         {view === "master"    && !isMaster && <div style={{ padding: 40, textAlign: "center", color: C.textMuted }}>Acesso restrito ao painel master.</div>}
       </div>
